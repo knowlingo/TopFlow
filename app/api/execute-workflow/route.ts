@@ -2,7 +2,8 @@ import type { Node, Edge } from "@xyflow/react"
 import { TopFlowExecutionEngine } from "@/lib/topflow-execution-engine"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
-import { shouldUseDemoMode, getDemoWorkflowResult } from "@/lib/demo-mode"
+import { shouldUseDemoMode } from "@/lib/demo-mode"
+import { getDemoResults } from "@/lib/demo-results"
 
 export const maxDuration = 30
 
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
         const demoMode = shouldUseDemoMode(apiKeys, workflowId)
 
         if (demoMode) {
-          const demoResult = getDemoWorkflowResult(workflowId)
+          const demoResult = getDemoResults(workflowId)
 
           if (demoResult) {
             // Stream demo execution with realistic timing
@@ -111,7 +112,9 @@ export async function POST(req: Request) {
                 nodeId,
               })
 
-              await new Promise((resolve) => setTimeout(resolve, nodeResult.duration))
+              // Simulate realistic execution delay (300-800ms per node)
+              const duration = 300 + Math.random() * 500
+              await new Promise((resolve) => setTimeout(resolve, duration))
 
               sendUpdate({
                 type: "node_complete",
