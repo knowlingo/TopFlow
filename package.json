@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@charliesu/workflow-core": "file:../workflow-core",
     "@ai-sdk/anthropic": "3.0.5",
     "@ai-sdk/google": "2.0.17",
     "@ai-sdk/groq": "3.0.3",

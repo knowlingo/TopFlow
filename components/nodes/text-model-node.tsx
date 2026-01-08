@@ -4,7 +4,7 @@ import { memo } from "react"
 import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { MessageSquare, Settings } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { getStatusColor } from "@/lib/node-utils"
+import { getStatusColor } from "@charliesu/workflow-core"
 
 export type TextModelNodeData = {
   model: string

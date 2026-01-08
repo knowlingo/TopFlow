@@ -5,7 +5,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { Flag, Download, FileText } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { getStatusColor } from "@/lib/node-utils"
+import { getStatusColor } from "@charliesu/workflow-core"
 import Link from "next/link"
 
 export type EndNodeData = {

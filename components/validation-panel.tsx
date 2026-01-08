@@ -17,7 +17,7 @@ import {
   calculateValidationScore,
   getValidationGrade,
   type ValidationIssue,
-} from "@/lib/validation"
+} from "@charliesu/workflow-core"
 
 type ValidationPanelProps = {
   nodes: Node[]

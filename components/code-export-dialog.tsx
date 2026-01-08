@@ -6,7 +6,7 @@ import { Copy, Check, Download } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { generateAISDKCode, generateRouteHandlerCode } from "@/lib/code-generator"
+import { generateAISDKCode, generateRouteHandlerCode } from "@charliesu/workflow-core"
 
 type CodeExportDialogProps = {
   open: boolean
