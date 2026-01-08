@@ -770,13 +770,13 @@ Provide: severity, affected systems, recommended actions`}
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-500">⚠️</span>
                     <div>
-                      <strong>High temperature</strong> - Using temperature > 1.5 may produce inconsistent results
+                      <strong>High temperature</strong> - Using temperature &gt; 1.5 may produce inconsistent results
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-500">⚠️</span>
                     <div>
-                      <strong>Large maxTokens</strong> - Setting > 2000 may slow execution
+                      <strong>Large maxTokens</strong> - Setting &gt; 2000 may slow execution
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
