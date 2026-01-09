@@ -36,12 +36,12 @@ const DEMO_WORKFLOW_REGISTRY: Record<string, () => DemoResult> = {
   "template-ot-critical-infra": () => OT_WORKFLOW_DEMO,
 
   // Existing security templates (from /lib/demo-results.ts)
-  "template-gdpr-data-access": () =>
-    DEMO_RESULTS.find((d) => d.templateId === "template-gdpr-data-access")!,
+  "template-gdpr-access-request": () =>
+    DEMO_RESULTS.find((d) => d.templateId === "template-gdpr-access-request")!,
   "template-pii-detection": () =>
     DEMO_RESULTS.find((d) => d.templateId === "template-pii-detection")!,
-  "template-security-incident": () =>
-    DEMO_RESULTS.find((d) => d.templateId === "template-security-incident")!,
+  "template-incident-response": () =>
+    DEMO_RESULTS.find((d) => d.templateId === "template-incident-response")!,
   "template-soc2-evidence": () =>
     DEMO_RESULTS.find((d) => d.templateId === "template-soc2-evidence")!,
 }

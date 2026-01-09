@@ -919,6 +919,7 @@ export default function AgentBuilder(): ReactElement {
             apiKeys={apiKeys}
             onClose={() => setShowValidation(false)}
             onNodeHighlight={handleNodeHighlight}
+            workflowId={currentWorkflow?.id}
           />
         )}
 

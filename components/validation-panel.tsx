@@ -18,6 +18,8 @@ import {
   getValidationGrade,
   type ValidationIssue,
 } from "@charliesu/workflow-core"
+import { shouldUseDemoMode } from "@/lib/demo-mode"
+import { hasDemoData } from "@/lib/demo-data"
 
 type ValidationPanelProps = {
   nodes: Node[]
@@ -26,13 +28,38 @@ type ValidationPanelProps = {
   onClose: () => void
   onNodeHighlight?: (nodeIds: string[]) => void
   onFixIssue?: (issueId: string) => void
+  workflowId?: string
 }
 
-export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighlight, onFixIssue }: ValidationPanelProps) {
+export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighlight, onFixIssue, workflowId }: ValidationPanelProps) {
   const [activeTab, setActiveTab] = useState("all")
 
   const workflowIssues = useMemo(() => validateWorkflow(nodes, edges), [nodes, edges])
-  const apiKeyIssues = useMemo(() => validateApiKeys(apiKeys, nodes), [apiKeys, nodes])
+
+  // Check if demo mode should be used for this workflow
+  const demoMode = useMemo(() => {
+    return shouldUseDemoMode(apiKeys, workflowId)
+  }, [apiKeys, workflowId])
+
+  const demoDataAvailable = useMemo(() => {
+    return workflowId ? hasDemoData(workflowId) : false
+  }, [workflowId])
+
+  // Only validate API keys if NOT in demo mode OR if no demo data available
+  const apiKeyIssues = useMemo(() => {
+    if (demoMode && demoDataAvailable) {
+      // Demo mode is active and demo data available - downgrade API key errors to info
+      const issues = validateApiKeys(apiKeys, nodes)
+      return issues.map(issue => ({
+        ...issue,
+        type: "info" as const,
+        title: `Demo Mode: ${issue.title}`,
+        description: `${issue.description} (Demo data will be used for this template)`
+      }))
+    }
+    return validateApiKeys(apiKeys, nodes)
+  }, [apiKeys, nodes, demoMode, demoDataAvailable])
+
   const allIssues = useMemo(() => [...workflowIssues, ...apiKeyIssues], [workflowIssues, apiKeyIssues])
 
   // Categorize issues

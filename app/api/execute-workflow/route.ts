@@ -3,7 +3,7 @@ import { TopFlowExecutionEngine } from "@/lib/topflow-execution-engine"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
 import { shouldUseDemoMode } from "@/lib/demo-mode"
-import { getDemoResults } from "@/lib/demo-results"
+import { getDemoWorkflowResult, hasDemoData } from "@/lib/demo-data"
 
 export const maxDuration = 30
 
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         const demoMode = shouldUseDemoMode(apiKeys, workflowId)
 
         if (demoMode) {
-          const demoResult = getDemoResults(workflowId)
+          const demoResult = getDemoWorkflowResult(workflowId)
 
           if (demoResult) {
             // Stream demo execution with realistic timing
@@ -126,6 +126,14 @@ export async function POST(req: Request) {
             sendUpdate({ type: "complete" })
             controller.close()
             return
+          } else {
+            // Demo mode enabled but no demo data available for this workflow
+            sendUpdate({
+              type: "error",
+              error: `Demo mode is active (no API keys configured), but this workflow does not have cached demo data. Please add API keys in Settings or use a template with demo data available.`,
+            })
+            controller.close()
+            return
           }
         }
 
@@ -139,7 +147,7 @@ export async function POST(req: Request) {
         }))
 
         // ============================================================================
-        // Validation (Cycles, SSRF, API Keys)
+        // Validation (Cycles, SSRF)
         // ============================================================================
 
         const validationIssues = validateWorkflow(sanitizedNodes, edges)
@@ -154,16 +162,19 @@ export async function POST(req: Request) {
           return
         }
 
-        const apiKeyIssues = validateApiKeys(apiKeys, sanitizedNodes)
-        const apiKeyErrors = apiKeyIssues.filter((issue) => issue.type === "error")
+        // API key validation - only if NOT in demo mode
+        if (!demoMode) {
+          const apiKeyIssues = validateApiKeys(apiKeys, sanitizedNodes)
+          const apiKeyErrors = apiKeyIssues.filter((issue) => issue.type === "error")
 
-        if (apiKeyErrors.length > 0) {
-          sendUpdate({
-            type: "error",
-            error: `${apiKeyErrors[0].title}: ${apiKeyErrors[0].description}`,
-          })
-          controller.close()
-          return
+          if (apiKeyErrors.length > 0) {
+            sendUpdate({
+              type: "error",
+              error: `${apiKeyErrors[0].title}: ${apiKeyErrors[0].description}`,
+            })
+            controller.close()
+            return
+          }
         }
 
         // ============================================================================
