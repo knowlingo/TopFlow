@@ -1,6 +1,7 @@
 # Testing Documentation
 
-![Test Status](https://img.shields.io/badge/tests-189%20passing-brightgreen)
+![Test Status](https://img.shields.io/badge/tests-194%20passing-brightgreen)
+![E2E Tests](https://img.shields.io/badge/e2e-5%20smoke%20tests-blue)
 ![Coverage](https://img.shields.io/badge/coverage-95%25%20(tested%20modules)-brightgreen)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
@@ -28,9 +29,9 @@ pnpm test:ci
 
 | Metric | Value |
 |--------|-------|
-| **Total Test Suites** | 12 |
-| **Total Tests** | 189 passing |
-| **Test Speed** | ~3.6s |
+| **Total Test Suites** | 13 (12 unit/integration + 1 E2E) |
+| **Total Tests** | 194 passing (189 unit/integration + 5 E2E) |
+| **Test Speed** | ~3.6s (unit/integration), ~5.2s (E2E) |
 | **Critical Modules Covered** | 12/12 (100%) |
 | **Build Status** | ✅ Passing |
 
@@ -64,6 +65,16 @@ pnpm test:ci
 | **app/api/execute-workflow/route.ts** | 17 |
 | **app/api/demo-country/route.ts** | 9 |
 
+**Phase 5: E2E Testing (Playwright)**
+| Module | Tests | Status |
+|--------|-------|--------|
+| **e2e/smoke.spec.ts** | 5 | ✅ Passing |
+| **e2e/workflow-creation.spec.ts** | 11 | 📋 Needs UI tuning |
+| **e2e/template-gallery.spec.ts** | 10 | 📋 Needs UI tuning |
+| **e2e/demo-mode.spec.ts** | 8 | 📋 Needs UI tuning |
+| **e2e/api-settings.spec.ts** | 8 | 📋 Needs UI tuning |
+| **e2e/validation.spec.ts** | 7 | 📋 Needs UI tuning |
+
 ## Test Architecture
 
 ### Test Pyramid
@@ -79,9 +90,9 @@ pnpm test:ci
 ```
 
 **Current Distribution:**
-- 86% Unit Tests (163 tests)
-- 14% Integration Tests (26 tests)
-- 0% E2E Tests (planned)
+- 84% Unit Tests (163 tests)
+- 13% Integration Tests (26 tests)
+- 3% E2E Tests (5 smoke tests passing)
 
 ### Testing Stack
 
@@ -90,6 +101,7 @@ pnpm test:ci
 - **MSW** 2.12.7 - API mocking at network level
 - **Testing Library User Event** 14.6.1 - User interaction simulation
 - **Vitest** 4.0.16 - Alternative test runner with UI
+- **Playwright** 1.57.0 - E2E testing framework
 
 ## Test Suites
 
@@ -315,7 +327,7 @@ See [docs/development/testing-guide.md](docs/development/testing-guide.md) for d
 - ✅ **Phase 2**: Hooks and custom React hooks
 - ✅ **Phase 3**: Component tests (React Testing Library)
 - ✅ **Phase 4**: Integration tests (API Routes)
-- 📋 **Phase 5**: E2E tests (Playwright)
+- ✅ **Phase 5**: E2E infrastructure (Playwright, 5 smoke tests passing)
 
 ---
 
@@ -433,11 +445,20 @@ moduleNameMapper: {
 **Commit**: Latest
 **Status**: ✅ All tests passing
 
+**Unit & Integration Tests:**
 ```
 Test Suites: 12 passed, 12 total
 Tests:       189 passed, 189 total
 Snapshots:   0 total
 Time:        3.577 s
+```
+
+**E2E Tests (Smoke):**
+```
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Time:        5.2 s
+Browser:     Chromium
 ```
 
 **Build Status**: ✅ Passing (8.3s)

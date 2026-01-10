@@ -9,7 +9,8 @@
 [![Vercel AI SDK](https://img.shields.io/badge/Vercel%20AI%20SDK-5.0-orange)](https://sdk.vercel.ai/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 
-[![Tests](https://img.shields.io/badge/tests-189%20passing-brightgreen)](TESTING.md)
+[![Tests](https://img.shields.io/badge/tests-194%20passing-brightgreen)](TESTING.md)
+[![E2E](https://img.shields.io/badge/e2e-5%20smoke%20tests-blue)](E2E_TESTS.md)
 [![Coverage](https://img.shields.io/badge/coverage-95%25%20(tested%20modules)-brightgreen)](TESTING.md)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](TESTING.md)
 
