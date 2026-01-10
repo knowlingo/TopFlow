@@ -64,7 +64,7 @@ const PII_PATTERNS = {
     name: "Credit Card Number",
   },
   phone: {
-    pattern: /\b(\+\d{1,3}[\s.-]?)?$$?\d{3}$$?[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
+    pattern: /\b(\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
     name: "Phone Number",
   },
   ipAddress: {

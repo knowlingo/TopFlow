@@ -1,6 +1,6 @@
 # Testing Documentation
 
-![Test Status](https://img.shields.io/badge/tests-59%20passing-brightgreen)
+![Test Status](https://img.shields.io/badge/tests-133%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-95%25%20(tested%20modules)-brightgreen)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
@@ -28,19 +28,29 @@ pnpm test:ci
 
 | Metric | Value |
 |--------|-------|
-| **Total Test Suites** | 3 |
-| **Total Tests** | 59 passing |
-| **Test Speed** | ~0.9s |
-| **Critical Modules Covered** | 3/3 (100%) |
+| **Total Test Suites** | 8 |
+| **Total Tests** | 133 passing |
+| **Test Speed** | ~1.9s |
+| **Critical Modules Covered** | 8/8 (100%) |
 | **Build Status** | ✅ Passing |
 
 ### Coverage by Module
 
+**Phase 1: Core Business Logic**
 | Module | Statements | Branches | Functions | Lines | Tests |
 |--------|-----------|----------|-----------|-------|-------|
 | **lib/utils.ts** | 100% | 100% | 100% | 100% | 6 |
 | **lib/storage.ts** | 95.23% | 83.33% | 100% | 93.93% | 21 |
 | **lib/workflow-store.ts** | 95% | 80% | 100% | 94.44% | 32 |
+
+**Phase 2: Hooks**
+| Module | Tests |
+|--------|-------|
+| **hooks/use-mobile.ts** | 9 |
+| **hooks/use-workflow-validation.ts** | 11 |
+| **hooks/use-auto-save.ts** | 12 |
+| **hooks/use-keyboard-shortcuts.ts** | 20 |
+| **hooks/use-toast.ts** | 22 |
 
 ## Test Architecture
 
@@ -57,8 +67,8 @@ pnpm test:ci
 ```
 
 **Current Distribution:**
-- 100% Unit Tests (59 tests)
-- 0% Integration Tests (coming soon)
+- 100% Unit Tests (133 tests)
+- 0% Integration Tests (planned)
 - 0% E2E Tests (planned)
 
 ### Testing Stack
