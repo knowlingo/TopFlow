@@ -1,6 +1,6 @@
 # Testing Documentation
 
-![Test Status](https://img.shields.io/badge/tests-163%20passing-brightgreen)
+![Test Status](https://img.shields.io/badge/tests-189%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-95%25%20(tested%20modules)-brightgreen)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
@@ -28,10 +28,10 @@ pnpm test:ci
 
 | Metric | Value |
 |--------|-------|
-| **Total Test Suites** | 10 |
-| **Total Tests** | 163 passing |
-| **Test Speed** | ~2.4s |
-| **Critical Modules Covered** | 10/10 (100%) |
+| **Total Test Suites** | 12 |
+| **Total Tests** | 189 passing |
+| **Test Speed** | ~3.6s |
+| **Critical Modules Covered** | 12/12 (100%) |
 | **Build Status** | ✅ Passing |
 
 ### Coverage by Module
@@ -58,6 +58,12 @@ pnpm test:ci
 | **components/auto-save-indicator.tsx** | 14 |
 | **components/undo-redo-toolbar.tsx** | 16 |
 
+**Phase 4: Integration (API Routes)**
+| Module | Tests |
+|--------|-------|
+| **app/api/execute-workflow/route.ts** | 17 |
+| **app/api/demo-country/route.ts** | 9 |
+
 ## Test Architecture
 
 ### Test Pyramid
@@ -73,8 +79,8 @@ pnpm test:ci
 ```
 
 **Current Distribution:**
-- 100% Unit Tests (163 tests)
-- 0% Integration Tests (planned)
+- 86% Unit Tests (163 tests)
+- 14% Integration Tests (26 tests)
 - 0% E2E Tests (planned)
 
 ### Testing Stack
@@ -305,10 +311,10 @@ See [docs/development/testing-guide.md](docs/development/testing-guide.md) for d
 
 ### Coverage Roadmap
 
-- ✅ **Phase 1**: Core utilities and business logic (Current)
-- 🟡 **Phase 2**: Hooks and custom React hooks
-- 📋 **Phase 3**: Component tests (React Testing Library)
-- 📋 **Phase 4**: Integration tests (API + Components)
+- ✅ **Phase 1**: Core utilities and business logic
+- ✅ **Phase 2**: Hooks and custom React hooks
+- ✅ **Phase 3**: Component tests (React Testing Library)
+- ✅ **Phase 4**: Integration tests (API Routes)
 - 📋 **Phase 5**: E2E tests (Playwright)
 
 ---
@@ -428,10 +434,10 @@ moduleNameMapper: {
 **Status**: ✅ All tests passing
 
 ```
-Test Suites: 3 passed, 3 total
-Tests:       59 passed, 59 total
+Test Suites: 12 passed, 12 total
+Tests:       189 passed, 189 total
 Snapshots:   0 total
-Time:        0.943 s
+Time:        3.577 s
 ```
 
 **Build Status**: ✅ Passing (8.3s)
