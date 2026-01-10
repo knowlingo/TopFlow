@@ -43,25 +43,25 @@ export default function AboutPage() {
               <p className="mb-4 text-xl text-muted-foreground">Former CISO & Creator of TopFlow</p>
               <div className="flex flex-wrap justify-center gap-3 md:justify-start">
                 <Button variant="outline" size="sm" asChild>
-                  <a href="https://linkedin.com/in/charliesu" target="_blank" rel="noopener noreferrer">
+                  <a href="https://linkedin.com/in/charliesu-ai" target="_blank" rel="noopener noreferrer">
                     <Linkedin className="mr-2 h-4 w-4" />
                     LinkedIn
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="https://github.com/charliesu" target="_blank" rel="noopener noreferrer">
+                  <a href="https://github.com/csupenn/topflow" target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
                     GitHub
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="https://twitter.com/charliesu" target="_blank" rel="noopener noreferrer">
+                  <a href="https://twitter.com/charliesu_ai" target="_blank" rel="noopener noreferrer">
                     <Twitter className="mr-2 h-4 w-4" />
                     Twitter
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="mailto:charlie@topflow.dev">
+                  <a href="mailto:charlie@charliesu.com">
                     <Mail className="mr-2 h-4 w-4" />
                     Email
                   </a>
