@@ -20,7 +20,6 @@ This guide explains how to develop, publish, and manage the `@charliesu/workflow
 
 **@charliesu/workflow-core** is a shared React Flow-based workflow orchestration engine used by:
 - **TopFlow** - Security-focused AI workflow builder
-- **TaraFlow** - (Future) Enterprise workflow platform
 
 **Package Location**: `/home/ubuntu/Projects/school/workflow-core`
 **npm Package**: [@charliesu/workflow-core](https://www.npmjs.com/package/@charliesu/workflow-core)

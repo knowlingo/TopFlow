@@ -1,6 +1,10 @@
 # Contributing to TopFlow
 
-Thank you for your interest in contributing to TopFlow! We welcome contributions from security professionals, privacy advocates, compliance experts, and AI engineers who share our vision of building secure, privacy-preserving AI systems.
+Thank you for your interest in contributing to TopFlow!
+
+We welcome contributions from security professionals, privacy advocates, compliance experts, and AI engineers who share our vision of building secure, privacy-preserving AI systems. Whether you're fixing a bug, adding a security feature, or contributing a compliance workflow template, your contribution helps make AI safer for everyone.
+
+TopFlow is a **security-first, open-source project** designed to demonstrate how to build AI systems with enterprise-grade security baked in from day one. By contributing, you're helping establish best practices for secure AI development.
 
 ---
 
@@ -77,20 +81,22 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 ### What We DON'T Accept
 
-Per our [Strategic Identity Framework](docs/repositioning-proposal/00-ai-agent-research/01-Strategic-Identity-Framework.md), we **do not accept** contributions that:
+TopFlow is focused on security, compliance, and privacy. We **do not accept** contributions that:
 
-- Add general business automation features (marketing, sales, HR)
-- Implement consumer-facing functionality
+- Add general business automation features (marketing, sales, HR workflows)
+- Implement consumer-facing functionality unrelated to security/compliance
 - Dilute the "security-first" positioning
 - Introduce dependencies with known security vulnerabilities
 - Bypass security controls for convenience
 
-**All features must pass our [5-Filter Test](docs/repositioning-proposal/00-ai-agent-research/02-Feature-Evaluation-Matrix.md)**:
-1. Target Audience (CISOs, DPOs, Security Engineers)
-2. Security Relevance (helps secure AI systems or protect data)
-3. Compliance Value (aids regulatory compliance)
-4. Reference Architecture (showcases secure AI patterns)
-5. Brand Alignment (reinforces "built by CISO" identity)
+**Feature Evaluation Criteria**:
+
+All new features should align with TopFlow's mission:
+1. **Target Audience** - Useful for CISOs, DPOs, Security Engineers, or Compliance Teams
+2. **Security Relevance** - Helps secure AI systems or protect sensitive data
+3. **Compliance Value** - Aids regulatory compliance (GDPR, SOC 2, HIPAA, etc.)
+4. **Reference Architecture** - Demonstrates secure AI implementation patterns
+5. **Brand Alignment** - Reinforces "security-first, built by security professionals" identity
 
 ---
 
@@ -100,7 +106,7 @@ Per our [Strategic Identity Framework](docs/repositioning-proposal/00-ai-agent-r
 
 ### Reporting Process
 
-1. **Email**: security@topflow.dev (or open a private security advisory on GitHub)
+1. **Email**: charlie@charliesu.com (or open a private security advisory on GitHub)
 2. **Include**:
    - Description of the vulnerability
    - Steps to reproduce
@@ -197,7 +203,7 @@ pnpm type-check
 
 ### Working with workflow-core Package
 
-TopFlow uses [@charliesu/workflow-core](https://www.npmjs.com/package/@charliesu/workflow-core), a shared workflow execution engine that powers both TopFlow and TaraFlow.
+TopFlow uses [@charliesu/workflow-core](https://www.npmjs.com/package/@charliesu/workflow-core), a shared workflow execution engine.
 
 **For most contributions**, you don't need to modify workflow-core—just work with TopFlow's codebase.
 
@@ -233,11 +239,12 @@ For detailed instructions, see **[Workflow-Core Package Guide](docs/development/
 
 ### Before Submitting
 
-1. **Check Existing Issues/PRs**: Avoid duplicate work
-2. **Create an Issue**: Discuss your proposal before implementing large changes
-3. **Follow Feature Guidelines**: Ensure your contribution aligns with project goals
-4. **Write Tests**: Add tests for new features/bug fixes
-5. **Update Documentation**: Keep docs in sync with code changes
+1. **Search Existing Issues/PRs**: Check if someone is already working on this to avoid duplicate effort
+2. **Create an Issue First**: For significant changes, open an issue to discuss your approach before coding
+3. **Align with Project Goals**: Ensure your contribution fits TopFlow's security-first, compliance-focused mission
+4. **Include Tests**: Add or update tests to cover your changes (see [Testing Requirements](#testing-requirements))
+5. **Update Documentation**: Keep README, guides, and inline documentation in sync with code changes
+6. **Run Tests Locally**: Verify all tests pass before submitting (`pnpm test && pnpm build`)
 
 ### PR Submission Steps
 
@@ -496,14 +503,15 @@ CVE-2026-XXXXX
 
 ### Template Specification Format
 
-See existing specs in `docs/repositioning-proposal/00-gdpr-ultimate-plan/` for the format:
+When contributing new workflow templates, include:
 
-- **Overview**: Purpose, business value, time savings
-- **Node-by-Node Flow**: Complete workflow description
+- **Overview**: Purpose, business value, and time savings estimate
+- **Node-by-Node Flow**: Complete workflow description with data flow
 - **Integration Points**: Required APIs and credentials
-- **Security Considerations**: Privacy, compliance, audit trails
+- **Security Considerations**: Privacy, compliance, and audit trail requirements
 - **Customization Options**: Industry-specific adaptations
 - **Implementation Guide**: Step-by-step setup instructions
+- **Test Cases**: Expected inputs and outputs for validation
 
 ---
 
@@ -522,7 +530,7 @@ We value all contributions and will:
 
 - **General Questions**: Open a [GitHub Discussion](https://github.com/topflow/topflow/discussions)
 - **Bug Reports**: Open a [GitHub Issue](https://github.com/topflow/topflow/issues)
-- **Security Issues**: Email security@topflow.dev
+- **Security Issues**: Email charlie@charliesu.com
 - **Feature Proposals**: Open an issue with the "feature request" label
 
 ---

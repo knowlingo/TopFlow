@@ -245,7 +245,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
-                <a href="mailto:charlie@topflow.dev">
+                <a href="mailto:charlie@charliesu.com">
                   <Mail className="mr-2 h-5 w-5" />
                   Send Email
                 </a>

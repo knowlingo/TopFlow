@@ -769,8 +769,8 @@ vercel deploy
                 </ul>
                 <p>
                   <strong>Contact</strong>:{" "}
-                  <a href="mailto:charlie@topflow.dev" className="text-primary hover:underline">
-                    charlie@topflow.dev
+                  <a href="mailto:charlie@charliesu.com" className="text-primary hover:underline">
+                    charlie@charliesu.com
                   </a>
                 </p>
                 <p>
@@ -1122,7 +1122,7 @@ localStorage.getItem('ai-agent-builder-autosave-*')
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="mailto:charlie@topflow.dev">
+              <Link href="mailto:charlie@charliesu.com">
                 Contact Support
               </Link>
             </Button>

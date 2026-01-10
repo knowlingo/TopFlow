@@ -44,7 +44,7 @@ docs/development/workflow-core/
   - Semantic versioning strategy
   - npm publish commands
   - Git tag management
-- ✅ Consuming in applications (TopFlow, TaraFlow)
+- ✅ Consuming in applications (TopFlow)
 - ✅ Dependency management strategies
 - ✅ Versioning progression (alpha → beta → stable)
 - ✅ Best practices (development, code quality, documentation)
@@ -118,7 +118,7 @@ docs/development/workflow-core/
 - [x] Updating to latest version
 - [x] Version pinning strategies
 - [x] Dependency resolution
-- [x] Future TaraFlow integration
+- [x] Future application integration
 
 ### Best Practices
 - [x] Type safety patterns
@@ -148,7 +148,7 @@ docs/development/workflow-core/
 **What they need**: How to publish new versions
 **Where to start**: [README.md - Publishing to npm](./README.md#publishing-to-npm)
 
-### Users (TopFlow/TaraFlow developers)
+### Users (TopFlow developers)
 **What they need**: How to install and update the package
 **Where to start**: [README.md - Consuming in Applications](./README.md#consuming-in-applications)
 
@@ -202,7 +202,6 @@ docs/development/workflow-core/
 
 ### Integration
 - [x] TopFlow installation
-- [x] TaraFlow (future) guidance
 - [x] Version pinning strategies
 - [x] Update procedures
 - [x] Dependency management
@@ -287,7 +286,7 @@ docs/development/workflow-core/
 This documentation enables:
 - ✅ New contributors to set up development environment in <15 minutes
 - ✅ Maintainers to publish new versions with confidence
-- ✅ TopFlow/TaraFlow developers to integrate package easily
+- ✅ TopFlow developers to integrate package easily
 - ✅ Anyone to find answers quickly (index + quick reference)
 - ✅ Public contributors to understand the workflow
 - ✅ Future team members to onboard efficiently
@@ -308,7 +307,6 @@ This documentation enables:
 ### When to Update This Documentation
 
 - [ ] After publishing workflow-core v1.0.0 (stable)
-- [ ] When TaraFlow integration is complete
 - [ ] When adding new development tools or workflows
 - [ ] When best practices change
 - [ ] After gathering contributor feedback

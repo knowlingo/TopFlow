@@ -9,7 +9,7 @@ Comprehensive guide covering:
 - Package architecture and setup
 - Local development workflow (pnpm link)
 - Publishing to npm (alpha, beta, stable)
-- Consuming in TopFlow and TaraFlow
+- Consuming in TopFlow
 - Versioning strategy and best practices
 - Troubleshooting common issues
 
