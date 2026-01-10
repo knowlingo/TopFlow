@@ -195,6 +195,38 @@ pnpm lint
 pnpm type-check
 ```
 
+### Working with workflow-core Package
+
+TopFlow uses [@charliesu/workflow-core](https://www.npmjs.com/package/@charliesu/workflow-core), a shared workflow execution engine that powers both TopFlow and TaraFlow.
+
+**For most contributions**, you don't need to modify workflow-core—just work with TopFlow's codebase.
+
+**If you need to contribute to workflow-core** (e.g., adding new node types, modifying execution logic):
+
+1. **Read the documentation**: See [docs/development/workflow-core/](docs/development/workflow-core/) for complete guides
+2. **Quick reference**: Check [docs/development/workflow-core/quick-reference.md](docs/development/workflow-core/quick-reference.md) for common commands
+3. **Local development**: Use `pnpm link` to test workflow-core changes in TopFlow
+
+**Quick setup for workflow-core development**:
+```bash
+# Clone workflow-core
+cd /path/to/projects
+git clone https://github.com/charliesu/workflow-core.git
+cd workflow-core
+pnpm install
+pnpm build
+
+# Link to TopFlow
+pnpm link --global
+
+# In TopFlow directory
+cd /path/to/topflow
+pnpm link --global @charliesu/workflow-core
+pnpm dev
+```
+
+For detailed instructions, see **[Workflow-Core Package Guide](docs/development/workflow-core/README.md)**.
+
 ---
 
 ## 🔄 Pull Request Process
