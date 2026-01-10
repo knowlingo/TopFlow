@@ -1,6 +1,6 @@
 # Testing Documentation
 
-![Test Status](https://img.shields.io/badge/tests-194%20passing-brightgreen)
+![Test Status](https://img.shields.io/badge/tests-437%20passing-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/e2e-5%20smoke%20tests-blue)
 ![Coverage](https://img.shields.io/badge/coverage-95%25%20(tested%20modules)-brightgreen)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
@@ -29,10 +29,10 @@ pnpm test:ci
 
 | Metric | Value |
 |--------|-------|
-| **Total Test Suites** | 13 (12 unit/integration + 1 E2E) |
-| **Total Tests** | 194 passing (189 unit/integration + 5 E2E) |
+| **Total Test Suites** | 20 (19 unit/integration + 1 E2E) |
+| **Total Tests** | 437 passing (432 unit/integration + 5 E2E) |
 | **Test Speed** | ~3.6s (unit/integration), ~5.2s (E2E) |
-| **Critical Modules Covered** | 12/12 (100%) |
+| **Critical Modules Covered** | 19/19 (100%) |
 | **Build Status** | ✅ Passing |
 
 ### Coverage by Module
@@ -75,6 +75,18 @@ pnpm test:ci
 | **e2e/api-settings.spec.ts** | 8 | 📋 Needs UI tuning |
 | **e2e/validation.spec.ts** | 7 | 📋 Needs UI tuning |
 
+**Phase 6: Node Component Tests (React Testing Library)**
+| Module | Tests |
+|--------|-------|
+| **components/nodes/start-node.tsx** | 16 |
+| **components/nodes/end-node.tsx** | 28 |
+| **components/nodes/text-model-node.tsx** | 43 |
+| **components/nodes/prompt-node.tsx** | 34 |
+| **components/nodes/javascript-node.tsx** | 38 |
+| **components/nodes/conditional-node.tsx** | 40 |
+| **components/nodes/http-request-node.tsx** | 44 |
+| **Total Node Component Tests** | **243** |
+
 ## Test Architecture
 
 ### Test Pyramid
@@ -90,9 +102,9 @@ pnpm test:ci
 ```
 
 **Current Distribution:**
-- 84% Unit Tests (163 tests)
-- 13% Integration Tests (26 tests)
-- 3% E2E Tests (5 smoke tests passing)
+- 88% Unit Tests (382 tests)
+- 11% Integration Tests (50 tests)
+- 1% E2E Tests (5 smoke tests passing)
 
 ### Testing Stack
 
@@ -328,6 +340,7 @@ See [docs/development/testing-guide.md](docs/development/testing-guide.md) for d
 - ✅ **Phase 3**: Component tests (React Testing Library)
 - ✅ **Phase 4**: Integration tests (API Routes)
 - ✅ **Phase 5**: E2E infrastructure (Playwright, 5 smoke tests passing)
+- ✅ **Phase 6**: Node component tests (243 tests for 7 workflow nodes)
 
 ---
 
@@ -442,15 +455,15 @@ moduleNameMapper: {
 ### Latest Run
 
 **Date**: January 10, 2026
-**Commit**: Latest
+**Commit**: Latest (Phase 6: Node Component Tests)
 **Status**: ✅ All tests passing
 
 **Unit & Integration Tests:**
 ```
-Test Suites: 12 passed, 12 total
-Tests:       189 passed, 189 total
+Test Suites: 19 passed, 19 total
+Tests:       432 passed, 432 total
 Snapshots:   0 total
-Time:        3.577 s
+Time:        3.642 s
 ```
 
 **E2E Tests (Smoke):**
