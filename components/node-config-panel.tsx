@@ -95,7 +95,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       } else {
-        // Handle regular URLs (like /demo-assets/images/threat-intelligence-map.png)
+        // Handle regular URLs (like /demo-assets/images/threat-intelligence-map.webp)
         const extension = imageUrl.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)?.[1] || "png"
 
         // Fetch the image

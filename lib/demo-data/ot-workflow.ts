@@ -518,8 +518,8 @@ Classification: TLP:AMBER
       nodeId: "ot-visualization",
       nodeType: "imageGeneration",
       output: {
-        url: "/demo-assets/images/ot-threat-intelligence-map.png",
-        format: "png",
+        url: "/demo-assets/images/ot-threat-intelligence-map.webp",
+        format: "webp",
         dimensions: { width: 1920, height: 1080 },
         prompt:
           "High-fidelity cybersecurity threat intelligence map for Smart Energy Grid showing IT/OT convergence with CVE-2024-3400 (VPN breach), CVE-2024-6387 (Linux Server), and Volt Typhoon APT targeting SCADA systems. Dark glassmorphism UI, Purdue Model zones, irregular IoT heartbeat indicators.",
@@ -544,7 +544,7 @@ Classification: TLP:AMBER
             "Critical cyber security incident detected targeting Smart Energy Grid infrastructure. Adversary (suspected Volt Typhoon APT) has compromised IT perimeter via CVE-2024-3400 (VPN Gateway) and is attempting lateral movement to OT control systems. IoT telemetry shows IRREGULAR heartbeat from Smart Inverter Array 01, indicating active reconnaissance of SCADA-connected field devices. This incident meets NERC CIP-008-6 threshold for mandatory reporting within 1 hour of discovery.",
           generated_at: new Date().toISOString(),
         },
-        threat_map: "/demo-assets/images/ot-threat-intelligence-map.png",
+        threat_map: "/demo-assets/images/ot-threat-intelligence-map.webp",
         compliance_status: "NERC_CIP_008_READY",
         download_formats: ["PDF", "JSON", "STIX"],
       },

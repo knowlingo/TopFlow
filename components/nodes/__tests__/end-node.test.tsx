@@ -190,7 +190,7 @@ describe('EndNode', () => {
     it('should detect threat intelligence report output', () => {
       const output = {
         report: 'Threat analysis completed',
-        threat_map: '/demo-assets/images/threat-intelligence-map.png',
+        threat_map: '/demo-assets/images/threat-intelligence-map.webp',
       }
       renderNode({ output })
 
@@ -206,7 +206,7 @@ describe('EndNode', () => {
 
       const threatIntelOutput = {
         report: 'Analysis',
-        threat_map: '/demo-assets/images/threat-map.png',
+        threat_map: '/demo-assets/images/threat-map.webp',
       }
       rerender(
         <ReactFlowProvider>
@@ -220,7 +220,7 @@ describe('EndNode', () => {
     it('should link to correct report template', () => {
       const output = {
         report: 'Threat analysis',
-        threat_map: '/demo-assets/images/threat-map.png',
+        threat_map: '/demo-assets/images/threat-map.webp',
       }
       renderNode({ output })
 
@@ -255,7 +255,7 @@ describe('EndNode', () => {
     it('should render download button for threat intel report image', () => {
       const output = {
         report: 'Threat analysis',
-        threat_map: '/demo-assets/images/threat-map.png',
+        threat_map: '/demo-assets/images/threat-map.webp',
       }
       renderNode({ output })
 

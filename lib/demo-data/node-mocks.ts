@@ -119,10 +119,10 @@ export async function getMockImageOutput(
 
   // Map aspect ratios to demo images
   const demoImages: Record<string, string> = {
-    "1:1": "/demo-assets/images/placeholder-square.png",
-    "16:9": "/demo-assets/images/placeholder-landscape.png",
-    "9:16": "/demo-assets/images/placeholder-portrait.png",
-    "4:3": "/demo-assets/images/placeholder-4x3.png",
+    "1:1": "/demo-assets/images/placeholder-square.webp",
+    "16:9": "/demo-assets/images/placeholder-landscape.webp",
+    "9:16": "/demo-assets/images/placeholder-portrait.webp",
+    "4:3": "/demo-assets/images/placeholder-4x3.webp",
   }
 
   // Determine dimensions based on aspect ratio
@@ -136,7 +136,7 @@ export async function getMockImageOutput(
   return {
     type: "image",
     url: demoImages[aspectRatio] || demoImages["1:1"],
-    format: "png",
+    format: "webp",
     dimensions: dimensions[aspectRatio] || dimensions["1:1"],
   }
 }

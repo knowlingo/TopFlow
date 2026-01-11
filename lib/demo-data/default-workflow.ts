@@ -310,8 +310,8 @@ Create a threat intelligence dashboard that looks professional and actionable.`,
       nodeType: "imageGeneration",
       output: {
         type: "image",
-        url: "/demo-assets/images/threat-intelligence-map.png",
-        format: "png",
+        url: "/demo-assets/images/threat-intelligence-map.webp",
+        format: "webp",
         dimensions: { width: 1920, height: 1080 },
         text: "A professional cybersecurity threat map showing attack vectors, affected systems, and risk levels",
       },
@@ -359,7 +359,7 @@ Current Threat Level: CRITICAL (87/100)
 Exploitable Vulnerabilities: 2 of 3
 Estimated Time to Compromise: < 24 hours without mitigation
 Recommended Response Time: Immediate (P1 incident)`,
-        threat_map: "/demo-assets/images/threat-intelligence-map.png",
+        threat_map: "/demo-assets/images/threat-intelligence-map.webp",
         structured_data: {
           affected_systems: [
             "web-server-01",
@@ -643,8 +643,8 @@ Create a security dashboard showing normal operations and routine maintenance.`,
       nodeType: "imageGeneration",
       output: {
         type: "image",
-        url: "/demo-assets/images/threat-status-normal.png",
-        format: "png",
+        url: "/demo-assets/images/threat-status-normal.webp",
+        format: "webp",
         dimensions: { width: 1920, height: 1080 },
         text: "Security status dashboard showing normal operations with routine maintenance items",
       },
@@ -666,7 +666,7 @@ Exploitable Vulnerabilities: 0 of 2
 Recommended Response: Standard patch management process
 
 Security posture remains strong.`,
-        threat_map: "/demo-assets/images/threat-status-normal.png",
+        threat_map: "/demo-assets/images/threat-status-normal.webp",
         structured_data: {
           affected_systems: ["marketing-website", "api-backend"],
           attack_vectors: ["Cross-Site Scripting", "Dependency Vulnerability"],

@@ -17,7 +17,7 @@ export function ThreatVisualization({
         <div className="border border-border rounded-lg overflow-hidden bg-black/5">
           <div className="relative w-full aspect-[16/10]">
             <Image
-              src="/demo-assets/images/ot-threat-intelligence-map.png"
+              src="/demo-assets/images/ot-threat-intelligence-map.webp"
               alt="OT Threat Intelligence Map showing attack vectors from IT (Zone 1) to OT (Zone 3)"
               fill
               className="object-contain"
