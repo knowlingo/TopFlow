@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 
 export const runtime = "edge"
-export const alt = "AI Agent Builder - Visual workflow builder for AI SDK"
+export const alt = "TopFlow - Secure AI Agent Orchestration Platform"
 export const size = {
   width: 1200,
   height: 630,
@@ -37,28 +37,28 @@ export default async function Image() {
         {/* Title */}
         <div
           style={{
-            fontSize: 72,
+            fontSize: 82,
             fontWeight: 700,
-            background: "linear-gradient(to bottom right, #ffffff, #a855f7)",
+            background: "linear-gradient(to bottom right, #ffffff, #10b981)",
             backgroundClip: "text",
             color: "transparent",
             marginBottom: 24,
             textAlign: "center",
           }}
         >
-          AI Agent Builder
+          TopFlow
         </div>
 
         {/* Subtitle */}
         <div
           style={{
-            fontSize: 32,
+            fontSize: 36,
             color: "#a1a1aa",
             marginBottom: 60,
             textAlign: "center",
           }}
         >
-          Visual workflow builder for AI SDK
+          Secure AI Agent Orchestration Platform
         </div>
 
         {/* Visual representation of nodes */}
@@ -79,16 +79,16 @@ export default async function Image() {
               width: 140,
               height: 140,
               backgroundColor: "#18181b",
-              border: "3px solid #a855f7",
+              border: "3px solid #10b981",
               borderRadius: 16,
             }}
           >
-            <div style={{ fontSize: 48, marginBottom: 8 }}>📝</div>
-            <div style={{ fontSize: 18, color: "#e4e4e7" }}>Prompt</div>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>🔒</div>
+            <div style={{ fontSize: 18, color: "#e4e4e7" }}>Validate</div>
           </div>
 
           {/* Arrow */}
-          <div style={{ fontSize: 48, color: "#a855f7" }}>→</div>
+          <div style={{ fontSize: 48, color: "#10b981" }}>→</div>
 
           {/* Node 2 */}
           <div
@@ -105,7 +105,7 @@ export default async function Image() {
             }}
           >
             <div style={{ fontSize: 48, marginBottom: 8 }}>🤖</div>
-            <div style={{ fontSize: 18, color: "#e4e4e7" }}>AI Model</div>
+            <div style={{ fontSize: 18, color: "#e4e4e7" }}>Process</div>
           </div>
 
           {/* Arrow */}
@@ -121,12 +121,12 @@ export default async function Image() {
               width: 140,
               height: 140,
               backgroundColor: "#18181b",
-              border: "3px solid #10b981",
+              border: "3px solid #a855f7",
               borderRadius: 16,
             }}
           >
-            <div style={{ fontSize: 48, marginBottom: 8 }}>🎨</div>
-            <div style={{ fontSize: 18, color: "#e4e4e7" }}>Output</div>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+            <div style={{ fontSize: 18, color: "#e4e4e7" }}>Secure</div>
           </div>
         </div>
       </div>
@@ -143,9 +143,11 @@ export default async function Image() {
           fontSize: 24,
         }}
       >
-        <span>Powered by AI SDK</span>
+        <span>Privacy-First</span>
         <span>•</span>
-        <span>Built with React Flow</span>
+        <span>GDPR Compliant</span>
+        <span>•</span>
+        <span>Zero Data Storage</span>
       </div>
     </div>,
     {

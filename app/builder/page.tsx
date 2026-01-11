@@ -762,16 +762,21 @@ export default function AgentBuilder(): ReactElement {
             {isPaletteOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
+            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground md:text-xl">
-              {currentWorkflow ? currentWorkflow.name : "AI Agent Builder"}
-            </h1>
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-2">
+              <h1 className="text-lg font-bold text-foreground md:text-xl">TopFlow</h1>
+              {currentWorkflow && (
+                <span className="text-sm text-muted-foreground">/ {currentWorkflow.name}</span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground md:text-sm">
               {currentWorkflow
-                ? `v${currentWorkflow.version} • ${currentWorkflow.category}`
-                : "Visual workflow designer for AI SDK"}
+                ? `v${currentWorkflow.version} • ${currentWorkflow.category} • ${
+                    currentWorkflow.description?.substring(0, 50) || "Workflow"
+                  }${currentWorkflow.description && currentWorkflow.description.length > 50 ? "..." : ""}`
+                : "Secure AI Agent Orchestration Platform"}
             </p>
           </div>
         </div>

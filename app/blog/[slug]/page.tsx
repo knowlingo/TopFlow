@@ -26,23 +26,48 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
+  const canonicalUrl = `https://topflow.dev/blog/${post.slug}`
+
   return {
     title: `${post.title} | TopFlow Blog`,
     description: post.seo.description,
     keywords: post.seo.keywords,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: post.title,
       description: post.seo.description,
-      url: `https://topflow.dev/blog/${post.slug}`,
+      url: canonicalUrl,
       type: "article",
       publishedTime: post.publishedAt,
       authors: [post.author.name],
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       creator: "@charliesu_ai",
       title: post.title,
       description: post.seo.description,
+      images: ["/og-image.png"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   }
 }
