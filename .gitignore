@@ -40,3 +40,28 @@ next-env.d.ts
 
 # private project instructions (not for public repo)
 CLAUDE.md
+AGENTS.md
+.claude/
+
+# backup and temporary files
+*.backup
+*.bak
+*.tmp
+*~
+.DS_Store
+
+# coverage and test reports (regenerated locally)
+coverage-*.txt
+/coverage/
+
+# editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# local notes and todos
+TODO.md
+NOTES.md
+**/.__backups/
+**/.backup/
