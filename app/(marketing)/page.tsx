@@ -65,7 +65,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <HeroSection
         onTryDemo={() => router.push("/builder")}
-        onReadDocs={() => router.push("/about")}
+        onReadDocs={() => router.push("/docs")}
       />
 
       {/* Security Features Section */}
