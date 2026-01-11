@@ -8,6 +8,7 @@ import { OpenSourceSecurityContent } from "@/components/blog/articles/open-sourc
 import { CISOToFullStackContent } from "@/components/blog/articles/ciso-to-fullstack-developer"
 import { SSRFPreventionContent } from "@/components/blog/articles/preventing-ssrf-attacks-ai-workflows"
 import { BudgetSaaSContent } from "@/components/blog/articles/20-dollar-saas-infrastructure"
+import { GDPRAutomationContent } from "@/components/blog/articles/gdpr-automation-3-minutes"
 
 interface BlogContentProps {
   slug: string
@@ -22,7 +23,7 @@ export function BlogContent({ slug }: BlogContentProps) {
     "ciso-to-fullstack-developer": <CISOToFullStackContent />,
     "preventing-ssrf-attacks-ai-workflows": <SSRFPreventionContent />,
     "20-dollar-saas-infrastructure": <BudgetSaaSContent />,
-    "gdpr-automation-3-minutes": null, // Coming soon
+    "gdpr-automation-3-minutes": <GDPRAutomationContent />
   }
 
   const content = contentMap[slug]
