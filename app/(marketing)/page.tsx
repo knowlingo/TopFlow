@@ -147,7 +147,7 @@ export default function HomePage() {
             <Link href="/builder">
               <Button size="lg">Try Demo Now</Button>
             </Link>
-            <Link href="/about">
+            <Link href="https://www.charliesu.com/projects/topflow" target="_blank" rel="noopener noreferrer">
               <Button size="lg" variant="outline">
                 Learn More
               </Button>
