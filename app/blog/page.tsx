@@ -1,157 +1,216 @@
-import type { Metadata } from "next"
+"use client"
+
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Calendar, User } from "lucide-react"
-
-export const metadata: Metadata = {
-  title: "TopFlow Blog - AI Security & Workflow Guides",
-  description:
-    "Articles on building secure AI workflows, compliance automation, and security patterns. Learn how to use TopFlow for GDPR, SOC 2, and HIPAA compliance.",
-  keywords: ["AI security", "TopFlow guides", "workflow automation", "compliance", "secure AI"],
-  openGraph: {
-    title: "TopFlow Blog - AI Security & Workflow Guides",
-    description: "Articles on secure AI workflows, compliance templates, and security patterns",
-    url: "https://topflow.dev/blog",
-    type: "website",
-  },
-}
-
-const blogPosts = [
-  {
-    slug: "getting-started-topflow",
-    title: "Getting Started with TopFlow",
-    excerpt: "Learn the basics of TopFlow and build your first secure AI workflow in minutes.",
-    author: "Charlie Su",
-    publishedAt: "January 2026",
-    readingTime: "5 min read",
-    category: "Tutorial",
-    featured: true,
-  },
-  {
-    slug: "gdpr-compliance-workflows",
-    title: "How to Build GDPR-Compliant AI Workflows",
-    excerpt: "Step-by-step guide to using TopFlow's GDPR templates for data access requests and compliance automation.",
-    author: "Charlie Su",
-    publishedAt: "January 2026",
-    readingTime: "8 min read",
-    category: "Guide",
-    featured: true,
-  },
-  {
-    slug: "security-templates-deep-dive",
-    title: "TopFlow Security Templates: Deep Dive",
-    excerpt: "Explore all 7 security-focused templates and learn how to customize them for your compliance needs.",
-    author: "Charlie Su",
-    publishedAt: "January 2026",
-    readingTime: "10 min read",
-    category: "Guide",
-    featured: true,
-  },
-]
+import { ArrowRight, ArrowLeft, Calendar, Clock, Tag } from "lucide-react"
+import { blogPosts } from "@/lib/blog/blog-data"
+import { BlogListSchema } from "@/components/blog/blog-schema"
+import { BlogControls } from "@/components/blog/blog-controls"
+import { BlogFilters } from "@/components/blog/blog-filters"
+import { BlogListView } from "@/components/blog/blog-list-view"
+import { BlogEmptyState } from "@/components/blog/blog-empty-state"
+import {
+  filterPostsByCategory,
+  searchPosts,
+  sortPosts,
+  getCategoryCount,
+  BLOG_CATEGORIES,
+  type ViewMode,
+  type SortOption,
+} from "@/lib/blog/blog-utils"
 
 export default function BlogPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  const [sortBy, setSortBy] = useState<SortOption>("newest")
+  const [activeCategory, setActiveCategory] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  // Load view preference from localStorage
+  useEffect(() => {
+    const savedView = localStorage.getItem("topflow-blog-view") as ViewMode | null
+    if (savedView) setViewMode(savedView)
+
+    const savedSort = localStorage.getItem("topflow-blog-sort") as SortOption | null
+    if (savedSort) setSortBy(savedSort)
+  }, [])
+
+  // Save view preference
+  useEffect(() => {
+    localStorage.setItem("topflow-blog-view", viewMode)
+  }, [viewMode])
+
+  // Save sort preference
+  useEffect(() => {
+    localStorage.setItem("topflow-blog-sort", sortBy)
+  }, [sortBy])
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Apply filters and sorting
+  const filteredPosts = useMemo(() => {
+    let posts = [...blogPosts]
+
+    // Apply category filter
+    posts = filterPostsByCategory(posts, activeCategory)
+
+    // Apply search
+    posts = searchPosts(posts, debouncedSearch)
+
+    // Apply sorting
+    posts = sortPosts(posts, sortBy)
+
+    return posts
+  }, [activeCategory, debouncedSearch, sortBy])
+
+  // Calculate category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    BLOG_CATEGORIES.forEach((category) => {
+      counts[category.id] = getCategoryCount(blogPosts, category.id)
+    })
+    return counts
+  }, [])
+
+  const handleClearFilters = () => {
+    setActiveCategory("all")
+    setSearchQuery("")
+    setDebouncedSearch("")
+  }
+
+  const featuredPost = sortBy === "newest" && activeCategory === "all" && !debouncedSearch ? filteredPosts[0] : null
+  const displayPosts = featuredPost ? filteredPosts.slice(1) : filteredPosts
+
   return (
     <div className="min-h-screen bg-background">
+      <BlogListSchema />
+
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-lg font-semibold">TopFlow</div>
+      <div className="border-b border-border bg-panel">
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Builder
           </Link>
-          <Button asChild variant="outline">
-            <Link href="/">Back to Home</Link>
-          </Button>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-background to-card py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center md:px-6">
-          <h1 className="mb-4 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            TopFlow Blog
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Guides, tutorials, and insights on building secure AI workflows with TopFlow. Learn security patterns,
-            compliance automation, and best practices.
+          <h1 className="text-4xl font-bold text-foreground mb-3">Blog</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Insights on AI security, workflow automation, and compliance from{" "}
+            <a
+              href="https://charliesu.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Charlie Su
+            </a>
+            , former CISO and creator of TopFlow.
           </p>
         </div>
-      </section>
+      </div>
 
-      {/* Blog Posts */}
-      <section className="py-12 md:py-16">
-        <div className="container mx-auto max-w-4xl px-4 md:px-6">
-          {/* Featured Posts */}
-          <div className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-foreground">Featured Posts</h2>
-            <div className="space-y-6">
-              {blogPosts
-                .filter((post) => post.featured)
-                .map((post) => (
-                  <article
-                    key={post.slug}
-                    className="border-b border-border pb-6 last:border-b-0"
-                  >
-                    <div className="flex flex-col gap-3">
-                      <Link href={`/blog/${post.slug}`} className="group">
-                        <h3 className="text-xl font-semibold text-foreground transition-colors group-hover:text-primary md:text-2xl">
-                          {post.title}
-                        </h3>
-                      </Link>
-                      <p className="text-muted-foreground">{post.excerpt}</p>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>{post.author}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{post.publishedAt}</span>
-                        </div>
-                        <span>{post.readingTime}</span>
-                        <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                          {post.category}
-                        </span>
-                      </div>
-                      <Link href={`/blog/${post.slug}`}>
-                        <Button variant="ghost" size="sm" className="mt-2">
-                          Read Article
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </article>
-                ))}
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        {/* Controls */}
+        <BlogControls
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
+        {/* Filters */}
+        <BlogFilters
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          categoryCounts={categoryCounts}
+          totalPosts={blogPosts.length}
+          filteredCount={filteredPosts.length}
+          searchQuery={debouncedSearch}
+          onClearFilters={handleClearFilters}
+        />
+
+        {/* Featured Post (only show in default state) */}
+        {featuredPost && (
+          <Link href={`/blog/${featuredPost.slug}`} className="block group mb-16">
+            <div className="bg-card border border-border rounded-lg p-8 hover:border-primary transition-all duration-200">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide">Featured</span>
+                <span className="text-xs text-muted-foreground">•</span>
+                <span className="text-xs text-muted-foreground">{featuredPost.category}</span>
+              </div>
+
+              <h2 className="text-3xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
+                {featuredPost.title}
+              </h2>
+
+              <p className="text-muted-foreground text-lg mb-6 leading-relaxed">{featuredPost.excerpt}</p>
+
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{featuredPost.publishedAt}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>{featuredPost.readTime}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          </Link>
+        )}
 
-          {/* Coming Soon Notice */}
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">More Articles Coming Soon</h3>
-            <p className="text-muted-foreground">
-              We're publishing new guides on security patterns, compliance automation, and TopFlow best practices
-              regularly. Check back soon!
-            </p>
-          </div>
-        </div>
-      </section>
+        {/* Empty State */}
+        {displayPosts.length === 0 && <BlogEmptyState onClearFilters={handleClearFilters} />}
 
-      {/* CTA Section */}
-      <section className="border-t border-border py-12 md:py-16">
-        <div className="container mx-auto max-w-4xl px-4 text-center md:px-6">
-          <h2 className="mb-4 text-2xl font-bold text-foreground">Ready to Build Secure Workflows?</h2>
-          <p className="mb-6 text-lg text-muted-foreground">
-            Try TopFlow with your own API keys or use our pre-cached demo data.
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/builder">Try Demo</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/docs">Read Documentation</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        {/* Posts Display */}
+        {displayPosts.length > 0 && (
+          <>
+            {viewMode === "list" ? (
+              <BlogListView posts={displayPosts} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayPosts.map((post) => (
+                  <Link key={post.slug} href={`/blog/${post.slug}`} className="block group">
+                    <div className="bg-card border border-border rounded-lg p-6 h-full hover:border-primary transition-all duration-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Tag className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs text-muted-foreground">{post.category}</span>
+                      </div>
+
+                      <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors leading-snug">
+                        {post.title}
+                      </h3>
+
+                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-3">{post.excerpt}</p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{post.publishedAt}</span>
+                          <span>•</span>
+                          <span>{post.readTime}</span>
+                        </div>
+
+                        <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
