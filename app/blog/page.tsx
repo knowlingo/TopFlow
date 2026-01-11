@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { ArrowRight, Calendar, Clock, Tag, Shield } from "lucide-react"
+import { ArrowRight, Calendar, Clock, Tag, Shield, Github, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { blogPosts } from "@/lib/blog/blog-data"
 import { BlogListSchema } from "@/components/blog/blog-schema"
@@ -237,6 +237,66 @@ export default function BlogPage() {
           </>
         )}
       </div>
+
+      {/* CTA Section Card */}
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">
+          <h3 className="mb-3 text-2xl font-bold text-foreground">Ready to Build Secure Workflows?</h3>
+          <p className="mb-6 text-muted-foreground max-w-2xl mx-auto">
+            Try TopFlow with your own API keys or use our pre-cached demo data. No signup required.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link href="/builder">
+              <Button size="lg">Try Demo</Button>
+            </Link>
+            <Link href="/docs">
+              <Button variant="outline" size="lg">
+                Read Documentation
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-8 px-4 bg-card/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <div className="text-sm font-medium text-foreground">
+                TopFlow: Secure AI Agent Orchestration
+              </div>
+              <div className="text-sm text-muted-foreground">
+                © 2026 TopFlow. Built by Charlie Su, Former CISO.
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="sm">
+                  <Github className="h-4 w-4 mr-2" />
+                  GitHub
+                </Button>
+              </Link>
+              <Link href="/">
+                <Button variant="ghost" size="sm">
+                  Home
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <div className="text-xs text-center md:text-left text-muted-foreground space-y-2">
+            <p>Security-first AI automation for compliance and privacy teams.</p>
+            <p className="flex items-center justify-center md:justify-start gap-2">
+              <Shield className="h-3 w-3" />
+              <span>Privacy-First: Minimal tracking, client-side storage.</span>
+              <Link href="/privacy" className="underline hover:text-foreground">
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
