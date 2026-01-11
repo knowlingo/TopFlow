@@ -31,6 +31,18 @@ const customJestConfig = {
     '!**/dist/**',
   ],
 
+  // Coverage reporters
+  coverageReporters: [
+    'text',           // Console output
+    'text-summary',   // Summary in console
+    'lcov',          // For CI tools
+    'html',          // HTML report for local viewing
+    'json-summary',  // JSON summary for badges/tools
+  ],
+
+  // Coverage directory
+  coverageDirectory: 'coverage',
+
   // Coverage thresholds (aligned with TDD strategy doc)
   coverageThreshold: {
     global: {

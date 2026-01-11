@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -16,7 +17,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:chromium": "playwright test --project=chromium",
-    "test:all": "pnpm test && pnpm test:e2e"
+    "test:all": "pnpm test && pnpm test:e2e",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "3.0.5",
@@ -94,8 +96,10 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@vitest/ui": "^4.0.16",
+    "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "msw": "^2.12.7",
     "playwright": "^1.57.0",
     "postcss": "^8.5",
@@ -103,5 +107,13 @@
     "tw-animate-css": "1.3.3",
     "typescript": "^5",
     "vitest": "^4.0.16"
+  },
+  "lint-staged": {
+    "{app,components,lib,hooks}/**/*.{ts,tsx,js,jsx}": [
+      "pnpm lint --fix"
+    ],
+    "*.{ts,tsx}": [
+      "pnpm type-check"
+    ]
   }
 }

@@ -26,6 +26,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# testing
+/coverage
+/.nyc_output
+/playwright-report
+/test-results
+
 # documentation - private/working docs not for public repo
 /docs/notes
 /docs/reference

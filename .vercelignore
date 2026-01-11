@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+
+# Testing
+coverage
+.nyc_output
+*.log
+
+# Docs (private/working docs)
+docs/notes
+docs/reference
+docs/repositioning-proposal
+docs/v0-documentation
+
+# Private files
+CLAUDE.md
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Test files
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+playwright.config.ts
+jest.config.js
+jest.setup.js
