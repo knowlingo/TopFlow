@@ -169,7 +169,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+              <Link href="https://github.com/csupenn/topflow" target="_blank" rel="noopener noreferrer">
                 <Button variant="ghost" size="sm">
                   <Github className="h-4 w-4 mr-2" />
                   GitHub
