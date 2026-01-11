@@ -49,9 +49,9 @@ export default function HomePage() {
                   Docs
                 </Button>
               </Link>
-              <Link href="/about">
+              <Link href="/blog">
                 <Button variant="ghost" size="sm">
-                  About
+                  Blog
                 </Button>
               </Link>
               <Link href="/builder">
