@@ -214,7 +214,7 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
               <p className="text-xs font-semibold">Input Validation</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              {allIssues.some(i => i.id.includes("missing")) ? "Issues Found" : "Configured"}
+              {allIssues.some(i => i.message.toLowerCase().includes("missing") || i.message.toLowerCase().includes("required")) ? "Issues Found" : "Configured"}
             </p>
           </Card>
 
@@ -225,7 +225,7 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
               <p className="text-xs font-semibold">Cycle Detection</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              {allIssues.some(i => i.id.includes("cycle")) ? "Cycle Found" : "No Cycles"}
+              {allIssues.some(i => i.message.toLowerCase().includes("cycle")) ? "Cycle Found" : "No Cycles"}
             </p>
           </Card>
 
