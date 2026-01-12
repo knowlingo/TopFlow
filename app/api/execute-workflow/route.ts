@@ -2,8 +2,8 @@ import type { Node, Edge } from "@xyflow/react"
 import { TopFlowExecutionEngine } from "@/lib/topflow-execution-engine"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
-import { shouldUseDemoMode } from "@/lib/demo-mode"
-import { getDemoWorkflowResult, hasDemoData } from "@/lib/demo-data"
+import { shouldUseDemoMode, hasDemoData as hasNewDemoData } from "@/lib/demo-mode"
+import { getDemoWorkflowResult, hasDemoData as hasLegacyDemoData } from "@/lib/demo-data"
 
 export const maxDuration = 30
 
@@ -120,8 +120,23 @@ export async function POST(req: Request) {
 
         const demoMode = shouldUseDemoMode(apiKeys, workflowId)
 
+        // Check both legacy and new demo mode systems
+        const hasLegacyDemo = hasLegacyDemoData(workflowId)
+        const hasNewDemo = hasNewDemoData(workflowId)
+
         // For workflows without demo data, check early and show error
-        if (demoMode && !hasDemoData(workflowId)) {
+        if (demoMode && !hasLegacyDemo && !hasNewDemo) {
+          // Demo mode enabled but no demo data available for this workflow
+          sendUpdate({
+            type: "error",
+            error: `Demo mode is active (no API keys configured), but this workflow does not have cached demo data. Please add API keys in Settings or use a template with demo data available.`,
+          })
+          controller.close()
+          return
+        }
+
+        // Use legacy demo system for workflows with pre-generated results
+        if (demoMode && hasLegacyDemo) {
           const legacyDemoResult = getDemoWorkflowResult(workflowId)
 
           if (legacyDemoResult) {
@@ -146,16 +161,10 @@ export async function POST(req: Request) {
             sendUpdate({ type: "complete" })
             controller.close()
             return
-          } else {
-            // Demo mode enabled but no demo data available for this workflow
-            sendUpdate({
-              type: "error",
-              error: `Demo mode is active (no API keys configured), but this workflow does not have cached demo data. Please add API keys in Settings or use a template with demo data available.`,
-            })
-            controller.close()
-            return
           }
         }
+
+        // If hasNewDemo is true, execution will continue to use TopFlowExecutionEngine with demo mode
 
         // ============================================================================
         // Input Sanitization
