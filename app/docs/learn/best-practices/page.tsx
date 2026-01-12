@@ -534,8 +534,8 @@ const priority = calculatePriority(tier, severity, timestamp);`}
             href: "/docs/learn/tutorials",
           }}
           nextPage={{
-            title: "Node Reference",
-            href: "/docs/build/nodes",
+            title: "FAQ",
+            href: "/docs/learn/faq",
           }}
         />
       </div>
