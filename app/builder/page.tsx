@@ -729,7 +729,7 @@ export default function AgentBuilder(): ReactElement {
             setNodes((nds) =>
               nds.map((node) =>
                 node.type === "start"
-                  ? { ...node, data: { ...node.data, userInput: repoParam } }
+                  ? { ...node, data: { ...node.data, defaultValue: `https://github.com/${repoParam}` } }
                   : node
               )
             )
