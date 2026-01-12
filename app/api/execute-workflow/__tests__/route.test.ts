@@ -244,6 +244,8 @@ describe('POST /api/execute-workflow', () => {
     it('should skip API key validation in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
+        templateId: 'test-template',
+        workflowName: 'Test Workflow',
         outputs: {},
         nodeResults: {
           '1': {
@@ -254,6 +256,8 @@ describe('POST /api/execute-workflow', () => {
             status: 'completed',
           },
         },
+        executionTime: 100,
+        timestamp: new Date().toISOString(),
       })
 
       mockValidateApiKeys.mockReturnValue([
@@ -285,6 +289,8 @@ describe('POST /api/execute-workflow', () => {
     it('should stream demo results when in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
+        templateId: 'test-template',
+        workflowName: 'Test Workflow',
         outputs: { final: 'Demo result' },
         nodeResults: {
           '1': {
@@ -302,6 +308,8 @@ describe('POST /api/execute-workflow', () => {
             status: 'completed',
           },
         },
+        executionTime: 100,
+        timestamp: new Date().toISOString(),
       })
 
       const request = createRequest({ nodes: mockNodes, edges: mockEdges, apiKeys: {} })

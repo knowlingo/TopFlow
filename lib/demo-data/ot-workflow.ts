@@ -24,6 +24,7 @@ import type { DemoResult } from "./types"
 export const OT_WORKFLOW_DEMO: DemoResult = {
   templateId: "template-ot-critical-infra",
   workflowName: "Critical Infrastructure Defense",
+  outputs: {},
   executionTime: 25000, // 25 seconds total
   timestamp: new Date().toISOString(),
   metadata: {

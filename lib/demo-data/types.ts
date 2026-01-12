@@ -5,6 +5,7 @@
 export interface DemoResult {
   templateId: string
   workflowName: string
+  outputs: Record<string, any>
   nodeResults: Record<string, NodeResult>
   executionTime: number // Total simulated execution time (ms)
   timestamp: string

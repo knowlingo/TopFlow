@@ -21,8 +21,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4(zod@3.25.67)
       '@charliesu/workflow-core':
-        specifier: ^0.0.1-alpha
-        version: 0.0.1-alpha(@types/react@18.3.27)(immer@11.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: file:../workflow-core
+        version: file:../workflow-core(@types/react@18.3.27)(immer@11.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@emotion/is-prop-valid':
         specifier: latest
         version: 1.4.0
@@ -505,8 +505,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@charliesu/workflow-core@0.0.1-alpha':
-    resolution: {integrity: sha512-4qHutPrLtmfROd39F6fLIj6+gUWoUPelbuWXGhUBs0v4/94CzwGO1SS4vXedbcE9yjMyoJi36DViVrdTSdvFmg==}
+  '@charliesu/workflow-core@file:../workflow-core':
+    resolution: {directory: ../workflow-core, type: directory}
     peerDependencies:
       react: '>=19.0.0'
       react-dom: '>=19.0.0'
@@ -5372,7 +5372,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@charliesu/workflow-core@0.0.1-alpha(@types/react@18.3.27)(immer@11.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@charliesu/workflow-core@file:../workflow-core(@types/react@18.3.27)(immer@11.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@xyflow/react': 12.8.6(@types/react@18.3.27)(immer@11.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
