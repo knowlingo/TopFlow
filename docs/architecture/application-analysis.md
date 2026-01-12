@@ -1,8 +1,8 @@
-# AI Agent Builder - Application Analysis
+# TopFlow - Application Analysis
 
 ## Executive Summary
 
-The AI Agent Builder is a sophisticated visual workflow designer that enables users to create, test, and export AI-powered applications without writing code. Built on Next.js 15 and the Vercel AI SDK v5, it provides a node-based interface for composing complex AI workflows that can be executed in real-time or exported as production-ready TypeScript code.
+The TopFlow is a sophisticated visual workflow designer that enables users to create, test, and export AI-powered applications without writing code. Built on Next.js 15 and the Vercel AI SDK v5, it provides a node-based interface for composing complex AI workflows that can be executed in real-time or exported as production-ready TypeScript code.
 
 ## Architecture Overview
 
@@ -630,7 +630,7 @@ pnpm start      # Production server
 
 ## Conclusion
 
-The AI Agent Builder successfully delivers a production-ready visual workflow designer for AI applications. Its architecture is modular, extensible, and built on solid foundations (Next.js, ReactFlow, AI SDK). The combination of visual design, real-time execution, and code generation provides a complete development experience.
+The TopFlow successfully delivers a production-ready visual workflow designer for AI applications. Its architecture is modular, extensible, and built on solid foundations (Next.js, ReactFlow, AI SDK). The combination of visual design, real-time execution, and code generation provides a complete development experience.
 
 **Key Strengths**:
 - Intuitive visual interface

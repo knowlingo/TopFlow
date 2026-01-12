@@ -5,7 +5,7 @@
 [![Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now-brightgreen?style=for-the-badge)](https://topflow.dev)
 [![GitHub Stars](https://img.shields.io/github/stars/csupenn/topflow?style=for-the-badge&color=yellow)](https://github.com/csupenn/topflow/stargazers)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
-[![Security](https://img.shields.io/badge/Security-A+-green?style=for-the-badge)](docs/security)
+[![Security](https://img.shields.io/badge/Security-A+-green?style=for-the-badge)](https://topflow.dev/docs/security)
 
 <!-- Replace with actual workflow demo GIF -->
 <img src="public/demo-assets/images/placeholder-landscape.webp" alt="TopFlow Demo" width="100%">
@@ -272,9 +272,9 @@ import { TextModelNode, HttpRequestNode } from '@topflow/workflow-core'
 ## 📖 Documentation
 
 - 📚 **[Architecture Overview](docs/architecture/architecture-overview.md)** - System design & security model
-- 🎓 **[Quick Start Guide](docs/guides/quick-start.md)** - Get running in 5 minutes
-- 🔧 **[Node Reference](docs/reference/nodes.md)** - All 12 node types explained
-- 🛡️ **[Security Documentation](docs/security/README.md)** - Threat model & controls
+- 🎓 **[Quick Start Guide](https://topflow.dev/docs/learn/quick-start)** - Get running in 5 minutes
+- 🔧 **[Node Reference](https://topflow.dev/docs/build/nodes)** - All 12 node types explained
+- 🛡️ **[Security Documentation](https://topflow.dev/docs/security)** - Threat model & controls
 - 🧪 **[Testing Guide](TESTING.md)** - 437 tests, 95% coverage
 
 ---

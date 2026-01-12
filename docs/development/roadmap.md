@@ -1,4 +1,4 @@
-# AI Agent Builder - Product Roadmap & Enhancement Guide
+# TopFlow - Product Roadmap & Enhancement Guide
 
 ## Table of Contents
 
@@ -16,9 +16,9 @@
 
 ## Application Overview
 
-### What is AI Agent Builder?
+### What is TopFlow?
 
-AI Agent Builder is a visual workflow designer that enables users to create, test, and export AI-powered applications without writing code. Built on modern web technologies, it provides an intuitive node-based interface for composing complex AI workflows that can be executed in real-time or exported as production-ready TypeScript code.
+TopFlow is a visual workflow designer that enables users to create, test, and export AI-powered applications without writing code. Built on modern web technologies, it provides an intuitive node-based interface for composing complex AI workflows that can be executed in real-time or exported as production-ready TypeScript code.
 
 ### Key Value Propositions
 

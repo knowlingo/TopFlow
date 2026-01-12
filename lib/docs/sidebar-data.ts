@@ -4,81 +4,48 @@ export const learnSidebar: SidebarSection[] = [
   {
     title: "Getting Started",
     items: [
-      { title: "Introduction", href: "/docs/learn/introduction" },
       { title: "Quick Start", href: "/docs/learn/quick-start" },
-      { title: "Installation", href: "/docs/learn/installation" },
+      { title: "Core Concepts", href: "/docs/learn/core-concepts" },
+      { title: "Workflows 101", href: "/docs/learn/workflows-101" },
     ],
   },
   {
-    title: "Core Concepts",
+    title: "Resources",
     items: [
-      { title: "Workflows", href: "/docs/learn/workflows" },
-      { title: "Nodes", href: "/docs/learn/nodes" },
-      { title: "Connections", href: "/docs/learn/connections" },
-      { title: "Validation", href: "/docs/learn/validation" },
-    ],
-  },
-  {
-    title: "Tutorials",
-    items: [
-      { title: "First Workflow", href: "/docs/learn/first-workflow" },
-      { title: "Data Processing", href: "/docs/learn/data-processing" },
-      { title: "API Integration", href: "/docs/learn/api-integration" },
+      { title: "Tutorials", href: "/docs/learn/tutorials" },
+      { title: "Best Practices", href: "/docs/learn/best-practices" },
+      { title: "FAQ", href: "/docs/learn/faq" },
     ],
   },
 ]
 
 export const buildSidebar: SidebarSection[] = [
   {
-    title: "Nodes",
+    title: "Node Reference",
     items: [
       { title: "Overview", href: "/docs/build/nodes" },
-      { title: "Source Nodes", href: "/docs/build/nodes/source" },
-      { title: "Transform Nodes", href: "/docs/build/nodes/transform" },
-      { title: "Sink Nodes", href: "/docs/build/nodes/sink" },
+      { title: "Start Node", href: "/docs/build/nodes/start" },
+      { title: "Text Model", href: "/docs/build/nodes/text-model" },
+      { title: "HTTP Request", href: "/docs/build/nodes/http-request" },
+      { title: "Conditional", href: "/docs/build/nodes/conditional" },
+      { title: "JavaScript", href: "/docs/build/nodes/javascript" },
+      { title: "End Node", href: "/docs/build/nodes/end" },
     ],
   },
   {
-    title: "Configuration",
+    title: "Development",
     items: [
-      { title: "Node Properties", href: "/docs/build/config/properties" },
-      { title: "Data Types", href: "/docs/build/config/data-types" },
-      { title: "Validation Rules", href: "/docs/build/config/validation" },
-    ],
-  },
-  {
-    title: "Advanced",
-    items: [
-      { title: "Custom Nodes", href: "/docs/build/advanced/custom-nodes" },
-      { title: "Plugins", href: "/docs/build/advanced/plugins" },
-      { title: "Performance", href: "/docs/build/advanced/performance" },
+      { title: "API Reference", href: "/docs/build/api" },
     ],
   },
 ]
 
 export const securitySidebar: SidebarSection[] = [
   {
-    title: "Security Rules",
+    title: "Security & Compliance",
     items: [
-      { title: "Overview", href: "/docs/security/overview" },
+      { title: "Overview", href: "/docs/security" },
       { title: "All Validations", href: "/docs/security/validations" },
-      { title: "Flow Rules", href: "/docs/security/flow-rules" },
-    ],
-  },
-  {
-    title: "Best Practices",
-    items: [
-      { title: "Workflow Design", href: "/docs/security/best-practices/workflow-design" },
-      { title: "Data Protection", href: "/docs/security/best-practices/data-protection" },
-      { title: "Access Control", href: "/docs/security/best-practices/access-control" },
-    ],
-  },
-  {
-    title: "Compliance",
-    items: [
-      { title: "Standards", href: "/docs/security/compliance/standards" },
-      { title: "Auditing", href: "/docs/security/compliance/auditing" },
-      { title: "Reporting", href: "/docs/security/compliance/reporting" },
     ],
   },
 ]
