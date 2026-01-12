@@ -715,11 +715,26 @@ export default function AgentBuilder(): ReactElement {
   // Handle template loading from URL params (must be after handleUseTemplate definition)
   useEffect(() => {
     const templateId = searchParams.get("template")
+    const repoParam = searchParams.get("repo")
+
     if (templateId && !currentWorkflow) {
       const templates = WorkflowStorage.getTemplates()
       const template = templates.find((t) => t.id === templateId)
       if (template) {
         handleUseTemplate(template)
+
+        // Pre-fill start node with repo parameter (GitHub Scanner only)
+        if (templateId === "github-security-scanner" && repoParam) {
+          setTimeout(() => {
+            setNodes((nds) =>
+              nds.map((node) =>
+                node.type === "start"
+                  ? { ...node, data: { ...node.data, userInput: repoParam } }
+                  : node
+              )
+            )
+          }, 100)
+        }
       }
     }
   }, [searchParams, handleUseTemplate, currentWorkflow])
