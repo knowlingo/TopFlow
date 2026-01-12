@@ -1,5 +1,6 @@
 import { POST } from '../route'
 import type { Node, Edge } from '@xyflow/react'
+import type { ValidationIssue } from '@charliesu/workflow-core'
 
 // Mock the TopFlowExecutionEngine
 jest.mock('@/lib/topflow-execution-engine', () => ({
