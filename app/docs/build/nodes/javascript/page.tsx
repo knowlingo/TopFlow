@@ -32,12 +32,6 @@ export const metadata: Metadata = {
   },
 }
 
-const sidebarSections = [
-  {
-    title: "Node Reference",
-    items: buildSidebar,
-  },
-]
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
@@ -55,7 +49,7 @@ const tocItems = [
 export default function JavaScriptNodePage() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="build" />
+      <SidebarPortal currentTab="build" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">

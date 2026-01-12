@@ -25,12 +25,6 @@ export const metadata: Metadata = {
   },
 }
 
-const sidebarSections = [
-  {
-    title: "Getting Started",
-    items: learnSidebar,
-  },
-]
 
 const tocItems = [
   { id: "general", title: "General Questions", level: 2 },
@@ -44,7 +38,7 @@ const tocItems = [
 export default function FAQPage() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="learn" />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">

@@ -19,13 +19,6 @@ export const metadata: Metadata = {
   },
 }
 
-const sidebarSections = [
-  {
-    title: "Getting Started",
-    items: learnSidebar,
-  },
-]
-
 const tocItems = [
   { id: "what-is-workflow", title: "What is a Workflow?", level: 2 },
   { id: "anatomy", title: "Anatomy of a Workflow", level: 2 },
@@ -39,7 +32,7 @@ const tocItems = [
 export default function Workflows101Page() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="learn" />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">
