@@ -33,7 +33,7 @@ export default function TutorialsPage() {
 
   return (
     <>
-      <SidebarPortal sections={learnSidebar} />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="space-y-8">
