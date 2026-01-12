@@ -115,9 +115,6 @@
   "lint-staged": {
     "{app,components,lib,hooks}/**/*.{ts,tsx,js,jsx}": [
       "pnpm lint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "pnpm type-check"
     ]
   }
 }

@@ -196,8 +196,7 @@ describe('POST /api/execute-workflow', () => {
         {
           type: 'error',
           nodeId: '1',
-          title: 'Cycle detected',
-          description: 'Workflow contains a cycle',
+          message: 'Cycle detected - Workflow contains a cycle',
         },
       ])
 
@@ -222,8 +221,7 @@ describe('POST /api/execute-workflow', () => {
         {
           type: 'error',
           nodeId: '2',
-          title: 'Missing API Key',
-          description: 'OpenAI API key is required',
+          message: 'Missing API Key - OpenAI API key is required',
         },
       ])
 
@@ -247,7 +245,13 @@ describe('POST /api/execute-workflow', () => {
       mockGetDemoWorkflowResult.mockReturnValue({
         outputs: {},
         nodeResults: {
-          '1': { output: 'demo output' },
+          '1': {
+            nodeId: '1',
+            nodeType: 'start',
+            output: 'demo output',
+            duration: 100,
+            status: 'completed',
+          },
         },
       })
 
@@ -255,8 +259,7 @@ describe('POST /api/execute-workflow', () => {
         {
           type: 'error',
           nodeId: '2',
-          title: 'Missing API Key',
-          description: 'OpenAI API key is required',
+          message: 'Missing API Key - OpenAI API key is required',
         },
       ])
 
@@ -283,8 +286,20 @@ describe('POST /api/execute-workflow', () => {
       mockGetDemoWorkflowResult.mockReturnValue({
         outputs: { final: 'Demo result' },
         nodeResults: {
-          '1': { output: 'Start node' },
-          '2': { output: 'End node' },
+          '1': {
+            nodeId: '1',
+            nodeType: 'start',
+            output: 'Start node',
+            duration: 50,
+            status: 'completed',
+          },
+          '2': {
+            nodeId: '2',
+            nodeType: 'end',
+            output: 'End node',
+            duration: 50,
+            status: 'completed',
+          },
         },
       })
 
@@ -319,7 +334,7 @@ describe('POST /api/execute-workflow', () => {
 
     it('should return error when demo mode enabled but no demo data', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
-      mockGetDemoWorkflowResult.mockReturnValue(null)
+      mockGetDemoWorkflowResult.mockReturnValue(undefined)
 
       const request = createRequest({ nodes: mockNodes, edges: mockEdges, apiKeys: {} })
       const response = await POST(request)
