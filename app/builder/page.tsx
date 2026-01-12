@@ -39,6 +39,7 @@ import {
   Home,
 } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import TextModelNode from "@/components/nodes/text-model-node"
 import EmbeddingModelNode from "@/components/nodes/embedding-model-node"
 import ToolNode from "@/components/nodes/tool-node"
@@ -64,7 +65,7 @@ import { VersionHistory } from "@/components/version-history"
 import { GitHubScannerResultsDialog } from "@/components/github-scanner-results-dialog"
 import { Badge } from "@/components/ui/badge"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
-import type { StoredWorkflow } from "@/lib/storage"
+import { WorkflowStorage, type StoredWorkflow } from "@/lib/storage"
 import { useToast } from "@/hooks/use-toast"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 
@@ -356,6 +357,7 @@ export default function AgentBuilder(): ReactElement {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false)
   const [isPaletteCollapsed, setIsPaletteCollapsed] = useState(false)
   const { toast } = useToast()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -385,6 +387,18 @@ export default function AgentBuilder(): ReactElement {
     const maxId = Math.max(...nodes.map((n) => Number.parseInt(n.id) || 0), 0)
     nodeIdCounter.current = maxId + 1
   }, [nodes])
+
+  // Handle template loading from URL params
+  useEffect(() => {
+    const templateId = searchParams.get("template")
+    if (templateId && !currentWorkflow) {
+      const templates = WorkflowStorage.getTemplates()
+      const template = templates.find((t) => t.id === templateId)
+      if (template) {
+        handleUseTemplate(template)
+      }
+    }
+  }, [searchParams, handleUseTemplate, currentWorkflow])
 
   const validationErrorsCount = React.useMemo(() => {
     const workflowIssues = validateWorkflow(nodes, edges)

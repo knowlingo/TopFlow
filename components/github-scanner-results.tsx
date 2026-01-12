@@ -59,7 +59,7 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
 
   // Share functionality
   const shareToTwitter = () => {
-    const text = `🔒 ${repoName} scored ${score}/100 (Grade: ${grade}) on @TopFlowDev security scanner! Try it: https://topflow.dev`
+    const text = `🔒 ${repoName} scored ${score}/100 (Grade: ${grade}) on @TopFlowDev security scanner! Try it: https://topflow.dev/builder?template=github-security-scanner`
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
   }
 
@@ -69,7 +69,7 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
   }
 
   const copyBadge = () => {
-    const badgeMarkdown = `[![Security Score](https://img.shields.io/badge/Security-${grade}-${score >= 80 ? 'green' : 'yellow'})](https://topflow.dev)`
+    const badgeMarkdown = `[![Security Score](https://img.shields.io/badge/Security-${grade}-${score >= 80 ? 'green' : 'yellow'})](https://topflow.dev/builder?template=github-security-scanner)`
     navigator.clipboard.writeText(badgeMarkdown)
     setCopied(true)
     toast.success("Badge markdown copied to clipboard!")
