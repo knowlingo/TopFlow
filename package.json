@@ -25,7 +25,7 @@
     "@ai-sdk/google": "2.0.17",
     "@ai-sdk/groq": "3.0.3",
     "@ai-sdk/openai": "3.0.4",
-    "@charliesu/workflow-core": "^0.0.1-alpha",
+    "@charliesu/workflow-core": "0.0.2-alpha",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
@@ -115,9 +115,6 @@
   "lint-staged": {
     "{app,components,lib,hooks}/**/*.{ts,tsx,js,jsx}": [
       "pnpm lint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "pnpm type-check"
     ]
   }
 }

@@ -1,5 +1,6 @@
 import { POST } from '../route'
 import type { Node, Edge } from '@xyflow/react'
+import type { ValidationIssue } from '@charliesu/workflow-core'
 
 // Mock the TopFlowExecutionEngine
 jest.mock('@/lib/topflow-execution-engine', () => ({
@@ -196,8 +197,7 @@ describe('POST /api/execute-workflow', () => {
         {
           type: 'error',
           nodeId: '1',
-          title: 'Cycle detected',
-          description: 'Workflow contains a cycle',
+          message: 'Cycle detected - Workflow contains a cycle',
         },
       ])
 
@@ -222,8 +222,7 @@ describe('POST /api/execute-workflow', () => {
         {
           type: 'error',
           nodeId: '2',
-          title: 'Missing API Key',
-          description: 'OpenAI API key is required',
+          message: 'Missing API Key - OpenAI API key is required',
         },
       ])
 
@@ -245,18 +244,27 @@ describe('POST /api/execute-workflow', () => {
     it('should skip API key validation in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
+        templateId: 'test-template',
+        workflowName: 'Test Workflow',
         outputs: {},
         nodeResults: {
-          '1': { output: 'demo output' },
+          '1': {
+            nodeId: '1',
+            nodeType: 'start',
+            output: 'demo output',
+            duration: 100,
+            status: 'completed',
+          },
         },
+        executionTime: 100,
+        timestamp: new Date().toISOString(),
       })
 
       mockValidateApiKeys.mockReturnValue([
         {
           type: 'error',
           nodeId: '2',
-          title: 'Missing API Key',
-          description: 'OpenAI API key is required',
+          message: 'Missing API Key - OpenAI API key is required',
         },
       ])
 
@@ -281,11 +289,27 @@ describe('POST /api/execute-workflow', () => {
     it('should stream demo results when in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
+        templateId: 'test-template',
+        workflowName: 'Test Workflow',
         outputs: { final: 'Demo result' },
         nodeResults: {
-          '1': { output: 'Start node' },
-          '2': { output: 'End node' },
+          '1': {
+            nodeId: '1',
+            nodeType: 'start',
+            output: 'Start node',
+            duration: 50,
+            status: 'completed',
+          },
+          '2': {
+            nodeId: '2',
+            nodeType: 'end',
+            output: 'End node',
+            duration: 50,
+            status: 'completed',
+          },
         },
+        executionTime: 100,
+        timestamp: new Date().toISOString(),
       })
 
       const request = createRequest({ nodes: mockNodes, edges: mockEdges, apiKeys: {} })
@@ -319,7 +343,7 @@ describe('POST /api/execute-workflow', () => {
 
     it('should return error when demo mode enabled but no demo data', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
-      mockGetDemoWorkflowResult.mockReturnValue(null)
+      mockGetDemoWorkflowResult.mockReturnValue(undefined)
 
       const request = createRequest({ nodes: mockNodes, edges: mockEdges, apiKeys: {} })
       const response = await POST(request)

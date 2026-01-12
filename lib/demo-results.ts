@@ -3,17 +3,14 @@
  * These allow users to test workflows without API keys
  */
 
-export interface DemoResult {
-  templateId: string
-  nodeResults: Record<string, any>
-  executionTime: number
-  timestamp: string
-}
+import type { DemoResult } from "./demo-data/types"
 
 export const DEMO_RESULTS: DemoResult[] = [
   // GDPR Data Access Request Demo Results
   {
     templateId: "template-gdpr-access-request",
+    workflowName: "GDPR Data Access Request Automation",
+    outputs: {},
     nodeResults: {
       "gdpr-start": {
         output: "Workflow started"
@@ -224,6 +221,8 @@ TopFlow Security Office`,
   // PII Detection & Redaction Demo Results
   {
     templateId: "template-pii-detection",
+    workflowName: "PII Detection & Redaction Pipeline",
+    outputs: {},
     nodeResults: {
       "start-2": {
         output: `Employee Record:
@@ -378,6 +377,8 @@ Employee ID: EMP-2024-0892`,
   // Security Incident Response Demo Results
   {
     templateId: "template-incident-response",
+    workflowName: "Security Incident Response Workflow",
+    outputs: {},
     nodeResults: {
       "start-3": {
         output: `SECURITY ALERT: Potential data breach detected
@@ -576,6 +577,8 @@ COMMUNICATION PLAN:
   // SOC 2 Control Evidence Collection Demo Results
   {
     templateId: "template-soc2-evidence",
+    workflowName: "SOC 2 Control Evidence Collection",
+    outputs: {},
     nodeResults: {
       "start-4": {
         output: `SOC 2 Control: CC6.1 - Logical and Physical Access Controls

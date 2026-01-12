@@ -9,13 +9,13 @@ import { ExportSection } from "@/components/reports/export-section"
 import { ThreatVisualization } from "@/components/reports/threat-visualization"
 
 interface ReportPageProps {
-  params: {
+  params: Promise<{
     templateId: string
-  }
+  }>
 }
 
-export default function ReportPage({ params }: ReportPageProps) {
-  const { templateId } = params
+export default async function ReportPage({ params }: ReportPageProps) {
+  const { templateId } = await params
 
   // Check if demo data exists
   if (!hasDemoData(templateId)) {
@@ -457,7 +457,7 @@ function GenericReport({ demoResult, templateId }: { demoResult: any; templateId
 
 // Metadata for SEO
 export async function generateMetadata({ params }: ReportPageProps) {
-  const { templateId } = params
+  const { templateId } = await params
 
   if (templateId === "template-ot-critical-infra") {
     return {
