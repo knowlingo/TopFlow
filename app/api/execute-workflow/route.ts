@@ -97,6 +97,14 @@ export async function POST(req: Request) {
           userInputs?: Record<string, string>
         } = await req.json()
 
+        console.log('[Execute Workflow] Request received:', {
+          workflowId,
+          nodeCount: nodes.length,
+          edgeCount: edges.length,
+          hasApiKeys: Object.keys(apiKeys).length > 0,
+          userInputs: userInputs ? Object.keys(userInputs) : []
+        })
+
         // Process user inputs for start nodes
         let processedNodes = nodes
         if (userInputs) {
@@ -123,6 +131,13 @@ export async function POST(req: Request) {
         // Check both legacy and new demo mode systems
         const hasLegacyDemo = hasLegacyDemoData(workflowId)
         const hasNewDemo = hasNewDemoData(workflowId)
+
+        console.log('[Execute Workflow] Demo mode check:', {
+          workflowId,
+          demoMode,
+          hasLegacyDemo,
+          hasNewDemo
+        })
 
         // For workflows without demo data, check early and show error
         if (demoMode && !hasLegacyDemo && !hasNewDemo) {
