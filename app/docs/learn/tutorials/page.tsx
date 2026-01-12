@@ -131,8 +131,8 @@ export default function TutorialsPage() {
 
           <div className="grid gap-4">
             {/* Tutorial 1 */}
-            <Link href="/docs/learn/first-workflow">
-              <Card className="border-2 hover:border-primary/50 transition-all group">
+            <div className="cursor-not-allowed">
+              <Card className="border-2 opacity-75">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -143,15 +143,15 @@ export default function TutorialsPage() {
                         <Badge variant="outline" className="text-xs">
                           15 min
                         </Badge>
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500 text-xs">
+                          Coming Soon
+                        </Badge>
                       </div>
-                      <CardTitle className="group-hover:text-primary transition-colors">
-                        Your First AI Workflow
-                      </CardTitle>
+                      <CardTitle>Your First AI Workflow</CardTitle>
                       <CardDescription>
                         Build a simple text summarization workflow using OpenAI's GPT-4
                       </CardDescription>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -168,11 +168,11 @@ export default function TutorialsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
 
             {/* Tutorial 2 */}
-            <Link href="/docs/learn/data-processing">
-              <Card className="border-2 hover:border-primary/50 transition-all group">
+            <div className="cursor-not-allowed">
+              <Card className="border-2 opacity-75">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -183,15 +183,15 @@ export default function TutorialsPage() {
                         <Badge variant="outline" className="text-xs">
                           20 min
                         </Badge>
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500 text-xs">
+                          Coming Soon
+                        </Badge>
                       </div>
-                      <CardTitle className="group-hover:text-primary transition-colors">
-                        Data Processing Pipeline
-                      </CardTitle>
+                      <CardTitle>Data Processing Pipeline</CardTitle>
                       <CardDescription>
                         Transform and validate data using JavaScript nodes and structured outputs
                       </CardDescription>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -208,11 +208,11 @@ export default function TutorialsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
 
             {/* Tutorial 3 */}
-            <Link href="/docs/learn/api-integration">
-              <Card className="border-2 hover:border-primary/50 transition-all group">
+            <div className="cursor-not-allowed">
+              <Card className="border-2 opacity-75">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -223,13 +223,15 @@ export default function TutorialsPage() {
                         <Badge variant="outline" className="text-xs">
                           25 min
                         </Badge>
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500 text-xs">
+                          Coming Soon
+                        </Badge>
                       </div>
-                      <CardTitle className="group-hover:text-primary transition-colors">API Integration</CardTitle>
+                      <CardTitle>API Integration</CardTitle>
                       <CardDescription>
                         Connect to external APIs and process responses with AI models
                       </CardDescription>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -246,7 +248,7 @@ export default function TutorialsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
           </div>
         </div>
 
