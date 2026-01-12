@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { AnimatedScore } from "@/components/animated-score"
 
 interface GitHubScannerResultsProps {
   outputs: Record<string, any>
@@ -96,20 +97,12 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
                 {repoName}
               </CardDescription>
             </div>
-            <div className={`flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 ${getGradeColor(grade)}`}>
-              <div className={`text-5xl font-bold ${getScoreColor(score)}`}>
-                {score}
-              </div>
-              <div className="text-xs text-muted-foreground">out of 100</div>
-            </div>
+            <AnimatedScore score={score} grade={grade} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Grade Badge */}
+          {/* Status Badges */}
           <div className="flex items-center gap-4">
-            <Badge variant="outline" className={`text-2xl py-2 px-6 font-bold ${getGradeColor(grade)}`}>
-              Grade: {grade}
-            </Badge>
             {score >= 90 && (
               <Badge variant="outline" className="text-green-500 border-green-500">
                 <CheckCircle2 className="h-4 w-4 mr-1" />
