@@ -56,6 +56,12 @@ export function TemplateGallery({ open, onOpenChange, onUseTemplate }: TemplateG
     const isDemoTemplate = template.id.startsWith('template-') || template.id === 'github-security-scanner'
     const templateId = isDemoTemplate ? template.id : undefined
 
+    console.log('[Template Gallery] Loading template:', {
+      originalId: template.id,
+      isDemoTemplate,
+      preservedId: templateId || `workflow-${Date.now()}`
+    })
+
     // Create a new workflow from template with unique ID
     const newWorkflow: StoredWorkflow = {
       ...template,

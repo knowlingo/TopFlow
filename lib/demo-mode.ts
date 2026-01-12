@@ -268,6 +268,7 @@ export const DEMO_NODE_DELAYS: Record<string, number> = {
  * Check if a workflow has demo data available
  */
 export function hasDemoData(workflowId: string | undefined): boolean {
+  console.log('[Demo Mode] Checking if workflow has demo data:', { workflowId, hasDemoData: workflowId === "github-security-scanner" })
   if (!workflowId) return false
   return workflowId === "github-security-scanner"
 }
