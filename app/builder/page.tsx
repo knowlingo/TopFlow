@@ -388,18 +388,6 @@ export default function AgentBuilder(): ReactElement {
     nodeIdCounter.current = maxId + 1
   }, [nodes])
 
-  // Handle template loading from URL params
-  useEffect(() => {
-    const templateId = searchParams.get("template")
-    if (templateId && !currentWorkflow) {
-      const templates = WorkflowStorage.getTemplates()
-      const template = templates.find((t) => t.id === templateId)
-      if (template) {
-        handleUseTemplate(template)
-      }
-    }
-  }, [searchParams, handleUseTemplate, currentWorkflow])
-
   const validationErrorsCount = React.useMemo(() => {
     const workflowIssues = validateWorkflow(nodes, edges)
     const apiKeyIssues = validateApiKeys(apiKeys, nodes)
@@ -723,6 +711,18 @@ export default function AgentBuilder(): ReactElement {
     },
     [toast],
   )
+
+  // Handle template loading from URL params (must be after handleUseTemplate definition)
+  useEffect(() => {
+    const templateId = searchParams.get("template")
+    if (templateId && !currentWorkflow) {
+      const templates = WorkflowStorage.getTemplates()
+      const template = templates.find((t) => t.id === templateId)
+      if (template) {
+        handleUseTemplate(template)
+      }
+    }
+  }, [searchParams, handleUseTemplate, currentWorkflow])
 
   const handleWorkflowSaved = useCallback(
     (workflow: StoredWorkflow) => {
