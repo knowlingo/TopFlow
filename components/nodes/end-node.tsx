@@ -11,6 +11,8 @@ import Link from "next/link"
 export type EndNodeData = {
   status?: "idle" | "running" | "completed" | "error"
   output?: any
+  workflowId?: string
+  onViewResults?: () => void
 }
 
 function EndNode({ data, selected }: NodeProps<EndNodeData>) {
@@ -24,6 +26,11 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
       "report" in data.output &&
       "threat_map" in data.output
     )
+  }
+
+  // Check if this is a GitHub Scanner result
+  const isGitHubScannerReport = () => {
+    return data.workflowId === "github-security-scanner" && data.output && data.status === "completed"
   }
 
   const hasImages = () => {
@@ -162,6 +169,19 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
                         View Full Report
                       </Button>
                     </Link>
+                  )}
+                  {isGitHubScannerReport() && data.onViewResults && (
+                    <Button
+                      size="sm"
+                      className="w-full h-7 text-xs bg-primary hover:bg-primary/90"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        data.onViewResults?.()
+                      }}
+                    >
+                      <FileText className="mr-1.5 h-3 w-3" />
+                      View Full Report
+                    </Button>
                   )}
                 </div>
               ))}

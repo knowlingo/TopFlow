@@ -4,7 +4,7 @@ import React from "react"
 
 import type { ReactElement } from "react"
 
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useRef, useEffect, useMemo } from "react"
 import {
   ReactFlow,
   applyNodeChanges,
@@ -61,6 +61,7 @@ import { ValidationPanel } from "@/components/validation-panel"
 import { TemplateGallery } from "@/components/template-gallery"
 import { WorkflowManager } from "@/components/workflow-manager"
 import { VersionHistory } from "@/components/version-history"
+import { GitHubScannerResultsDialog } from "@/components/github-scanner-results-dialog"
 import { Badge } from "@/components/ui/badge"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { StoredWorkflow } from "@/lib/storage"
@@ -347,6 +348,8 @@ export default function AgentBuilder(): ReactElement {
   const [showVersionHistory, setShowVersionHistory] = useState(false)
   const [currentWorkflow, setCurrentWorkflow] = useState<StoredWorkflow | null>(null)
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
+  const [lastExecutionResults, setLastExecutionResults] = useState<Record<string, any> | null>(null)
+  const [showResultsDialog, setShowResultsDialog] = useState(false)
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const nodeIdCounter = useRef(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -468,6 +471,12 @@ export default function AgentBuilder(): ReactElement {
 
   const handleNodeOutputChange = useCallback((nodeId: string, output: any) => {
     setNodes((nds) => nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, output } } : node)))
+
+    // Store execution results when any node completes
+    setLastExecutionResults((prev) => ({
+      ...(prev || {}),
+      [nodeId]: output
+    }))
   }, [])
 
   const handleDeleteNode = useCallback(() => {
@@ -743,6 +752,33 @@ export default function AgentBuilder(): ReactElement {
     }
   }, [nodes, reactFlowInstance])
 
+  // Callback for viewing GitHub Scanner results
+  const handleViewResults = useCallback(() => {
+    if (lastExecutionResults && currentWorkflow?.id === "github-security-scanner") {
+      setShowResultsDialog(true)
+    }
+  }, [lastExecutionResults, currentWorkflow?.id])
+
+  // Enrich nodes with workflowId and onViewResults callback for end nodes
+  const enrichedNodes = useMemo(() => {
+    return nodes.map((node) => {
+      if (node.type === "end") {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            workflowId: currentWorkflow?.id,
+            onViewResults: handleViewResults
+          }
+        }
+      }
+      return node
+    })
+  }, [nodes, currentWorkflow?.id, handleViewResults])
+
+  // Get repository name for results dialog
+  const repository = lastExecutionResults?.["start"] || ""
+
   return (
     <div className="flex h-screen w-full flex-col bg-background">
       <header className="flex flex-col gap-3 border-b border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
@@ -861,7 +897,7 @@ export default function AgentBuilder(): ReactElement {
 
         <div className="flex-1" ref={reactFlowWrapper}>
           <ReactFlow
-            nodes={nodes}
+            nodes={enrichedNodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
@@ -970,6 +1006,12 @@ export default function AgentBuilder(): ReactElement {
         onOpenChange={setShowVersionHistory}
         workflowId={currentWorkflow?.id || null}
         onRestoreVersion={handleRestoreVersion}
+      />
+      <GitHubScannerResultsDialog
+        open={showResultsDialog}
+        onOpenChange={setShowResultsDialog}
+        outputs={lastExecutionResults || {}}
+        repository={repository}
       />
     </div>
   )
