@@ -1,11 +1,11 @@
 /**
  * Dynamic Search Index Generator
  *
- * Generates searchable content from navigation data automatically.
+ * Generates searchable content from unified navigation data automatically.
  * No need to manually update search indexes when adding new pages.
  */
 
-import { docsNavigation, learnSidebar, buildSidebar, securitySidebar, type NavItem, type NavSection } from './navigation-data'
+import { getAllNavItems, getCategoryOverviews } from './unified-navigation'
 
 export interface SearchResult {
   title: string
@@ -15,89 +15,35 @@ export interface SearchResult {
 }
 
 /**
- * Determines which section a URL belongs to
- */
-function getSectionFromHref(href: string): string {
-  if (href.startsWith('/docs/learn')) return 'Learn'
-  if (href.startsWith('/docs/build')) return 'Build'
-  if (href.startsWith('/docs/security')) return 'Security'
-  return 'Docs'
-}
-
-/**
- * Extracts search results from a navigation section
- */
-function extractFromNavSection(section: NavSection): SearchResult[] {
-  const results: SearchResult[] = []
-
-  // Add the section itself
-  results.push({
-    title: section.title,
-    href: section.href,
-    description: `${section.title} section overview`,
-    section: section.title,
-  })
-
-  // Add all items in the section
-  if (section.items) {
-    section.items.forEach((item) => {
-      results.push({
-        title: item.title,
-        href: item.href,
-        description: item.description || `Learn about ${item.title}`,
-        section: section.title,
-      })
-    })
-  }
-
-  return results
-}
-
-/**
- * Extracts search results from sidebar navigation items
- */
-function extractFromSidebar(items: NavItem[], sectionName: string): SearchResult[] {
-  return items
-    .filter((item) => item.href !== `/docs/${sectionName.toLowerCase()}`) // Skip overview (already in main nav)
-    .map((item) => ({
-      title: item.title,
-      href: item.href,
-      description: item.description || `Documentation for ${item.title}`,
-      section: sectionName,
-    }))
-}
-
-/**
- * Generates comprehensive search index from all navigation data
+ * Generates comprehensive search index from unified navigation data
  */
 export function generateSearchIndex(): SearchResult[] {
   const results: SearchResult[] = []
 
-  // Extract from main navigation
-  docsNavigation.forEach((section) => {
-    results.push(...extractFromNavSection(section))
+  // Add category overview pages
+  const categories = getCategoryOverviews()
+  categories.forEach((cat) => {
+    results.push({
+      title: cat.title,
+      href: cat.href,
+      description: cat.description,
+      section: cat.title,
+    })
   })
 
-  // Extract additional items from sidebars (that aren't in main nav)
-  const mainNavUrls = new Set(results.map((r) => r.href))
-
-  // Learn sidebar
-  const learnItems = extractFromSidebar(learnSidebar, 'Learn').filter(
-    (item) => !mainNavUrls.has(item.href)
-  )
-  results.push(...learnItems)
-
-  // Build sidebar
-  const buildItems = extractFromSidebar(buildSidebar, 'Build').filter(
-    (item) => !mainNavUrls.has(item.href)
-  )
-  results.push(...buildItems)
-
-  // Security sidebar
-  const securityItems = extractFromSidebar(securitySidebar, 'Security').filter(
-    (item) => !mainNavUrls.has(item.href)
-  )
-  results.push(...securityItems)
+  // Add all navigation items
+  const allItems = getAllNavItems()
+  allItems.forEach((item) => {
+    // Skip if it's a category overview (already added above)
+    if (!categories.some((cat) => cat.href === item.href)) {
+      results.push({
+        title: item.title,
+        href: item.href,
+        description: item.description || `Documentation for ${item.title}`,
+        section: item.section,
+      })
+    }
+  })
 
   // Remove duplicates based on href
   const uniqueResults = Array.from(
@@ -106,12 +52,22 @@ export function generateSearchIndex(): SearchResult[] {
 
   // Sort alphabetically by title within each section
   uniqueResults.sort((a, b) => {
-    if (a.section === b.section) {
+    const sectionA = a.section || ''
+    const sectionB = b.section || ''
+
+    if (sectionA === sectionB) {
       return a.title.localeCompare(b.title)
     }
-    // Order sections: Learn, Build, Security
-    const sectionOrder = { Learn: 1, Build: 2, Security: 3, Docs: 4 }
-    return sectionOrder[a.section as keyof typeof sectionOrder] - sectionOrder[b.section as keyof typeof sectionOrder]
+
+    // Order sections: Learn, Build, Security, then others
+    const sectionOrder: Record<string, number> = {
+      Learn: 1,
+      Build: 2,
+      Security: 3
+    }
+    const orderA = sectionOrder[sectionA] || 99
+    const orderB = sectionOrder[sectionB] || 99
+    return orderA - orderB
   })
 
   return uniqueResults
@@ -124,7 +80,7 @@ export function generateSearchIndex(): SearchResult[] {
 export const searchIndex = generateSearchIndex()
 
 /**
- * Enhanced search with keyword matching
+ * Enhanced search with keyword matching and relevance scoring
  * Returns results sorted by relevance
  */
 export function searchDocs(query: string): SearchResult[] {

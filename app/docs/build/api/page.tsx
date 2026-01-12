@@ -6,7 +6,6 @@ import { Code, Shield, Zap, AlertTriangle, CheckCircle2, Copy, ExternalLink } fr
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "API Reference - Build | TopFlow",
@@ -31,12 +30,6 @@ export const metadata: Metadata = {
   },
 }
 
-const sidebarSections = [
-  {
-    title: "Build Reference",
-    items: buildSidebar,
-  },
-]
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
@@ -54,7 +47,7 @@ const tocItems = [
 export default function ApiReferencePage() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="build" />
+      <SidebarPortal currentTab="build" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">

@@ -53,8 +53,7 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
       return issues.map(issue => ({
         ...issue,
         type: "info" as const,
-        title: `Demo Mode: ${issue.title}`,
-        description: `${issue.description} (Demo data will be used for this template)`
+        message: `Demo Mode: ${issue.message} (Demo data will be used for this template)`
       }))
     }
     return validateApiKeys(apiKeys, nodes)
@@ -70,21 +69,24 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
   // Security-specific issues
   const securityIssues = useMemo(() => {
     return allIssues.filter((issue) => {
+      const message = issue.message.toLowerCase()
+      const field = issue.field?.toLowerCase() || ""
       const isSecurityRelated =
-        issue.id.includes("unsafe-url") ||
-        issue.id.includes("cycle") || // Infinite loops are security risks
-        issue.id.includes("missing-api-key") ||
-        issue.title.includes("Security") ||
-        issue.title.includes("Unsafe") ||
-        issue.description.includes("security") ||
-        issue.description.includes("private network")
+        message.includes("unsafe") ||
+        message.includes("cycle") || // Infinite loops are security risks
+        message.includes("security") ||
+        message.includes("private network") ||
+        message.includes("ssrf") ||
+        field.includes("url")
       return isSecurityRelated
     })
   }, [allIssues])
 
   // Configuration issues (non-security)
   const configIssues = useMemo(() => {
-    return allIssues.filter((issue) => !securityIssues.some(si => si.id === issue.id))
+    return allIssues.filter((issue) => !securityIssues.some(si =>
+      si.type === issue.type && si.nodeId === issue.nodeId && si.message === issue.message
+    ))
   }, [allIssues, securityIssues])
 
   // Detect compliance frameworks based on templates/nodes
@@ -141,8 +143,8 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
   }
 
   const handleIssueClick = (issue: ValidationIssue) => {
-    if (onNodeHighlight && issue.nodeIds.length > 0) {
-      onNodeHighlight(issue.nodeIds)
+    if (onNodeHighlight && issue.nodeId) {
+      onNodeHighlight([issue.nodeId])
     }
   }
 
@@ -151,9 +153,9 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
 
     return (
       <div className="space-y-2">
-        {issues.map((issue) => (
+        {issues.map((issue, index) => (
           <Card
-            key={issue.id}
+            key={`${issue.type}-${issue.nodeId || 'global'}-${index}`}
             className={`cursor-pointer border p-3 transition-all hover:shadow-md ${colorClass}`}
             onClick={() => handleIssueClick(issue)}
           >
@@ -161,16 +163,16 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
               <div className="mt-0.5">{icon}</div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">{issue.title}</p>
-                  {issue.fixable && (
-                    <Badge variant="outline" className="text-xs">
-                      Auto-fixable
-                    </Badge>
-                  )}
+                  <p className="text-sm font-semibold">{issue.message}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{issue.description}</p>
-                {issue.nodeIds.length > 0 && (
-                  <p className="text-xs text-muted-foreground">Affected nodes: {issue.nodeIds.length}</p>
+                {issue.suggestion && (
+                  <p className="text-xs text-muted-foreground">Suggestion: {issue.suggestion}</p>
+                )}
+                {issue.nodeId && (
+                  <p className="text-xs text-muted-foreground">Affected node: {issue.nodeId}</p>
+                )}
+                {issue.field && (
+                  <p className="text-xs text-muted-foreground">Field: {issue.field}</p>
                 )}
               </div>
             </div>

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "start": "next start",
     "test": "jest",
@@ -25,7 +25,7 @@
     "@ai-sdk/google": "2.0.17",
     "@ai-sdk/groq": "3.0.3",
     "@ai-sdk/openai": "3.0.4",
-    "@charliesu/workflow-core": "^0.0.1-alpha",
+    "@charliesu/workflow-core": "0.0.2-alpha",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
@@ -87,15 +87,19 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.9",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@vitest/ui": "^4.0.16",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "15.5.7",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
@@ -111,9 +115,6 @@
   "lint-staged": {
     "{app,components,lib,hooks}/**/*.{ts,tsx,js,jsx}": [
       "pnpm lint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "pnpm type-check"
     ]
   }
 }

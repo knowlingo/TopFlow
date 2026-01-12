@@ -22,6 +22,7 @@ import type { DemoResult } from "./types"
 export const DEFAULT_WORKFLOW_DEMO: DemoResult = {
   templateId: "template-threat-intel",
   workflowName: "Threat Intelligence Report Generator",
+  outputs: {},
   nodeResults: {
     // Node 1: Start
     "threat-start": {
@@ -422,6 +423,7 @@ Recommended Response Time: Immediate (P1 incident)`,
 export const DEFAULT_WORKFLOW_DEMO_ALT: DemoResult = {
   templateId: "template-threat-intel",
   workflowName: "Threat Intelligence Report Generator (Standard)",
+  outputs: {},
   nodeResults: {
     "threat-start": {
       nodeId: "threat-start",

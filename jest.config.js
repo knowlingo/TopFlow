@@ -59,6 +59,13 @@ const customJestConfig = {
     '**/?(*.)+(spec|test).[jt]s?(x)',
   ],
 
+  // Ignore e2e tests (run with Playwright separately)
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/.next/',
+    '/e2e/',
+  ],
+
   // Transform ignore patterns
   transformIgnorePatterns: [
     '/node_modules/',

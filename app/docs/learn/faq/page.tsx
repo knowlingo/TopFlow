@@ -12,7 +12,6 @@ import {
 import { Shield, Zap, Lock, Code, AlertCircle, CheckCircle2, HelpCircle, ArrowRight } from "lucide-react"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { learnSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions (FAQ) | TopFlow Learn",
@@ -26,12 +25,6 @@ export const metadata: Metadata = {
   },
 }
 
-const sidebarSections = [
-  {
-    title: "Getting Started",
-    items: learnSidebar,
-  },
-]
 
 const tocItems = [
   { id: "general", title: "General Questions", level: 2 },
@@ -45,7 +38,7 @@ const tocItems = [
 export default function FAQPage() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="learn" />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">

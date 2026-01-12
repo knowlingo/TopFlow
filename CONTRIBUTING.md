@@ -149,7 +149,13 @@ git clone https://github.com/YOUR_USERNAME/topflow.git
 cd topflow
 
 # Add upstream remote
-git remote add upstream https://github.com/topflow/topflow.git
+git remote add upstream https://github.com/csupenn/topflow.git
+
+# Fetch all branches
+git fetch upstream
+
+# Create your feature branch from dev (not main!)
+git checkout -b feature/your-feature upstream/dev
 
 # Install dependencies
 pnpm install
@@ -237,6 +243,16 @@ For detailed instructions, see **[Workflow-Core Package Guide](docs/development/
 
 ## 🔄 Pull Request Process
 
+### Branch Structure
+
+```
+main       → Protected branch for stable releases (maintainers only)
+  └── dev  → Active development branch (target for all PRs)
+      └── feature/* → Your feature branches
+```
+
+**IMPORTANT**: All pull requests should target the `dev` branch, NOT `main`.
+
 ### Before Submitting
 
 1. **Search Existing Issues/PRs**: Check if someone is already working on this to avoid duplicate effort
@@ -248,25 +264,32 @@ For detailed instructions, see **[Workflow-Core Package Guide](docs/development/
 
 ### PR Submission Steps
 
-1. **Create a Branch**:
+1. **Sync with Latest Dev Branch**:
+   ```bash
+   git fetch upstream
+   git checkout dev
+   git pull upstream dev
+   ```
+
+2. **Create Your Feature Branch from Dev**:
    ```bash
    git checkout -b feature/your-feature-name
    # or
    git checkout -b fix/your-bug-fix
    ```
 
-2. **Make Your Changes**:
+3. **Make Your Changes**:
    - Follow coding standards
    - Write clear commit messages
    - Keep commits atomic and focused
 
-3. **Test Thoroughly**:
+4. **Test Thoroughly**:
    - Manual testing in browser
    - Verify no console errors
    - Test edge cases
    - Check security implications
 
-4. **Commit with Conventional Commits**:
+5. **Commit with Conventional Commits**:
    ```bash
    git commit -m "feat: add GDPR Article 21 workflow"
    git commit -m "fix: prevent SSRF in HTTP request node"
@@ -275,11 +298,15 @@ For detailed instructions, see **[Workflow-Core Package Guide](docs/development/
 
    **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `security`
 
-5. **Push and Create PR**:
+6. **Push to Your Fork**:
    ```bash
    git push origin feature/your-feature-name
    ```
-   Then create a PR on GitHub.
+
+7. **Create Pull Request**:
+   - Go to GitHub and create a PR from your branch
+   - **IMPORTANT**: Set the base branch to `dev` (not `main`)
+   - Fill out the PR template completely
 
 ### PR Template
 
@@ -325,7 +352,10 @@ For detailed instructions, see **[Workflow-Core Package Guide](docs/development/
 2. **Security Review**: All PRs reviewed for security implications
 3. **Code Review**: At least one maintainer approval required
 4. **Testing**: Manual testing in development environment
-5. **Merge**: Squash and merge to main branch
+5. **Merge to Dev**: Squash and merge to `dev` branch
+6. **Release to Main**: Maintainers periodically promote stable `dev` to `main`
+
+**Note**: Direct commits to `main` are restricted. All changes flow through `dev` first.
 
 ---
 
@@ -528,8 +558,8 @@ We value all contributions and will:
 
 ## 📞 Questions?
 
-- **General Questions**: Open a [GitHub Discussion](https://github.com/topflow/topflow/discussions)
-- **Bug Reports**: Open a [GitHub Issue](https://github.com/topflow/topflow/issues)
+- **General Questions**: Open a [GitHub Discussion](https://github.com/csupenn/topflow/discussions)
+- **Bug Reports**: Open a [GitHub Issue](https://github.com/csupenn/topflow/issues)
 - **Security Issues**: Email charlie@charliesu.com
 - **Feature Proposals**: Open an issue with the "feature request" label
 

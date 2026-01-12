@@ -156,7 +156,7 @@ export async function POST(req: Request) {
         if (errors.length > 0) {
           sendUpdate({
             type: "error",
-            error: `Validation failed: ${errors[0].title} - ${errors[0].description}`,
+            error: `Validation failed: ${errors[0].message}`,
           })
           controller.close()
           return
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
           if (apiKeyErrors.length > 0) {
             sendUpdate({
               type: "error",
-              error: `${apiKeyErrors[0].title}: ${apiKeyErrors[0].description}`,
+              error: apiKeyErrors[0].message,
             })
             controller.close()
             return

@@ -2,7 +2,6 @@ import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/sidebar-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -128,7 +127,7 @@ export default function NodesReferencePage() {
 
   return (
     <>
-      <SidebarPortal sections={buildSidebar} currentTab="build" />
+      <SidebarPortal currentTab="build" />
       <TOCPortal items={tocItems} />
 
       <div className="space-y-8">

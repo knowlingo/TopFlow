@@ -2,7 +2,6 @@ import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { learnSidebar } from "@/lib/docs/sidebar-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -35,7 +34,7 @@ export default function BestPracticesPage() {
 
   return (
     <>
-      <SidebarPortal sections={learnSidebar} />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="space-y-8">
@@ -535,8 +534,8 @@ const priority = calculatePriority(tier, severity, timestamp);`}
             href: "/docs/learn/tutorials",
           }}
           nextPage={{
-            title: "Node Reference",
-            href: "/docs/build/nodes",
+            title: "FAQ",
+            href: "/docs/learn/faq",
           }}
         />
       </div>
