@@ -940,7 +940,7 @@ export default function CompliancePage() {
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/blog/gdpr-automation-workflow">
+                  <Link href="/blog/gdpr-automation-3-minutes">
                     View Blog Post
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
