@@ -25,6 +25,7 @@ type ExecutionPanelProps = {
   onNodeStatusChange?: (nodeId: string, status: "idle" | "running" | "completed" | "error") => void
   onNodeOutputChange?: (nodeId: string, output: any) => void
   onShowEndNode?: () => void
+  onViewFullReport?: () => void
   workflowId?: string
 }
 
@@ -35,6 +36,7 @@ export function ExecutionPanel({
   onNodeStatusChange,
   onNodeOutputChange,
   onShowEndNode,
+  onViewFullReport,
   workflowId,
 }: ExecutionPanelProps) {
   const [isExecuting, setIsExecuting] = useState(false)
@@ -283,7 +285,15 @@ export function ExecutionPanel({
       <div className="p-4">
         {executionComplete && !isExecuting ? (
           <div className="space-y-2">
-            {!isGitHubScanner && (
+            {isGitHubScanner && onViewFullReport ? (
+              <Button
+                onClick={onViewFullReport}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Full Report
+              </Button>
+            ) : !isGitHubScanner ? (
               <Button
                 onClick={handleShowResults}
                 className="w-full bg-primary hover:bg-primary/90"
@@ -291,9 +301,9 @@ export function ExecutionPanel({
                 <Eye className="mr-2 h-4 w-4" />
                 Show Results
               </Button>
-            )}
+            ) : null}
             <p className="text-center text-xs text-muted-foreground">
-              {isGitHubScanner ? "Scroll to view full report" : "To run again, click \"Run\" in the header"}
+              {isGitHubScanner ? "View detailed analysis in full screen" : "To run again, click \"Run\" in the header"}
             </p>
           </div>
         ) : (

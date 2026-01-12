@@ -981,6 +981,7 @@ export default function AgentBuilder(): ReactElement {
             onNodeStatusChange={handleNodeStatusChange}
             onNodeOutputChange={handleNodeOutputChange}
             onShowEndNode={handleShowEndNode}
+            onViewFullReport={handleViewResults}
             workflowId={currentWorkflow?.id || "template-threat-intel"}
           />
         )}

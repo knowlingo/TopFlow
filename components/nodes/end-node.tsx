@@ -170,19 +170,6 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
                       </Button>
                     </Link>
                   )}
-                  {isGitHubScannerReport() && data.onViewResults && (
-                    <Button
-                      size="sm"
-                      className="w-full h-7 text-xs bg-primary hover:bg-primary/90"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        data.onViewResults?.()
-                      }}
-                    >
-                      <FileText className="mr-1.5 h-3 w-3" />
-                      View Full Report
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>
@@ -192,6 +179,20 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
                 {typeof data.output === "string" ? data.output : JSON.stringify(data.output, null, 2)}
               </p>
             </div>
+          )}
+          {/* GitHub Scanner View Full Report button - always show when conditions met */}
+          {isGitHubScannerReport() && data.onViewResults && (
+            <Button
+              size="sm"
+              className="w-full h-7 text-xs bg-primary hover:bg-primary/90 mt-1.5"
+              onClick={(e) => {
+                e.stopPropagation()
+                data.onViewResults?.()
+              }}
+            >
+              <FileText className="mr-1.5 h-3 w-3" />
+              View Full Report
+            </Button>
           )}
         </div>
       )}

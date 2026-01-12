@@ -254,7 +254,7 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
             <p className="text-sm font-medium">Add this badge to your README:</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-xs bg-muted px-3 py-2 rounded">
-                [![Security](https://img.shields.io/badge/Security-{grade}-{score >= 80 ? 'green' : 'yellow'})]
+                {`[![Security Score](https://img.shields.io/badge/Security-${grade}-${score >= 80 ? 'green' : 'yellow'})](https://topflow.dev)`}
               </code>
               <Button onClick={copyBadge} size="sm" variant="outline">
                 {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
