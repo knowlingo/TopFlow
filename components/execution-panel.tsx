@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { WorkflowInputDialog } from "@/components/workflow-input-dialog"
 import type { StartNodeData } from "@/components/nodes/start-node"
+import { GitHubScannerResults } from "@/components/github-scanner-results"
 
 type ExecutionResult = {
   nodeId: string
@@ -255,6 +256,21 @@ export function ExecutionPanel({
     }
   }
 
+  // Convert execution log to outputs map for GitHub Scanner
+  const workflowOutputs = executionLog.reduce((acc, entry) => {
+    if (entry.output !== undefined) {
+      acc[entry.nodeId] = entry.output
+    }
+    return acc
+  }, {} as Record<string, any>)
+
+  // Get repository name from start node input
+  const startNodeInput = workflowOutputs["start"] || ""
+  const repository = typeof startNodeInput === "string" ? startNodeInput : ""
+
+  // Check if this is the GitHub Scanner workflow
+  const isGitHubScanner = workflowId === "github-security-scanner"
+
   return (
     <aside className="absolute right-0 top-0 z-10 h-full w-full border-l border-border bg-card md:relative md:w-96">
       <div className="flex items-center justify-between border-b border-border p-4">
@@ -267,15 +283,17 @@ export function ExecutionPanel({
       <div className="p-4">
         {executionComplete && !isExecuting ? (
           <div className="space-y-2">
-            <Button
-              onClick={handleShowResults}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Show Results
-            </Button>
+            {!isGitHubScanner && (
+              <Button
+                onClick={handleShowResults}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Show Results
+              </Button>
+            )}
             <p className="text-center text-xs text-muted-foreground">
-              To run again, click "Run" in the header
+              {isGitHubScanner ? "Scroll to view full report" : "To run again, click \"Run\" in the header"}
             </p>
           </div>
         ) : (
@@ -484,7 +502,15 @@ System: TopFlow GDPR Workflow Engine
           </Card>
         )}
 
-        {executionLog.length > 0 && (
+        {/* GitHub Scanner Results - Show after execution completes */}
+        {isGitHubScanner && executionComplete && !isExecuting && Object.keys(workflowOutputs).length > 0 && (
+          <ScrollArea className="h-[calc(100vh-200px)] mt-4">
+            <GitHubScannerResults outputs={workflowOutputs} repository={repository} />
+          </ScrollArea>
+        )}
+
+        {/* Standard Execution Log - Hidden for GitHub Scanner when complete */}
+        {executionLog.length > 0 && !(isGitHubScanner && executionComplete) && (
           <div className="mt-4">
             <h3 className="mb-2 text-sm font-medium text-foreground">Execution Log</h3>
             <ScrollArea className="h-[calc(100vh-250px)]">
