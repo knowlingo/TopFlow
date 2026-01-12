@@ -88,12 +88,31 @@ export async function POST(req: Request) {
           edges,
           apiKeys = {},
           workflowId,
+          userInputs,
         }: {
           nodes: Node[]
           edges: Edge[]
           apiKeys?: Record<string, string>
           workflowId?: string
+          userInputs?: Record<string, string>
         } = await req.json()
+
+        // Process user inputs for start nodes
+        let processedNodes = nodes
+        if (userInputs) {
+          processedNodes = nodes.map((node) => {
+            if (node.type === "start" && userInputs[node.id]) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  output: userInputs[node.id],
+                },
+              }
+            }
+            return node
+          })
+        }
 
         // ============================================================================
         // Demo Mode Handling
@@ -101,12 +120,13 @@ export async function POST(req: Request) {
 
         const demoMode = shouldUseDemoMode(apiKeys, workflowId)
 
-        if (demoMode) {
-          const demoResult = getDemoWorkflowResult(workflowId)
+        // For workflows without demo data, check early and show error
+        if (demoMode && !hasDemoData(workflowId)) {
+          const legacyDemoResult = getDemoWorkflowResult(workflowId)
 
-          if (demoResult) {
-            // Stream demo execution with realistic timing
-            for (const [nodeId, nodeResult] of Object.entries(demoResult.nodeResults)) {
+          if (legacyDemoResult) {
+            // Use legacy demo system for non-GitHub-Scanner workflows
+            for (const [nodeId, nodeResult] of Object.entries(legacyDemoResult.nodeResults)) {
               sendUpdate({
                 type: "node_start",
                 nodeId,
@@ -141,7 +161,7 @@ export async function POST(req: Request) {
         // Input Sanitization
         // ============================================================================
 
-        const sanitizedNodes = nodes.map((node) => ({
+        const sanitizedNodes = processedNodes.map((node) => ({
           ...node,
           data: sanitizeInput(node.data, ["code", "schema"]),
         }))
@@ -181,7 +201,10 @@ export async function POST(req: Request) {
         // Execute Workflow using TopFlowExecutionEngine
         // ============================================================================
 
-        const engine = new TopFlowExecutionEngine()
+        const engine = new TopFlowExecutionEngine({
+          demoMode,
+          workflowId,
+        })
 
         const result = await engine.executeWorkflow(
           sanitizedNodes,

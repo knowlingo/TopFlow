@@ -7,12 +7,27 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
 import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
+import {
+  getNodeDelay,
+  simulateDelay,
+  getGitHubScannerMockResponse,
+  hasDemoData
+} from './demo-mode'
 
 /**
  * TopFlow-specific execution engine
  * Extends base ExecutionEngine with AI model nodes and HTTP requests
+ * Supports demo mode for workflows with cached mock data
  */
 export class TopFlowExecutionEngine extends ExecutionEngine {
+  private demoMode: boolean = false
+  private workflowId?: string
+
+  constructor(options?: { demoMode?: boolean; workflowId?: string }) {
+    super()
+    this.demoMode = options?.demoMode || false
+    this.workflowId = options?.workflowId
+  }
   /**
    * Override executeNode to handle TopFlow-specific node types
    */
@@ -22,6 +37,19 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     context: ExecutionContext
   ): Promise<any> {
     const data = node.data as any
+
+    // Demo mode: Return mock responses for GitHub Scanner workflow
+    if (this.demoMode && this.workflowId === 'github-security-scanner' && hasDemoData(this.workflowId)) {
+      // Add realistic delay based on node type
+      const delay = getNodeDelay(node.type || 'default')
+      await simulateDelay(delay)
+
+      // Convert inputs object to array for mock response function
+      const inputArray = Object.values(inputs)
+
+      // Generate mock response
+      return getGitHubScannerMockResponse(node, inputArray)
+    }
 
     // Handle TopFlow-specific nodes
     switch (node.type) {

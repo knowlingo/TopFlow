@@ -289,9 +289,77 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
       case "start":
         return (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              The Start node marks the entry point of your workflow. No configuration needed.
-            </p>
+            <div className="space-y-2">
+              <Label htmlFor="start-label">Input Label (Optional)</Label>
+              <Input
+                id="start-label"
+                value={node.data.label || ""}
+                onChange={(e) => handleUpdate("label", e.target.value)}
+                placeholder="e.g., GitHub URL Input"
+              />
+              <p className="text-xs text-muted-foreground">
+                Custom label for the input field. If empty, node will not require user input.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-placeholder">Placeholder Text</Label>
+              <Input
+                id="start-placeholder"
+                value={node.data.placeholder || ""}
+                onChange={(e) => handleUpdate("placeholder", e.target.value)}
+                placeholder="e.g., https://github.com/owner/repo"
+                disabled={!node.data.label}
+              />
+              <p className="text-xs text-muted-foreground">
+                Example text shown in the input field
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-input-type">Input Type</Label>
+              <Select
+                value={node.data.inputType || "text"}
+                onValueChange={(value) => handleUpdate("inputType", value)}
+                disabled={!node.data.label}
+              >
+                <SelectTrigger id="start-input-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="url">URL</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Type of input validation to apply
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-default">Default Value (Optional)</Label>
+              <Input
+                id="start-default"
+                value={node.data.defaultValue || ""}
+                onChange={(e) => handleUpdate("defaultValue", e.target.value)}
+                placeholder="Optional pre-fill value"
+                disabled={!node.data.label}
+              />
+              <p className="text-xs text-muted-foreground">
+                Pre-filled value for the input field
+              </p>
+            </div>
+
+            {!node.data.label && (
+              <div className="rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
+                <p className="text-sm text-blue-900 dark:text-blue-100">
+                  <strong>No Input Configuration:</strong> This Start node will not require user input.
+                  To enable user input, add a custom label above.
+                </p>
+              </div>
+            )}
           </div>
         )
 

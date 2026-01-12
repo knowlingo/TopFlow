@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { WorkflowInputDialog } from "@/components/workflow-input-dialog"
+import type { StartNodeData } from "@/components/nodes/start-node"
 
 type ExecutionResult = {
   nodeId: string
@@ -40,6 +42,9 @@ export function ExecutionPanel({
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [executionComplete, setExecutionComplete] = useState(false)
+  const [showInputDialog, setShowInputDialog] = useState(false)
+  const [startNodesWithInput, setStartNodesWithInput] = useState<Node<StartNodeData>[]>([])
+  const [pendingUserInputs, setPendingUserInputs] = useState<Record<string, string> | null>(null)
 
   const finalEntries = executionLog.filter((entry) => entry.type === "end" && entry.output?.finalOutput !== undefined)
   const latestFinalEntry = finalEntries.length > 0 ? finalEntries[finalEntries.length - 1] : null
@@ -80,7 +85,33 @@ export function ExecutionPanel({
     }
   }
 
-  const handleExecute = async () => {
+  const handleExecute = () => {
+    // Check if any start nodes require user input
+    const startNodes = nodes.filter((node) => node.type === "start") as Node<StartNodeData>[]
+    const nodesWithInput = startNodes.filter((node) => node.data.label && node.data.label.trim())
+
+    if (nodesWithInput.length > 0) {
+      // Show input dialog
+      setStartNodesWithInput(nodesWithInput)
+      setShowInputDialog(true)
+    } else {
+      // No input needed, execute directly
+      executeWorkflow(null)
+    }
+  }
+
+  const handleInputSubmit = (inputs: Record<string, string>) => {
+    setShowInputDialog(false)
+    setPendingUserInputs(inputs)
+    executeWorkflow(inputs)
+  }
+
+  const handleInputCancel = () => {
+    setShowInputDialog(false)
+    setStartNodesWithInput([])
+  }
+
+  const executeWorkflow = async (userInputs: Record<string, string> | null) => {
     setIsExecuting(true)
     setExecutionLog([])
     setError(null)
@@ -104,6 +135,7 @@ export function ExecutionPanel({
           edges,
           apiKeys: keys,
           workflowId: workflowId || "template-threat-intel", // Default to threat intel workflow
+          userInputs: userInputs, // Pass user inputs to API
         }),
       })
 
@@ -526,6 +558,13 @@ System: TopFlow GDPR Workflow Engine
           </Card>
         )}
       </div>
+
+      <WorkflowInputDialog
+        open={showInputDialog}
+        startNodes={startNodesWithInput}
+        onSubmit={handleInputSubmit}
+        onCancel={handleInputCancel}
+      />
     </aside>
   )
 }
