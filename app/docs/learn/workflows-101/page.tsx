@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Shield, Zap, Code, ArrowRight, PlayCircle, AlertCircle, CheckCircle2, GitBranch } from "lucide-react"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { learnSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Workflows 101 - Understanding AI Workflows | TopFlow Learn",

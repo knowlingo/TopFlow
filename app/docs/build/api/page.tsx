@@ -6,7 +6,6 @@ import { Code, Shield, Zap, AlertTriangle, CheckCircle2, Copy, ExternalLink } fr
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "API Reference - Build | TopFlow",

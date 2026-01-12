@@ -1,7 +1,6 @@
 import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
-import { securitySidebar } from "@/lib/docs/sidebar-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -138,7 +137,7 @@ const validations = [
 export default function SecurityValidationsPage() {
   return (
     <>
-      <SidebarPortal sections={securitySidebar} currentTab="security" />
+      <SidebarPortal currentTab="security" />
 
       <div className="space-y-8">
         <DocsBreadcrumb />

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Play, ArrowRight, AlertCircle, CheckCircle2, Code } from "lucide-react"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Start Node - Node Reference | TopFlow Build",

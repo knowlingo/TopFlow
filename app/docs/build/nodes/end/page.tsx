@@ -6,7 +6,6 @@ import { Target, CheckCircle2, AlertTriangle, ArrowRight, Lightbulb } from "luci
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "End Node - Node Reference | TopFlow Build",

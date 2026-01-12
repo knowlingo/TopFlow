@@ -12,7 +12,6 @@ import {
 import { Shield, Zap, Lock, Code, AlertCircle, CheckCircle2, HelpCircle, ArrowRight } from "lucide-react"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { learnSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions (FAQ) | TopFlow Learn",

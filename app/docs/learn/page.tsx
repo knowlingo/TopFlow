@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BookOpen, Zap, GraduationCap, Lightbulb, HelpCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
-import { learnSidebar } from "@/lib/docs/sidebar-data"
 import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 
@@ -14,7 +13,7 @@ export const metadata = {
 export default function LearnOverviewPage() {
   return (
     <>
-      <SidebarPortal sections={learnSidebar} currentTab="learn" />
+      <SidebarPortal currentTab="learn" />
 
       <div className="space-y-8">
         <DocsBreadcrumb />

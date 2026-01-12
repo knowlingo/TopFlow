@@ -6,7 +6,6 @@ import { GitBranch, Shield, AlertTriangle, CheckCircle2, ArrowRight, Lightbulb }
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Conditional Node - Node Reference | TopFlow Build",

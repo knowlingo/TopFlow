@@ -6,7 +6,6 @@ import { Shield, AlertTriangle, Globe, Lock, CheckCircle2, ArrowRight } from "lu
 import Link from "next/link"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "HTTP Request Node - Node Reference | TopFlow Build",
