@@ -1,4 +1,5 @@
 import type { StoredWorkflow } from "./storage"
+import { GITHUB_SCANNER_NODES, GITHUB_SCANNER_EDGES } from "./templates/github-scanner"
 
 /**
  * Security-focused workflow templates demonstrating
@@ -10,6 +11,24 @@ export function getSecurityTemplates(): StoredWorkflow[] {
 
   // Templates are ordered for homepage display
   return [
+    // Template 0: GitHub Repository Security Scanner (MVP Demo)
+    {
+      id: "github-security-scanner",
+      name: "GitHub Repository Security Scanner",
+      description:
+        "Analyze any GitHub repository for security vulnerabilities, code quality, and OWASP compliance in under 30 seconds. Features parallel data fetching, weighted scoring algorithm, conditional branching, and AI-powered recommendations.",
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      author: "TopFlow Security",
+      isPublic: true,
+      tags: ["github", "security", "demo", "popular", "compliance", "owasp"],
+      category: "security",
+      securityScore: 98,
+      compliance: ["OWASP Top 10", "CWE Top 25", "NIST SSDF"],
+      nodes: GITHUB_SCANNER_NODES,
+      edges: GITHUB_SCANNER_EDGES,
+    },
     // Template 1: GDPR Data Access Request Automation
     {
       id: "template-gdpr-access-request",
