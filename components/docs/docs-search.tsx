@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Search, ArrowRight, FileText } from "lucide-react"
-import { docsNavigation } from "@/lib/docs/navigation-data"
+import { getCategoryOverviews } from "@/lib/docs/unified-navigation"
 import { searchDocs } from "@/lib/docs/generate-search-index"
 import type { SearchResult } from "@/lib/docs/generate-search-index"
 
@@ -94,13 +94,13 @@ export function DocsSearch() {
             <div className="py-8 px-4 space-y-4">
               <div className="text-sm font-medium text-muted-foreground">Quick Links</div>
               <div className="space-y-1">
-                {docsNavigation.map((section) => (
+                {getCategoryOverviews().map((category) => (
                   <button
-                    key={section.href}
-                    onClick={() => handleSelect(section.href)}
+                    key={category.href}
+                    onClick={() => handleSelect(category.href)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-accent rounded-md transition-colors flex items-center justify-between group"
                   >
-                    <span className="text-foreground">{section.title}</span>
+                    <span className="text-foreground">{category.title}</span>
                     <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}

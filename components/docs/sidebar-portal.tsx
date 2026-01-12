@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { DocsSidebarWithTabs, type SidebarSection } from "./docs-sidebar-with-tabs"
+import { getSidebarData } from "@/lib/docs/unified-navigation"
 
 interface SidebarPortalProps {
-  sections: SidebarSection[]
   currentTab: "learn" | "build" | "security"
+  sections?: SidebarSection[]  // Optional - will use unified navigation if not provided
 }
 
-export function SidebarPortal({ sections, currentTab }: SidebarPortalProps) {
+export function SidebarPortal({ sections: providedSections, currentTab }: SidebarPortalProps) {
   const [mounted, setMounted] = useState(false)
+
+  // Use provided sections or get from unified navigation
+  const sections = providedSections || getSidebarData(currentTab)
 
   useEffect(() => {
     setMounted(true)

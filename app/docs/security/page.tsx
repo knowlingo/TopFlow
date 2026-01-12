@@ -5,7 +5,6 @@ import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { Badge } from "@/components/ui/badge"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
-import { securitySidebar } from "@/lib/docs/sidebar-data"
 
 export const metadata = {
   title: "Security & Compliance | TopFlow - GDPR, SOC 2, HIPAA",
@@ -15,7 +14,7 @@ export const metadata = {
 export default function SecurityOverviewPage() {
   return (
     <>
-      <SidebarPortal sections={securitySidebar} currentTab="security" />
+      <SidebarPortal currentTab="security" />
 
       <div className="space-y-8">
         <DocsBreadcrumb />

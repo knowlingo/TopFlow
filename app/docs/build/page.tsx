@@ -4,7 +4,6 @@ import Link from "next/link"
 import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
-import { buildSidebar } from "@/lib/docs/sidebar-data"
 
 export const metadata = {
   title: "Build with TopFlow - Node Reference & API Documentation",
@@ -14,7 +13,7 @@ export const metadata = {
 export default function BuildOverviewPage() {
   return (
     <>
-      <SidebarPortal sections={buildSidebar} currentTab="build" />
+      <SidebarPortal currentTab="build" />
 
       <div className="space-y-8">
         <DocsBreadcrumb />

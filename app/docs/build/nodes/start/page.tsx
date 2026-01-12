@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Play, ArrowRight, AlertCircle, CheckCircle2, Code } from "lucide-react"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { buildSidebar } from "@/lib/docs/navigation-data"
 
 export const metadata: Metadata = {
   title: "Start Node - Node Reference | TopFlow Build",
@@ -15,12 +14,6 @@ export const metadata: Metadata = {
   keywords: ["start node", "workflow entry", "initial input", "topflow nodes"],
 }
 
-const sidebarSections = [
-  {
-    title: "Node Reference",
-    items: buildSidebar,
-  },
-]
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
@@ -34,7 +27,7 @@ const tocItems = [
 export default function StartNodePage() {
   return (
     <>
-      <SidebarPortal sections={sidebarSections} currentTab="build" />
+      <SidebarPortal currentTab="build" />
       <TOCPortal items={tocItems} />
 
       <div className="mx-auto max-w-4xl">

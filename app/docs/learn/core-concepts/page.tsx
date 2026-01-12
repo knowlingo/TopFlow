@@ -2,7 +2,6 @@ import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
 import { TOCPortal } from "@/components/docs/toc-portal"
-import { learnSidebar } from "@/lib/docs/sidebar-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +23,7 @@ export default function CoreConceptsPage() {
 
   return (
     <>
-      <SidebarPortal sections={learnSidebar} />
+      <SidebarPortal currentTab="learn" />
       <TOCPortal items={tocItems} />
 
       <div className="space-y-8">
@@ -359,8 +358,8 @@ export default function CoreConceptsPage() {
             href: "/docs/learn/quick-start",
           }}
           nextPage={{
-            title: "Workflows",
-            href: "/docs/learn/workflows",
+            title: "Workflows 101",
+            href: "/docs/learn/workflows-101",
           }}
         />
       </div>
