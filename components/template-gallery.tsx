@@ -52,7 +52,9 @@ export function TemplateGallery({ open, onOpenChange, onUseTemplate }: TemplateG
 
   const handleUseTemplate = (template: StoredWorkflow) => {
     // Preserve original template ID for demo mode lookup
-    const templateId = template.id.startsWith('template-') ? template.id : undefined
+    // Keep ID for templates that start with 'template-' OR have demo mode enabled
+    const isDemoTemplate = template.id.startsWith('template-') || template.id === 'github-security-scanner'
+    const templateId = isDemoTemplate ? template.id : undefined
 
     // Create a new workflow from template with unique ID
     const newWorkflow: StoredWorkflow = {
