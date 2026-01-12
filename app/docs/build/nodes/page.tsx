@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
@@ -17,6 +18,12 @@ import {
   Square,
 } from "lucide-react"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Workflow Nodes Reference",
+  description: "Complete reference guide for all 12 TopFlow workflow node types including AI models, data processing, flow control, and integrations.",
+  keywords: ["workflow nodes", "ai nodes", "text model", "image generation", "http request", "conditional logic", "javascript node"],
+}
 
 const nodes = [
   {

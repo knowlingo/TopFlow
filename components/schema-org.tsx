@@ -61,6 +61,31 @@ export function SchemaOrg() {
     },
   }
 
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "TopFlow",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Web",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    description: "Privacy-first visual workflow builder for AI applications with GDPR compliance, SSRF prevention, and 12+ security validations",
+    url: "https://topflow.dev",
+    screenshot: "https://topflow.dev/og-image.png",
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "5.0",
+      ratingCount: "1",
+    },
+    author: {
+      "@type": "Person",
+      name: "Charlie Su",
+    },
+  }
+
   return (
     <>
       <script
@@ -74,6 +99,10 @@ export function SchemaOrg() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
     </>
   )
