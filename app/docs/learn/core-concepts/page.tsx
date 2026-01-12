@@ -358,8 +358,8 @@ export default function CoreConceptsPage() {
             href: "/docs/learn/quick-start",
           }}
           nextPage={{
-            title: "Workflows",
-            href: "/docs/learn/workflows",
+            title: "Workflows 101",
+            href: "/docs/learn/workflows-101",
           }}
         />
       </div>
