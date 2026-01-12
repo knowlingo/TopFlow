@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { DocsBreadcrumb } from "@/components/docs/docs-breadcrumb"
 import { DocsFooter } from "@/components/docs/docs-footer"
 import { SidebarPortal } from "@/components/docs/sidebar-portal"
@@ -18,6 +19,12 @@ import {
   FileText,
   Server,
 } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Security Validations",
+  description: "Comprehensive security validation checks including SSRF prevention, cycle detection, API key validation, and 12+ security controls for secure AI workflows.",
+  keywords: ["security validation", "ssrf prevention", "cycle detection", "api key validation", "workflow security", "owasp top 10"],
+}
 
 const validations = [
   {
