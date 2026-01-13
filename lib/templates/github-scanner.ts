@@ -346,8 +346,9 @@ Tone: Supportive and actionable. Make improvements feel achievable.`,
     position: { x: 1860, y: 300 },
     data: {
       label: "Generate Dashboard",
-      model: "google/gemini-2.0-flash-exp",
-      size: "1792x1024",
+      model: "gemini-2.5-flash-image",
+      size: "1920x1080",
+      aspectRatio: "16:9",
       prompt: `Create a professional security dashboard visualization for a GitHub repository:
 
 Repository: $input1.fullName

@@ -542,8 +542,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</SelectItem>
-                  <SelectItem value="openai/dall-e-3">DALL-E 3</SelectItem>
-                  <SelectItem value="stability-ai/stable-diffusion">Stable Diffusion</SelectItem>
+                  <SelectItem value="gpt-4o-mini">GPT-4o Mini (Image)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -551,7 +550,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="aspectRatio">Aspect Ratio</Label>
               <Select
-                value={node.data.aspectRatio || "1:1"}
+                value={node.data.aspectRatio || "16:9"}
                 onValueChange={(value) => handleUpdate("aspectRatio", value)}
               >
                 <SelectTrigger id="aspectRatio">
