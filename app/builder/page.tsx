@@ -282,7 +282,22 @@ export default function AgentBuilder(): ReactElement {
       ...(prev || {}),
       [nodeId]: output
     }))
-  }, [])
+
+    // Auto-navigate to end node when GitHub Scanner completes
+    if (nodeId === "end" && currentWorkflow?.id === "github-security-scanner" && reactFlowInstance) {
+      setTimeout(() => {
+        const endNode = nodes.find((node) => node.id === "end")
+        if (endNode) {
+          reactFlowInstance.fitView({
+            nodes: [endNode],
+            duration: 800,
+            padding: { top: 0.2, right: 0.5, bottom: 0.2, left: 0.2 }, // Extra right padding for execution panel
+            maxZoom: 1.0,
+          })
+        }
+      }, 500) // Small delay to ensure rendering completes
+    }
+  }, [currentWorkflow?.id, reactFlowInstance, nodes])
 
   const handleDeleteNode = useCallback(() => {
     // Check if any edges are selected (ReactFlow adds selected property)
