@@ -652,7 +652,7 @@ export default function AgentBuilder(): ReactElement {
     <div className="flex h-screen w-full flex-col bg-background">
       <header className="flex flex-col gap-3 border-b border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
         <div className="flex items-center gap-3">
-          <Link href="/">
+          <Link href="/home">
             <Button variant="ghost" size="icon" aria-label="Go to homepage">
               <Home className="h-5 w-5" />
             </Button>
