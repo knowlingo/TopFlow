@@ -602,7 +602,7 @@ Tone: Supportive and actionable. Make improvements feel achievable.`
       else missingPractices.push("Secret scanning")
 
       if (score >= 90) {
-        return `# Security Excellence Report
+        return `# 🎉 Security Excellence Report
 
 **Repository:** ${repo}
 **Security Score:** ${score}/100
@@ -634,6 +634,38 @@ ${analysis.recommendations.filter(r => r.priority !== 'HIGH').slice(0, 3).map((r
 ).join('\n\n')}
 
 Implementing these improvements would elevate the security score to 98/100.`
+      } else if (score >= 80) {
+        return `# Strong Security Report
+
+**Repository:** ${repo}
+**Security Score:** ${score}/100
+**Overall Grade:** ${analysis.grade}
+
+## Security Strengths
+
+${enabledPractices.map(p => `- ${p}`).join('\n')}
+- Test coverage: ${analysis.codeQuality.coverage}%
+- ${analysis.language} best practices followed
+
+## Areas for Improvement
+
+Found ${vulnSummary} vulnerabilities that should be addressed.
+
+${analysis.vulnerabilities.details.slice(0, 2).map(vuln =>
+  `### ${vuln.severity}: ${vuln.id}
+**Component:** ${vuln.component}
+**Issue:** ${vuln.description}
+**Fix:** ${vuln.fix}
+**Effort:** ${vuln.effort}`
+).join('\n\n')}
+
+## Recommended Actions
+
+${analysis.recommendations.filter(r => r.priority === 'HIGH').slice(0, 3).map((rec, i) =>
+  `${i + 1}. **${rec.title}** (${rec.effort}): ${rec.description}`
+).join('\n\n')}
+
+Implementing these improvements would elevate the security score to 95+/100.`
       } else {
         // Build priority recommendations from actual data
         const highPriorityRecs = analysis.recommendations.filter(r => r.priority === 'HIGH')

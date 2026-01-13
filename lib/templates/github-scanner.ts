@@ -106,6 +106,57 @@ throw new Error('Invalid GitHub URL format');`,
       code: `// Calculate comprehensive security score from analysis data
 const security = input2;
 
+// Check if pre-calculated score exists (demo mode with curated data)
+if (security.securityScore !== undefined && security.grade) {
+  // Use pre-calculated score from demo data
+  // This allows curated repos to maintain specific scores for credibility
+  const vulnCritical = security.vulnerabilities?.critical || 0;
+  const vulnHigh = security.vulnerabilities?.high || 0;
+  const vulnMedium = security.vulnerabilities?.medium || 0;
+  const vulnLow = security.vulnerabilities?.low || 0;
+
+  const depVuln = security.dependencyAudit?.vulnerable || 0;
+  const depOutdated = security.dependencyAudit?.outdated || 0;
+
+  // Calculate component scores proportionally to match overall score
+  const baseScore = security.securityScore;
+
+  // Vulnerability component (adjusted to overall score)
+  const vulnDeduction = (vulnCritical * 8) + (vulnHigh * 4) + (vulnMedium * 2) + (vulnLow * 0.5);
+  const vulnScore = Math.max(40, Math.min(100, baseScore - vulnDeduction + 5));
+
+  // Dependency component
+  const depScore = Math.max(60, 100 - (depVuln * 10) - (depOutdated * 0.1));
+
+  // Practices component
+  const practices = security.securityPractices || {};
+  const practiceCount = Object.values(practices).filter(v => v === true).length;
+  const practiceTotal = Object.keys(practices).length || 1;
+  const practiceScore = (practiceCount / practiceTotal) * 100;
+
+  // OWASP component
+  const owasp = security.owaspCompliance || {};
+  const owaspPass = Object.values(owasp).filter(v => v === "PASS").length;
+  const owaspTotal = Object.keys(owasp).length || 1;
+  const owaspScore = (owaspPass / owaspTotal) * 100;
+
+  return {
+    score: security.securityScore,
+    grade: security.grade,
+    components: {
+      vulnerability: Math.round(vulnScore),
+      dependency: Math.round(depScore),
+      practices: Math.round(practiceScore),
+      owasp: Math.round(owaspScore)
+    },
+    breakdown: {
+      vulnerabilities: { critical: vulnCritical, high: vulnHigh, medium: vulnMedium, low: vulnLow },
+      dependencies: { vulnerable: depVuln, outdated: depOutdated }
+    }
+  };
+}
+
+// Real API mode: Calculate from actual data
 // Extract vulnerability counts
 const vulnCritical = security.vulnerabilities?.critical || 0;
 const vulnHigh = security.vulnerabilities?.high || 0;
