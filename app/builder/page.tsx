@@ -39,7 +39,7 @@ import {
   Home,
 } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import TextModelNode from "@/components/nodes/text-model-node"
 import EmbeddingModelNode from "@/components/nodes/embedding-model-node"
 import ToolNode from "@/components/nodes/tool-node"
@@ -358,6 +358,7 @@ export default function AgentBuilder(): ReactElement {
   const [isPaletteCollapsed, setIsPaletteCollapsed] = useState(false)
   const { toast } = useToast()
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -704,12 +705,15 @@ export default function AgentBuilder(): ReactElement {
       setEdges(workflow.edges)
       setCurrentWorkflow(workflow)
 
+      // Update URL to reflect loaded template
+      router.push(`/builder?template=${workflow.id}`, { scroll: false })
+
       toast({
         title: "Template loaded",
         description: `${workflow.name} has been loaded successfully`,
       })
     },
-    [toast],
+    [toast, router],
   )
 
   // Handle template loading from URL params (must be after handleUseTemplate definition)
