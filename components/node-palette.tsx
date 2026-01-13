@@ -63,13 +63,13 @@ const nodeTypes: NodeType[] = [
     color: "bg-chart-1",
     description: "Generate images",
   },
-  {
-    type: "audio",
-    label: "Audio",
-    icon: <Mic className="h-4 w-4" />,
-    color: "bg-orange-500",
-    description: "Generate audio/speech",
-  },
+  // {
+  //   type: "audio",
+  //   label: "Audio",
+  //   icon: <Mic className="h-4 w-4" />,
+  //   color: "bg-orange-500",
+  //   description: "Generate audio/speech",
+  // },
   {
     type: "httpRequest",
     label: "HTTP Request",

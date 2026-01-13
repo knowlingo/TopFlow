@@ -84,8 +84,11 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
   const shareToLinkedIn = () => {
     // LinkedIn's share endpoint only accepts URL (no title/text parameters)
     // Copy rich text to clipboard for user to paste
-    const shareText = `🔒 Security Analysis: ${repoName}
+    const fallbackNote = isUsingDefault && requestedRepo
+      ? `\n(Showing demo results for ${repoName} as requested repo ${requestedRepo} is not in demo data)\n`
+      : ''
 
+    const shareText = `🔒 Security Analysis: ${repoName}${fallbackNote}
 Score: ${score}/100 (Grade: ${grade})
 Language: ${language}
 Stars: ${stars.toLocaleString()}
@@ -116,9 +119,9 @@ Try it yourself: https://topflow.dev/builder?template=github-security-scanner
   }
 
   const copyLink = () => {
-    const url = window.location.href
+    const url = `${window.location.origin}/builder?template=github-security-scanner&repo=${encodeURIComponent(repoName)}`
     navigator.clipboard.writeText(url)
-    toast.success("Link copied to clipboard!")
+    toast.success("Link copied! Others can scan this repo with their own API keys.")
   }
 
   return (
