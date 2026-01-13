@@ -48,7 +48,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
     let imageUrl: string | null = null
 
     // Handle different output formats
-    if (typeof node.data.output === "string") {
+    // Check for images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      const firstImage = node.data.output.images.find(
+        (item: any) => typeof item === "string"
+      )
+      if (firstImage) imageUrl = firstImage
+    } else if (typeof node.data.output === "string") {
       imageUrl = node.data.output
     } else if (node.data.output.url) {
       imageUrl = node.data.output.url
@@ -189,6 +195,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
       return str.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(str)
     }
 
+    // Check object with images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      return node.data.output.images.some(
+        (item: any) => typeof item === "string" && isImageUrl(item)
+      )
+    }
+
     // Check direct string
     if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
       return true
@@ -255,6 +268,14 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
 
     const isImageUrl = (str: string) => {
       return str.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(str)
+    }
+
+    // Check for images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      const firstImage = node.data.output.images.find(
+        (item: any) => typeof item === "string" && isImageUrl(item)
+      )
+      return firstImage || null
     }
 
     if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
