@@ -11,6 +11,8 @@ import Link from "next/link"
 export type EndNodeData = {
   status?: "idle" | "running" | "completed" | "error"
   output?: any
+  workflowId?: string
+  onViewResults?: () => void
 }
 
 function EndNode({ data, selected }: NodeProps<EndNodeData>) {
@@ -26,8 +28,18 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
     )
   }
 
+  // Check if this is a GitHub Scanner result
+  const isGitHubScannerReport = () => {
+    return data.workflowId === "github-security-scanner" && data.output && data.status === "completed"
+  }
+
   const hasImages = () => {
     if (!data.output) return false
+
+    // Check for images array property (from image generation node)
+    if (data.output.images && Array.isArray(data.output.images)) {
+      return data.output.images.length > 0
+    }
 
     // Check for threat_map image URL
     if (isThreatIntelReport() && data.output.threat_map) {
@@ -35,24 +47,51 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
     }
 
     if (Array.isArray(data.output)) {
-      return data.output.some((item) => typeof item === "string" && item.startsWith("data:image/"))
+      return data.output.some((item) => {
+        if (typeof item !== "string") return false
+        // Check for data URL or raw base64 (starts with / or contains base64 pattern)
+        return item.startsWith("data:image/") || item.startsWith("/") || /^[A-Za-z0-9+/=]{20,}/.test(item)
+      })
     }
-    return typeof data.output === "string" && data.output.startsWith("data:image/")
+    if (typeof data.output === "string") {
+      return data.output.startsWith("data:image/") || data.output.startsWith("/") || /^[A-Za-z0-9+/=]{20,}/.test(data.output)
+    }
+    return false
   }
 
   const getImages = () => {
     if (!data.output) return []
+
+    // Extract images from images array property (from image generation node)
+    if (data.output.images && Array.isArray(data.output.images)) {
+      return data.output.images.filter((img: any) => typeof img === "string")
+    }
 
     // Get threat map if available
     if (isThreatIntelReport() && data.output.threat_map) {
       return [data.output.threat_map]
     }
 
-    if (Array.isArray(data.output)) {
-      return data.output.filter((item) => typeof item === "string" && item.startsWith("data:image/"))
+    const convertToDataUrl = (img: string) => {
+      if (typeof img !== "string") return ""
+      // If already a data URL or path, return as-is
+      if (img.startsWith("data:") || img.startsWith("/")) return img
+      // If raw base64, add data URL prefix
+      if (/^[A-Za-z0-9+/=]{20,}/.test(img)) {
+        return `data:image/png;base64,${img}`
+      }
+      return img
     }
-    if (typeof data.output === "string" && data.output.startsWith("data:image/")) {
-      return [data.output]
+
+    if (Array.isArray(data.output)) {
+      return data.output
+        .filter((item) => typeof item === "string")
+        .map(convertToDataUrl)
+        .filter(Boolean)
+    }
+    if (typeof data.output === "string") {
+      const converted = convertToDataUrl(data.output)
+      return converted ? [converted] : []
     }
     return []
   }
@@ -172,6 +211,20 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
                 {typeof data.output === "string" ? data.output : JSON.stringify(data.output, null, 2)}
               </p>
             </div>
+          )}
+          {/* GitHub Scanner View Full Report button - always show when conditions met */}
+          {isGitHubScannerReport() && data.onViewResults && (
+            <Button
+              size="sm"
+              className="w-full h-7 text-xs bg-primary hover:bg-primary/90 mt-1.5"
+              onClick={(e) => {
+                e.stopPropagation()
+                data.onViewResults?.()
+              }}
+            >
+              <FileText className="mr-1.5 h-3 w-3" />
+              View Full Report
+            </Button>
           )}
         </div>
       )}

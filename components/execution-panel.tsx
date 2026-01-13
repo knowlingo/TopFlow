@@ -2,11 +2,14 @@
 
 import { useState } from "react"
 import type { Node, Edge } from "@xyflow/react"
-import { Play, X, CheckCircle, XCircle, Loader2, Copy, Download, Eye } from "lucide-react"
+import { Play, X, CheckCircle, XCircle, Loader2, Copy, Download, Eye, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { WorkflowInputDialog } from "@/components/workflow-input-dialog"
+import type { StartNodeData } from "@/components/nodes/start-node"
+import { GitHubScannerResults } from "@/components/github-scanner-results"
 
 type ExecutionResult = {
   nodeId: string
@@ -22,6 +25,7 @@ type ExecutionPanelProps = {
   onNodeStatusChange?: (nodeId: string, status: "idle" | "running" | "completed" | "error") => void
   onNodeOutputChange?: (nodeId: string, output: any) => void
   onShowEndNode?: () => void
+  onViewFullReport?: () => void
   workflowId?: string
 }
 
@@ -32,6 +36,7 @@ export function ExecutionPanel({
   onNodeStatusChange,
   onNodeOutputChange,
   onShowEndNode,
+  onViewFullReport,
   workflowId,
 }: ExecutionPanelProps) {
   const [isExecuting, setIsExecuting] = useState(false)
@@ -40,6 +45,9 @@ export function ExecutionPanel({
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [executionComplete, setExecutionComplete] = useState(false)
+  const [showInputDialog, setShowInputDialog] = useState(false)
+  const [startNodesWithInput, setStartNodesWithInput] = useState<Node<StartNodeData>[]>([])
+  const [pendingUserInputs, setPendingUserInputs] = useState<Record<string, string> | null>(null)
 
   const finalEntries = executionLog.filter((entry) => entry.type === "end" && entry.output?.finalOutput !== undefined)
   const latestFinalEntry = finalEntries.length > 0 ? finalEntries[finalEntries.length - 1] : null
@@ -80,7 +88,65 @@ export function ExecutionPanel({
     }
   }
 
-  const handleExecute = async () => {
+  const handleDownloadImage = (imageData: string, index: number) => {
+    try {
+      // Extract base64 data and mime type
+      const [metadata, base64] = imageData.split(',')
+      const mimeType = metadata.match(/:(.*?);/)?.[1] || 'image/png'
+      const extension = mimeType.split('/')[1] || 'png'
+
+      // Convert base64 to blob
+      const byteString = atob(base64)
+      const arrayBuffer = new ArrayBuffer(byteString.length)
+      const uint8Array = new Uint8Array(arrayBuffer)
+
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i)
+      }
+
+      const blob = new Blob([arrayBuffer], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+
+      // Download file
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `generated-image-${Date.now()}-${index + 1}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Failed to download image:", error)
+    }
+  }
+
+  const handleExecute = () => {
+    // Check if any start nodes require user input
+    const startNodes = nodes.filter((node) => node.type === "start") as Node<StartNodeData>[]
+    const nodesWithInput = startNodes.filter((node) => node.data.label && node.data.label.trim())
+
+    if (nodesWithInput.length > 0) {
+      // Show input dialog
+      setStartNodesWithInput(nodesWithInput)
+      setShowInputDialog(true)
+    } else {
+      // No input needed, execute directly
+      executeWorkflow(null)
+    }
+  }
+
+  const handleInputSubmit = (inputs: Record<string, string>) => {
+    setShowInputDialog(false)
+    setPendingUserInputs(inputs)
+    executeWorkflow(inputs)
+  }
+
+  const handleInputCancel = () => {
+    setShowInputDialog(false)
+    setStartNodesWithInput([])
+  }
+
+  const executeWorkflow = async (userInputs: Record<string, string> | null) => {
     setIsExecuting(true)
     setExecutionLog([])
     setError(null)
@@ -104,6 +170,7 @@ export function ExecutionPanel({
           edges,
           apiKeys: keys,
           workflowId: workflowId || "template-threat-intel", // Default to threat intel workflow
+          userInputs: userInputs, // Pass user inputs to API
         }),
       })
 
@@ -223,6 +290,35 @@ export function ExecutionPanel({
     }
   }
 
+  // Convert execution log to outputs map for GitHub Scanner
+  const workflowOutputs = executionLog.reduce((acc, entry) => {
+    if (entry.output !== undefined) {
+      acc[entry.nodeId] = entry.output
+    }
+    return acc
+  }, {} as Record<string, any>)
+
+  // Get repository name from start node input
+  const startNodeInput = workflowOutputs["start"] || ""
+  const repository = typeof startNodeInput === "string" ? startNodeInput : ""
+
+  // Check if this is the GitHub Scanner workflow
+  const isGitHubScanner = workflowId === "github-security-scanner"
+
+  // Debug logging for GitHub Scanner
+  if (isGitHubScanner && executionComplete) {
+    console.log('[ExecutionPanel] GitHub Scanner execution complete:', {
+      executionComplete,
+      isExecuting,
+      outputKeysCount: Object.keys(workflowOutputs).length,
+      outputKeys: Object.keys(workflowOutputs),
+      hasCalculateScore: !!workflowOutputs["calculate-score"],
+      hasFetchMetadata: !!workflowOutputs["fetch-metadata"],
+      hasExtractActions: !!workflowOutputs["extract-actions"],
+      repository
+    })
+  }
+
   return (
     <aside className="absolute right-0 top-0 z-10 h-full w-full border-l border-border bg-card md:relative md:w-96">
       <div className="flex items-center justify-between border-b border-border p-4">
@@ -235,15 +331,25 @@ export function ExecutionPanel({
       <div className="p-4">
         {executionComplete && !isExecuting ? (
           <div className="space-y-2">
-            <Button
-              onClick={handleShowResults}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Show Results
-            </Button>
+            {isGitHubScanner && onViewFullReport ? (
+              <Button
+                onClick={onViewFullReport}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Full Report
+              </Button>
+            ) : !isGitHubScanner ? (
+              <Button
+                onClick={handleShowResults}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Show Results
+              </Button>
+            ) : null}
             <p className="text-center text-xs text-muted-foreground">
-              To run again, click "Run" in the header
+              {isGitHubScanner ? "View detailed analysis in full screen" : "To run again, click \"Run\" in the header"}
             </p>
           </div>
         ) : (
@@ -452,7 +558,15 @@ System: TopFlow GDPR Workflow Engine
           </Card>
         )}
 
-        {executionLog.length > 0 && (
+        {/* GitHub Scanner Results - Show after execution completes */}
+        {isGitHubScanner && executionComplete && !isExecuting && Object.keys(workflowOutputs).length > 0 && (
+          <ScrollArea className="h-[calc(100vh-200px)] mt-4">
+            <GitHubScannerResults outputs={workflowOutputs} repository={repository} />
+          </ScrollArea>
+        )}
+
+        {/* Standard Execution Log - Hidden for GitHub Scanner when complete */}
+        {executionLog.length > 0 && !(isGitHubScanner && executionComplete) && (
           <div className="mt-4">
             <h3 className="mb-2 text-sm font-medium text-foreground">Execution Log</h3>
             <ScrollArea className="h-[calc(100vh-250px)]">
@@ -485,6 +599,75 @@ System: TopFlow GDPR Workflow Engine
                         <p className="text-sm font-medium text-foreground">{getNodeLabel(result.nodeId)}</p>
                         {result.error ? (
                           <p className="text-xs text-destructive">{result.error}</p>
+                        ) : result.type === "imageGeneration" && result.output ? (
+                          (() => {
+                            // Handle different image output formats
+                            let imageArray: string[] = []
+
+                            if (Array.isArray(result.output)) {
+                              imageArray = result.output
+                            } else if (typeof result.output === 'object' && result.output.images) {
+                              imageArray = result.output.images
+                            } else if (typeof result.output === 'string') {
+                              imageArray = [result.output]
+                            }
+
+                            // Convert base64 strings to data URLs if needed
+                            imageArray = imageArray.map((img: string) => {
+                              if (typeof img !== 'string') return ''
+                              // If already a data URL, return as-is
+                              if (img.startsWith('data:')) return img
+                              // If raw base64, add data URL prefix
+                              return `data:image/png;base64,${img}`
+                            }).filter(Boolean)
+
+                            if (imageArray.length === 0) {
+                              // No valid images, show raw output
+                              return (
+                                <div className="rounded bg-background p-2">
+                                  <pre className="max-h-32 overflow-auto text-xs text-muted-foreground">
+                                    {JSON.stringify(result.output, null, 2)}
+                                  </pre>
+                                </div>
+                              )
+                            }
+
+                            return (
+                              <div className="space-y-2">
+                                {imageArray.map((imageDataUrl: string, idx: number) => (
+                                  <div key={idx} className="space-y-1.5">
+                                    <div className="rounded bg-background/90 border border-border/30 p-2">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <span className="text-xs font-medium text-muted-foreground">Image {idx + 1}</span>
+                                      </div>
+                                      <img
+                                        src={imageDataUrl}
+                                        alt={`Generated image ${idx + 1}`}
+                                        className="w-full rounded border border-border/30"
+                                        onError={(e) => {
+                                          console.error("[ExecutionPanel] Image failed to load:", imageDataUrl.substring(0, 50))
+                                          e.currentTarget.src = "/image-error.png"
+                                        }}
+                                      />
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full h-7 text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDownloadImage(imageDataUrl, idx)
+                                      }}
+                                    >
+                                      <Download className="mr-1.5 h-3 w-3" />
+                                      Download Image {idx + 1}
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })()
                         ) : (
                           <div className="rounded bg-background p-2">
                             <pre className="max-h-32 overflow-auto text-xs text-muted-foreground">
@@ -526,6 +709,13 @@ System: TopFlow GDPR Workflow Engine
           </Card>
         )}
       </div>
+
+      <WorkflowInputDialog
+        open={showInputDialog}
+        startNodes={startNodesWithInput}
+        onSubmit={handleInputSubmit}
+        onCancel={handleInputCancel}
+      />
     </aside>
   )
 }

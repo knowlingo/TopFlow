@@ -52,7 +52,15 @@ export function TemplateGallery({ open, onOpenChange, onUseTemplate }: TemplateG
 
   const handleUseTemplate = (template: StoredWorkflow) => {
     // Preserve original template ID for demo mode lookup
-    const templateId = template.id.startsWith('template-') ? template.id : undefined
+    // Keep ID for templates that start with 'template-' OR have demo mode enabled
+    const isDemoTemplate = template.id.startsWith('template-') || template.id === 'github-security-scanner'
+    const templateId = isDemoTemplate ? template.id : undefined
+
+    console.log('[Template Gallery] Loading template:', {
+      originalId: template.id,
+      isDemoTemplate,
+      preservedId: templateId || `workflow-${Date.now()}`
+    })
 
     // Create a new workflow from template with unique ID
     const newWorkflow: StoredWorkflow = {
@@ -120,7 +128,7 @@ export function TemplateGallery({ open, onOpenChange, onUseTemplate }: TemplateG
                       className="hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 flex flex-col"
                     >
                       <CardHeader className="pb-3">
-                        {template.id === "template-gdpr-access-request" && (
+                        {(template.id === "template-gdpr-access-request" || template.id === "github-security-scanner") && (
                           <Badge
                             variant="outline"
                             className="mb-2 w-fit bg-amber-500/10 text-amber-700 border-amber-500/40 flex items-center gap-1"

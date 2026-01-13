@@ -95,31 +95,38 @@ function ImageGenerationNode({ data, selected }: NodeProps<ImageGenerationNodeDa
           )}
           {data.output.images && data.output.images.length > 0 && (
             <div className="space-y-2">
-              {data.output.images.map((imageDataUrl: string, idx: number) => (
-                <div key={idx} className="space-y-1.5">
-                  <img
-                    src={imageDataUrl || "/placeholder.svg"}
-                    alt={`Generated image ${idx + 1}`}
-                    className="w-full rounded-md border-2 border-border/30 shadow-sm"
-                    onError={(e) => {
-                      console.error("[v0] Image failed to load:", imageDataUrl.substring(0, 50))
-                      e.currentTarget.src = "/image-error.png"
-                    }}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full h-7 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDownloadImage(imageDataUrl, idx)
-                    }}
-                  >
-                    <Download className="mr-1.5 h-3 w-3" />
-                    Download
-                  </Button>
-                </div>
-              ))}
+              {data.output.images.map((imageData: string, idx: number) => {
+                // Convert raw base64 to data URL if needed
+                const imageDataUrl = typeof imageData === 'string' && imageData.startsWith('data:')
+                  ? imageData
+                  : `data:image/png;base64,${imageData}`
+
+                return (
+                  <div key={idx} className="space-y-1.5">
+                    <img
+                      src={imageDataUrl || "/placeholder.svg"}
+                      alt={`Generated image ${idx + 1}`}
+                      className="w-full rounded-md border-2 border-border/30 shadow-sm"
+                      onError={(e) => {
+                        console.error("[v0] Image failed to load:", imageDataUrl.substring(0, 50))
+                        e.currentTarget.src = "/image-error.png"
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full h-7 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDownloadImage(imageDataUrl, idx)
+                      }}
+                    >
+                      <Download className="mr-1.5 h-3 w-3" />
+                      Download
+                    </Button>
+                  </div>
+                )
+              })}
             </div>
           )}
           {data.output.url && typeof data.output.url === 'string' && data.output.url.startsWith('data:image/') && (

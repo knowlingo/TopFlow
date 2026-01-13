@@ -1,4 +1,5 @@
 import type { StoredWorkflow } from "./storage"
+import { GITHUB_SCANNER_NODES, GITHUB_SCANNER_EDGES } from "./templates/github-scanner"
 
 /**
  * Security-focused workflow templates demonstrating
@@ -10,6 +11,24 @@ export function getSecurityTemplates(): StoredWorkflow[] {
 
   // Templates are ordered for homepage display
   return [
+    // Template 0: GitHub Repository Security Scanner (MVP Demo)
+    {
+      id: "github-security-scanner",
+      name: "GitHub Repository Security Scanner",
+      description:
+        "Analyze any GitHub repository for security vulnerabilities, code quality, and OWASP compliance in under 30 seconds. Features parallel data fetching, weighted scoring algorithm, conditional branching, and AI-powered recommendations.",
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      author: "TopFlow Security",
+      isPublic: true,
+      tags: ["github", "security", "demo", "popular", "compliance", "owasp"],
+      category: "security",
+      securityScore: 98,
+      compliance: ["OWASP Top 10", "CWE Top 25", "NIST SSDF"],
+      nodes: GITHUB_SCANNER_NODES,
+      edges: GITHUB_SCANNER_EDGES,
+    },
     // Template 1: GDPR Data Access Request Automation
     {
       id: "template-gdpr-access-request",
@@ -1179,7 +1198,7 @@ Tone: Informative, technical, proactive.`,
           type: "textModel",
           position: { x: 2200, y: 350 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.3,
             maxTokens: 2500,
             systemPrompt:
@@ -1287,7 +1306,7 @@ Tone: Informative, technical, proactive.`,
           type: "textModel",
           position: { x: 500, y: 300 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.2,
             maxTokens: 800,
             systemPrompt: "You are a security incident response specialist following the NIST Incident Response Framework (SP 800-61r2). Analyze incidents and provide structured assessments."
@@ -1368,7 +1387,7 @@ return {
           type: "textModel",
           position: { x: 1500, y: 200 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.3,
             maxTokens: 1000,
             systemPrompt: "Generate an incident response runbook following NIST guidelines. Include: 1) Containment steps, 2) Eradication procedures, 3) Recovery actions, 4) Lessons learned template."
