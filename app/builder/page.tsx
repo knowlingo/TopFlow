@@ -571,10 +571,19 @@ export default function AgentBuilder(): ReactElement {
           console.log('[Builder] Loading pending template from homepage:', template.id)
           handleUseTemplate(template)
           localStorage.removeItem("pending-template") // Clear after loading
+          return
         } catch (e) {
           console.error('[Builder] Failed to load pending template:', e)
           localStorage.removeItem("pending-template") // Clear invalid data
         }
+      }
+
+      // Priority 3: Default to GitHub Scanner (MVP landing page)
+      const templates = WorkflowStorage.getTemplates()
+      const githubScanner = templates.find((t) => t.id === "github-security-scanner")
+      if (githubScanner) {
+        console.log('[Builder] Loading default GitHub Scanner template')
+        handleUseTemplate(githubScanner)
       }
     }
   }, [searchParams, handleUseTemplate, currentWorkflow])
