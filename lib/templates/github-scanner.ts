@@ -30,8 +30,8 @@ export const GITHUB_SCANNER_NODES: Node[] = [
     position: { x: 100, y: 300 },
     data: {
       label: "GitHub Repository URL",
-      placeholder: "https://github.com/owner/repo",
-      inputType: "url",
+      placeholder: "owner/repo or https://github.com/owner/repo",
+      inputType: "text",
       defaultValue: "https://github.com/facebook/react",
       status: "idle"
     }
