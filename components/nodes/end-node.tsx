@@ -36,6 +36,11 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
   const hasImages = () => {
     if (!data.output) return false
 
+    // Check for images array property (from image generation node)
+    if (data.output.images && Array.isArray(data.output.images)) {
+      return data.output.images.length > 0
+    }
+
     // Check for threat_map image URL
     if (isThreatIntelReport() && data.output.threat_map) {
       return true
@@ -56,6 +61,11 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
 
   const getImages = () => {
     if (!data.output) return []
+
+    // Extract images from images array property (from image generation node)
+    if (data.output.images && Array.isArray(data.output.images)) {
+      return data.output.images.filter((img: any) => typeof img === "string")
+    }
 
     // Get threat map if available
     if (isThreatIntelReport() && data.output.threat_map) {
