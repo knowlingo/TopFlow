@@ -366,8 +366,8 @@ export const MOCK_REPO_ANALYSIS: Record<string, RepoAnalysis> = {
     language: "Python",
     lastAnalyzed: new Date().toISOString(),
 
-    securityScore: 30,
-    grade: "D",
+    securityScore: 85,
+    grade: "B+",
 
     vulnerabilities: {
       critical: 0,
@@ -928,6 +928,148 @@ export const MOCK_REPO_ANALYSIS: Record<string, RepoAnalysis> = {
       linkedInSummary: "Aqua Security's Trivy vulnerability scanner demonstrates strong security practices with 90/100 score",
       ogImage: "/api/og/github-scanner/aquasecurity-trivy"
     }
+  },
+
+  "request/request": {
+    repository: "request/request",
+    stars: 25600,
+    forks: 3100,
+    language: "JavaScript",
+    lastAnalyzed: new Date().toISOString(),
+
+    securityScore: 30,
+    grade: "D",
+
+    vulnerabilities: {
+      critical: 2,
+      high: 5,
+      medium: 12,
+      low: 20,
+      details: [
+        {
+          id: "CVE-2023-28155",
+          severity: "CRITICAL",
+          component: "request@2.88.2",
+          description: "SSRF vulnerability allows arbitrary HTTP requests via redirect following",
+          fix: "Migrate to 'got', 'axios', or 'node-fetch' (request is deprecated)",
+          effort: "4-8 hours"
+        },
+        {
+          id: "CVE-2023-26136",
+          severity: "CRITICAL",
+          component: "tough-cookie (dependency)",
+          description: "Prototype pollution via Cookie header parsing",
+          fix: "No fix available - request is deprecated since 2020",
+          effort: "N/A - requires migration"
+        },
+        {
+          id: "CVE-2022-24999",
+          severity: "HIGH",
+          component: "qs (dependency)",
+          description: "Prototype pollution via querystring parsing",
+          fix: "Migrate to modern HTTP client with updated dependencies",
+          effort: "6-8 hours"
+        },
+        {
+          id: "GHSA-2024-xxxx",
+          severity: "HIGH",
+          component: "tunnel-agent (dependency)",
+          description: "Unpatched vulnerabilities in proxy tunneling",
+          fix: "Switch to actively maintained HTTP client",
+          effort: "4-6 hours"
+        },
+        {
+          id: "SNYK-JS-REQUEST-2024",
+          severity: "HIGH",
+          component: "request@2.88.2",
+          description: "Multiple unpatched security issues due to deprecation",
+          fix: "Complete migration to 'got' or 'axios'",
+          effort: "8-12 hours"
+        }
+      ]
+    },
+
+    dependencyAudit: {
+      total: 52,
+      outdated: 18,
+      vulnerable: 8,
+      licenses: ["Apache-2.0", "ISC", "MIT"],
+      riskBreakdown: {
+        high: 8,
+        medium: 22,
+        low: 16
+      }
+    },
+
+    codeQuality: {
+      coverage: 82,
+      complexity: "Medium",
+      documentation: 75,
+      testRatio: 1.8,
+      linesOfCode: 12345,
+      technicalDebt: "8.5 days"
+    },
+
+    owaspCompliance: {
+      A01_broken_access: "FAIL",
+      A02_crypto_failures: "WARNING",
+      A03_injection: "WARNING",
+      A04_insecure_design: "WARNING",
+      A05_security_misconfig: "WARNING",
+      A06_vulnerable_components: "FAIL",
+      A07_auth_failures: "PASS",
+      A08_data_integrity: "WARNING",
+      A09_logging_failures: "PASS",
+      A10_ssrf: "FAIL"
+    },
+
+    securityPractices: {
+      has_security_policy: true,
+      dependabot_enabled: false,
+      code_scanning: false,
+      secret_scanning: false,
+      branch_protection: false,
+      signed_commits: false,
+      two_factor_required: false
+    },
+
+    recommendations: [
+      {
+        priority: "CRITICAL",
+        title: "Migrate away from 'request' immediately",
+        description: "The 'request' library has been deprecated since 2020 and contains multiple unpatched critical vulnerabilities. Migrate to 'got' (recommended), 'axios', or 'node-fetch' for continued security support.",
+        effort: "8-12 hours",
+        impact: "Eliminates all current vulnerabilities"
+      },
+      {
+        priority: "HIGH",
+        title: "Update all dependencies to actively maintained versions",
+        description: "Many dependencies (tough-cookie, qs, tunnel-agent) are outdated or unmaintained. Modern HTTP clients include updated, secure dependencies.",
+        effort: "Included in migration",
+        impact: "+25 security score"
+      },
+      {
+        priority: "HIGH",
+        title: "Enable Dependabot and automated security scanning",
+        description: "Once migrated to a maintained library, enable GitHub's automated security features to prevent future vulnerabilities.",
+        effort: "15 minutes",
+        impact: "+10 security score"
+      },
+      {
+        priority: "MEDIUM",
+        title: "Implement branch protection and code review requirements",
+        description: "Protect main branch to prevent direct pushes and require peer review for all changes.",
+        effort: "30 minutes",
+        impact: "+5 security score"
+      }
+    ],
+
+    shareData: {
+      tweetText: "⚠️ request/request scored 30/100 (D) on @TopFlowAI security scanner. DEPRECATED - migrate to modern alternatives immediately!",
+      linkedInTitle: "Request Library Security Analysis - Grade D (DEPRECATED)",
+      linkedInSummary: "The deprecated 'request' npm library shows critical security vulnerabilities with 30/100 score. Migration to actively maintained alternatives is strongly recommended.",
+      ogImage: "/api/og/github-scanner/request-request"
+    }
   }
 }
 
@@ -1109,7 +1251,7 @@ export function generateDynamicAnalysis(repoPath: string): RepoAnalysis {
 // ============================================================================
 
 export function getRepoAnalysis(repoPath: string): RepoAnalysis {
-  // Check if we have pre-loaded data (7 repositories)
+  // Check if we have pre-loaded data (8 repositories)
   if (MOCK_REPO_ANALYSIS[repoPath]) {
     console.log('[Demo Data] Using pre-loaded mock data for:', repoPath)
     return MOCK_REPO_ANALYSIS[repoPath]
