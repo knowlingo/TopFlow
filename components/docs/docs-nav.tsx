@@ -29,7 +29,7 @@ export function DocsNav() {
         <div className="max-w-[1800px] mx-auto px-6">
           <div className="flex items-center h-14">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
                 <Shield className="h-4 w-4 text-primary-foreground" />
               </div>
@@ -160,7 +160,7 @@ export function DocsNav() {
                           Open Builder
                         </Button>
                       </Link>
-                      <Link href="/" onClick={() => setMobileOpen(false)}>
+                      <Link href="/home" onClick={() => setMobileOpen(false)}>
                         <Button variant="outline" className="w-full bg-transparent" size="sm">
                           Home
                         </Button>
