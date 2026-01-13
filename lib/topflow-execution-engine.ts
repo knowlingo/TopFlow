@@ -232,7 +232,10 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     const images =
       result.files?.filter((f: any) => f.mediaType.startsWith('image/')).map((f: any) => f.base64) || []
 
-    return images
+    // Return as object with images array (matches node component expected format)
+    return {
+      images: images.map(base64 => `data:image/png;base64,${base64}`)
+    }
   }
 
   private async executeAudioNode(
