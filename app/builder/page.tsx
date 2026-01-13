@@ -710,62 +710,79 @@ export default function AgentBuilder(): ReactElement {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          <Button variant="outline" size="sm" onClick={() => setShowTemplateGallery(true)}>
-            <FolderOpen className="mr-2 h-4 w-4" />
-            Templates
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowWorkflowManager(true)}>
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-          {currentWorkflow && (
-            <Button variant="outline" size="sm" onClick={() => setShowVersionHistory(true)}>
-              <History className="mr-2 h-4 w-4" />
-              History
+          {/* File Operations Group */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowTemplateGallery(true)}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Templates
             </Button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImportWorkflow}
-            className="hidden"
-            aria-label="Import workflow"
-          />
-          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportWorkflow}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button
-            variant={validationErrorsCount > 0 ? "destructive" : "outline"}
-            size="sm"
-            onClick={handleToggleValidation}
-            className="relative"
-          >
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            Validate
-            {validationErrorsCount > 0 && (
-              <Badge variant="destructive" className="absolute -right-2 -top-2 h-5 min-w-5 rounded-full px-1 text-xs">
-                {validationErrorsCount}
-              </Badge>
+            <Button variant="outline" size="sm" onClick={() => setShowWorkflowManager(true)}>
+              <Save className="mr-2 h-4 w-4" />
+              Save
+            </Button>
+            {currentWorkflow && (
+              <Button variant="outline" size="sm" onClick={() => setShowVersionHistory(true)}>
+                <History className="mr-2 h-4 w-4" />
+                History
+              </Button>
             )}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowApiSettings(true)}>
-            <Key className="mr-2 h-4 w-4" />
-            API Keys
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowCodeExport(true)}>
-            <Code2 className="mr-2 h-4 w-4" />
-            Export Code
-          </Button>
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleRun}>
-            <Play className="mr-2 h-4 w-4" />
-            Run
-          </Button>
+          </div>
+
+          {/* Separator */}
+          <div className="hidden md:block h-6 w-px bg-border" />
+
+          {/* Execution Group */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={validationErrorsCount > 0 ? "destructive" : "outline"}
+              size="sm"
+              onClick={handleToggleValidation}
+              className="relative"
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Validate
+              {validationErrorsCount > 0 && (
+                <Badge variant="destructive" className="absolute -right-2 -top-2 h-5 min-w-5 rounded-full px-1 text-xs">
+                  {validationErrorsCount}
+                </Badge>
+              )}
+            </Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 font-semibold" onClick={handleRun}>
+              <Play className="mr-2 h-4 w-4" />
+              Run Demo
+            </Button>
+          </div>
+
+          {/* Separator */}
+          <div className="hidden md:block h-6 w-px bg-border" />
+
+          {/* Settings & Export Group */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowApiSettings(true)}>
+              <Key className="mr-2 h-4 w-4" />
+              API Keys
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImportWorkflow}
+              className="hidden"
+              aria-label="Import workflow"
+            />
+            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="hidden md:flex">
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleExportWorkflow} className="hidden md:flex">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowCodeExport(true)} className="hidden md:flex">
+              <Code2 className="mr-2 h-4 w-4" />
+              Code
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -790,16 +807,17 @@ export default function AgentBuilder(): ReactElement {
 
         <div className="flex-1 relative" ref={reactFlowWrapper}>
           {showOnboarding && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 max-w-2xl">
-              <div className="bg-card border border-border rounded-lg shadow-lg px-4 py-3 flex items-center gap-3">
-                <span className="text-sm">
-                  👋 <strong>Try the GitHub Security Scanner</strong> in demo mode (no API keys needed)
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 max-w-2xl animate-in slide-in-from-top-4 duration-500">
+              <div className="bg-primary border-2 border-primary-foreground/20 rounded-lg shadow-xl px-6 py-4 flex items-center gap-4">
+                <Sparkles className="h-5 w-5 text-primary-foreground shrink-0" />
+                <span className="text-sm md:text-base text-primary-foreground font-medium">
+                  <strong>Try the GitHub Security Scanner</strong> in demo mode — no API keys needed!
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleDismissOnboarding}
-                  className="shrink-0 h-6 w-6 p-0"
+                  className="shrink-0 h-7 w-7 p-0 hover:bg-primary-foreground/20 text-primary-foreground"
                 >
                   <X className="h-4 w-4" />
                 </Button>
