@@ -68,6 +68,7 @@ import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import { WorkflowStorage, type StoredWorkflow } from "@/lib/storage"
 import { useToast } from "@/hooks/use-toast"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
+import { GITHUB_SCANNER_NODES, GITHUB_SCANNER_EDGES } from "@/lib/templates/github-scanner"
 
 const STORAGE_KEY = "ai-agent-builder-workflow"
 
@@ -86,223 +87,10 @@ const nodeTypes: NodeTypes = {
   httpRequest: HttpRequestNode,
 }
 
-// Threat Intelligence Report Generator - Default Workflow
-const initialNodes: Node[] = [
-  // Node 1: Start
-  {
-    id: "threat-start",
-    type: "start",
-    position: { x: 50, y: 300 },
-    data: {},
-  },
-  // Node 2: HTTP Request - Fetch threat intelligence feed
-  {
-    id: "threat-http",
-    type: "httpRequest",
-    position: { x: 300, y: 300 },
-    data: {
-      url: "https://topflow.dev/api/demo-threat-intel",
-      method: "GET",
-      description: "Fetch latest threat intelligence from aggregated feeds",
-    },
-  },
-  // Node 3: JavaScript - Calculate risk score
-  {
-    id: "threat-calc",
-    type: "javascript",
-    position: { x: 650, y: 300 },
-    data: {
-      code: `// Calculate overall risk score
-const threats = input1.threats || input1.data?.threats || []
-const critical = threats.filter(t => t.severity === 'CRITICAL').length
-const high = threats.filter(t => t.severity === 'HIGH').length
-const exploitable = threats.filter(t => t.exploit_available).length
+// GitHub Security Scanner - Default Workflow (MVP Launch)
+const initialNodes: Node[] = GITHUB_SCANNER_NODES
 
-// Risk formula: (critical * 30) + (high * 20) + (exploitable * 15)
-const risk_score = (critical * 30) + (high * 20) + (exploitable * 15)
-
-// Determine priority
-let priority = 'LOW'
-if (risk_score > 75) priority = 'CRITICAL'
-else if (risk_score > 50) priority = 'HIGH'
-else if (risk_score > 25) priority = 'MEDIUM'
-
-return {
-  risk_score: risk_score,
-  priority: priority,
-  critical_count: critical,
-  high_count: high,
-  exploitable_count: exploitable,
-  total_threats: threats.length,
-  timestamp: new Date().toISOString()
-}`,
-    },
-  },
-  // Node 4: Conditional - Check if critical (risk_score > 75)
-  {
-    id: "threat-cond",
-    type: "conditional",
-    position: { x: 1000, y: 300 },
-    data: {
-      condition: "input1.risk_score > 75",
-    },
-  },
-  // Node 5a: Prompt - Urgent alert (TRUE branch)
-  {
-    id: "threat-prompt-critical",
-    type: "prompt",
-    position: { x: 1300, y: 150 },
-    data: {
-      content: `URGENT THREAT ALERT
-
-You are a cybersecurity analyst. Generate an executive-level threat intelligence report based on this data:
-
-Risk Score: $input1.risk_score/100
-Priority: $input1.priority
-Critical Threats: $input1.critical_count
-Active Exploits: $input1.exploitable_count
-
-Format: Professional executive summary with:
-1. Overview (2-3 sentences)
-2. Critical threats list
-3. Affected systems
-4. Recommended immediate actions
-
-Tone: Urgent but professional.`,
-    },
-  },
-  // Node 5b: Prompt - Standard summary (FALSE branch)
-  {
-    id: "threat-prompt-standard",
-    type: "prompt",
-    position: { x: 1300, y: 450 },
-    data: {
-      content: `THREAT INTELLIGENCE SUMMARY
-
-Generate a standard threat intelligence report based on this data:
-
-Risk Score: $input1.risk_score/100
-Priority: $input1.priority
-Total Threats: $input1.total_threats
-
-Format: Professional summary with context and recommendations.`,
-    },
-  },
-  // Node 6: Text Model - Generate threat report
-  {
-    id: "threat-text-model",
-    type: "textModel",
-    position: { x: 1700, y: 300 },
-    data: {
-      model: "openai/gpt-4o-mini",
-      temperature: 0.3,
-      maxTokens: 800,
-    },
-  },
-  // Node 7: Structured Output - Extract action items
-  {
-    id: "threat-structured",
-    type: "structuredOutput",
-    position: { x: 2050, y: 300 },
-    data: {
-      schemaName: "ThreatActions",
-      mode: "object",
-      schema: {
-        affected_systems: ["string"],
-        attack_vectors: ["string"],
-        mitigations: [
-          {
-            action: "string",
-            priority: "P1 | P2 | P3",
-            deadline: "string",
-            responsible_team: "string",
-          },
-        ],
-        compliance_requirements: ["string"],
-      },
-    },
-  },
-  // Node 8: Prompt - Visualization instructions
-  {
-    id: "threat-viz-prompt",
-    type: "prompt",
-    position: { x: 2400, y: 300 },
-    data: {
-      content: `Create a professional cybersecurity threat map visualization with the following elements:
-
-THREAT LANDSCAPE:
-- CVE-2026-1234 (Apache Struts RCE) - CRITICAL severity
-- CVE-2026-5678 (GitLab Auth Bypass) - CRITICAL severity
-- APT-29 Phishing Campaign - HIGH severity
-
-AFFECTED SYSTEMS:
-- Web Servers (3 instances)
-- GitLab Enterprise
-- Email Gateway
-
-VISUALIZATION STYLE:
-- Network diagram style with nodes and connections
-- Color-coded threat severity (red=critical, orange=high)
-- Show attack vectors as arrows between threat actors and systems
-- Include risk heat zones
-- Professional SOC dashboard aesthetic
-- Dark background with bright accent colors
-- Clean, modern design suitable for executive presentation
-
-Create a threat intelligence dashboard that looks professional and actionable.`,
-    },
-  },
-  // Node 9: Image Generation - Threat map
-  {
-    id: "threat-image",
-    type: "imageGeneration",
-    position: { x: 2850, y: 300 },
-    data: {
-      model: "gemini-2.5-flash-image",
-      aspectRatio: "16:9",
-      outputFormat: "png",
-    },
-  },
-  // Node 10: End - Display results
-  {
-    id: "threat-end",
-    type: "end",
-    position: { x: 3200, y: 300 },
-    data: {},
-  },
-]
-
-const initialEdges: Edge[] = [
-  // Linear flow: Start → HTTP → JavaScript → Conditional
-  { id: "e1", source: "threat-start", target: "threat-http" },
-  { id: "e2", source: "threat-http", target: "threat-calc" },
-  { id: "e3", source: "threat-calc", target: "threat-cond" },
-  // Conditional branches
-  {
-    id: "e4-true",
-    source: "threat-cond",
-    target: "threat-prompt-critical",
-    sourceHandle: "true",
-    label: "✓ CRITICAL",
-    style: { stroke: "#ef4444" }, // Red for critical
-  },
-  {
-    id: "e4-false",
-    source: "threat-cond",
-    target: "threat-prompt-standard",
-    sourceHandle: "false",
-    label: "○ Standard",
-    style: { stroke: "#3b82f6" }, // Blue for standard
-  },
-  // Both branches converge to text model
-  { id: "e5a", source: "threat-prompt-critical", target: "threat-text-model" },
-  { id: "e5b", source: "threat-prompt-standard", target: "threat-text-model" },
-  // Final linear flow: Text Model → Structured → Viz Prompt → Image → End
-  { id: "e6", source: "threat-text-model", target: "threat-structured" },
-  { id: "e7", source: "threat-structured", target: "threat-viz-prompt" },
-  { id: "e8", source: "threat-viz-prompt", target: "threat-image" },
-  { id: "e9", source: "threat-image", target: "threat-end" },
-]
+const initialEdges: Edge[] = GITHUB_SCANNER_EDGES
 
 const getDefaultNodeData = (type: string) => {
   switch (type) {
@@ -356,6 +144,7 @@ export default function AgentBuilder(): ReactElement {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isPaletteOpen, setIsPaletteOpen] = useState(false)
   const [isPaletteCollapsed, setIsPaletteCollapsed] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -383,6 +172,19 @@ export default function AgentBuilder(): ReactElement {
   useEffect(() => {
     localStorage.setItem("palette-collapsed", isPaletteCollapsed.toString())
   }, [isPaletteCollapsed])
+
+  // Check if onboarding banner was dismissed
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('topflow-onboarding-dismissed')
+      setShowOnboarding(!dismissed)
+    }
+  }, [])
+
+  const handleDismissOnboarding = useCallback(() => {
+    localStorage.setItem('topflow-onboarding-dismissed', 'true')
+    setShowOnboarding(false)
+  }, [])
 
   useEffect(() => {
     const maxId = Math.max(...nodes.map((n) => Number.parseInt(n.id) || 0), 0)
@@ -716,13 +518,14 @@ export default function AgentBuilder(): ReactElement {
     [toast, router],
   )
 
-  // Handle template loading from URL params (must be after handleUseTemplate definition)
+  // Handle template loading from URL params and localStorage (must be after handleUseTemplate definition)
   useEffect(() => {
     const templateId = searchParams.get("template")
     const repoParam = searchParams.get("repo")
 
     console.log('[Builder] URL params:', { templateId, repoParam })
 
+    // Priority 1: URL template parameter
     if (templateId && !currentWorkflow) {
       const templates = WorkflowStorage.getTemplates()
       let template = templates.find((t) => t.id === templateId)
@@ -755,6 +558,23 @@ export default function AgentBuilder(): ReactElement {
         }
 
         handleUseTemplate(template)
+        return
+      }
+    }
+
+    // Priority 2: Pending template from homepage (localStorage)
+    if (!templateId && !currentWorkflow && typeof window !== 'undefined') {
+      const pendingTemplateStr = localStorage.getItem("pending-template")
+      if (pendingTemplateStr) {
+        try {
+          const template = JSON.parse(pendingTemplateStr)
+          console.log('[Builder] Loading pending template from homepage:', template.id)
+          handleUseTemplate(template)
+          localStorage.removeItem("pending-template") // Clear after loading
+        } catch (e) {
+          console.error('[Builder] Failed to load pending template:', e)
+          localStorage.removeItem("pending-template") // Clear invalid data
+        }
       }
     }
   }, [searchParams, handleUseTemplate, currentWorkflow])
@@ -944,7 +764,24 @@ export default function AgentBuilder(): ReactElement {
           />
         </div>
 
-        <div className="flex-1" ref={reactFlowWrapper}>
+        <div className="flex-1 relative" ref={reactFlowWrapper}>
+          {showOnboarding && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 max-w-2xl">
+              <div className="bg-card border border-border rounded-lg shadow-lg px-4 py-3 flex items-center gap-3">
+                <span className="text-sm">
+                  👋 <strong>Try the GitHub Security Scanner</strong> in demo mode (no API keys needed)
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDismissOnboarding}
+                  className="shrink-0 h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
           <ReactFlow
             nodes={enrichedNodes}
             edges={edges}
