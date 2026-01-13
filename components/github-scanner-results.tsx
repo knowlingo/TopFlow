@@ -119,9 +119,9 @@ Try it yourself: https://topflow.dev/builder?template=github-security-scanner
   }
 
   const copyLink = () => {
-    const url = window.location.href
+    const url = `${window.location.origin}/builder?template=github-security-scanner&repo=${encodeURIComponent(repoName)}`
     navigator.clipboard.writeText(url)
-    toast.success("Link copied to clipboard!")
+    toast.success("Link copied! Others can scan this repo with their own API keys.")
   }
 
   return (
