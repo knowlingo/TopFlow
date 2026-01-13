@@ -37,6 +37,7 @@ import {
   FolderOpen,
   History,
   Home,
+  MoreVertical,
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -64,6 +65,13 @@ import { WorkflowManager } from "@/components/workflow-manager"
 import { VersionHistory } from "@/components/version-history"
 import { GitHubScannerResultsDialog } from "@/components/github-scanner-results-dialog"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import { WorkflowStorage, type StoredWorkflow } from "@/lib/storage"
 import { useToast } from "@/hooks/use-toast"
@@ -756,7 +764,7 @@ export default function AgentBuilder(): ReactElement {
           {/* Separator */}
           <div className="hidden md:block h-6 w-px bg-border" />
 
-          {/* Settings & Export Group */}
+          {/* Settings & More Group */}
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowApiSettings(true)}>
               <Key className="mr-2 h-4 w-4" />
@@ -770,18 +778,28 @@ export default function AgentBuilder(): ReactElement {
               className="hidden"
               aria-label="Import workflow"
             />
-            <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="hidden md:flex">
-              <Upload className="mr-2 h-4 w-4" />
-              Import
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleExportWorkflow} className="hidden md:flex">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowCodeExport(true)} className="hidden md:flex">
-              <Code2 className="mr-2 h-4 w-4" />
-              Code
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" aria-label="More actions">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import Workflow
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportWorkflow}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Workflow
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowCodeExport(true)}>
+                  <Code2 className="mr-2 h-4 w-4" />
+                  Export Code
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
