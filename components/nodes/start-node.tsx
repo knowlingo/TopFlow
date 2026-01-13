@@ -7,12 +7,21 @@ import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
 
 export type StartNodeData = {
+  // Input configuration
+  label?: string
+  placeholder?: string
+  inputType?: "text" | "url" | "number" | "email"
+  defaultValue?: string
+
+  // Execution state
   status?: "idle" | "running" | "completed" | "error"
   output?: any
 }
 
 function StartNode({ data, selected }: NodeProps<StartNodeData>) {
   const status = data.status || "idle"
+  const displayLabel = data.label || "Start"
+  const displayDescription = data.label ? (data.placeholder || "User input required") : "Workflow entry point"
 
   return (
     <Card
@@ -23,8 +32,8 @@ function StartNode({ data, selected }: NodeProps<StartNodeData>) {
           <Play className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-foreground leading-tight">Start</h3>
-          <p className="text-xs text-muted-foreground/90 truncate leading-tight mt-0.5">Workflow entry point</p>
+          <h3 className="text-sm font-semibold text-foreground leading-tight">{displayLabel}</h3>
+          <p className="text-xs text-muted-foreground/90 truncate leading-tight mt-0.5">{displayDescription}</p>
         </div>
       </div>
 

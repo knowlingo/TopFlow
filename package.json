@@ -25,7 +25,7 @@
     "@ai-sdk/google": "2.0.17",
     "@ai-sdk/groq": "3.0.3",
     "@ai-sdk/openai": "3.0.4",
-    "@charliesu/workflow-core": "0.0.2-alpha",
+    "@charliesu/workflow-core": "0.0.3-alpha",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",

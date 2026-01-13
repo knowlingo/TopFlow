@@ -4,7 +4,7 @@ import React from "react"
 
 import type { ReactElement } from "react"
 
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useRef, useEffect, useMemo } from "react"
 import {
   ReactFlow,
   applyNodeChanges,
@@ -37,8 +37,10 @@ import {
   FolderOpen,
   History,
   Home,
+  MoreVertical,
 } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams, useRouter } from "next/navigation"
 import TextModelNode from "@/components/nodes/text-model-node"
 import EmbeddingModelNode from "@/components/nodes/embedding-model-node"
 import ToolNode from "@/components/nodes/tool-node"
@@ -61,11 +63,20 @@ import { ValidationPanel } from "@/components/validation-panel"
 import { TemplateGallery } from "@/components/template-gallery"
 import { WorkflowManager } from "@/components/workflow-manager"
 import { VersionHistory } from "@/components/version-history"
+import { GitHubScannerResultsDialog } from "@/components/github-scanner-results-dialog"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
-import type { StoredWorkflow } from "@/lib/storage"
+import { WorkflowStorage, type StoredWorkflow } from "@/lib/storage"
 import { useToast } from "@/hooks/use-toast"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
+import { GITHUB_SCANNER_NODES, GITHUB_SCANNER_EDGES } from "@/lib/templates/github-scanner"
 
 const STORAGE_KEY = "ai-agent-builder-workflow"
 
@@ -84,223 +95,10 @@ const nodeTypes: NodeTypes = {
   httpRequest: HttpRequestNode,
 }
 
-// Threat Intelligence Report Generator - Default Workflow
-const initialNodes: Node[] = [
-  // Node 1: Start
-  {
-    id: "threat-start",
-    type: "start",
-    position: { x: 50, y: 300 },
-    data: {},
-  },
-  // Node 2: HTTP Request - Fetch threat intelligence feed
-  {
-    id: "threat-http",
-    type: "httpRequest",
-    position: { x: 300, y: 300 },
-    data: {
-      url: "https://topflow.dev/api/demo-threat-intel",
-      method: "GET",
-      description: "Fetch latest threat intelligence from aggregated feeds",
-    },
-  },
-  // Node 3: JavaScript - Calculate risk score
-  {
-    id: "threat-calc",
-    type: "javascript",
-    position: { x: 650, y: 300 },
-    data: {
-      code: `// Calculate overall risk score
-const threats = input1.threats || input1.data?.threats || []
-const critical = threats.filter(t => t.severity === 'CRITICAL').length
-const high = threats.filter(t => t.severity === 'HIGH').length
-const exploitable = threats.filter(t => t.exploit_available).length
+// GitHub Security Scanner - Default Workflow (MVP Launch)
+const initialNodes: Node[] = GITHUB_SCANNER_NODES
 
-// Risk formula: (critical * 30) + (high * 20) + (exploitable * 15)
-const risk_score = (critical * 30) + (high * 20) + (exploitable * 15)
-
-// Determine priority
-let priority = 'LOW'
-if (risk_score > 75) priority = 'CRITICAL'
-else if (risk_score > 50) priority = 'HIGH'
-else if (risk_score > 25) priority = 'MEDIUM'
-
-return {
-  risk_score: risk_score,
-  priority: priority,
-  critical_count: critical,
-  high_count: high,
-  exploitable_count: exploitable,
-  total_threats: threats.length,
-  timestamp: new Date().toISOString()
-}`,
-    },
-  },
-  // Node 4: Conditional - Check if critical (risk_score > 75)
-  {
-    id: "threat-cond",
-    type: "conditional",
-    position: { x: 1000, y: 300 },
-    data: {
-      condition: "input1.risk_score > 75",
-    },
-  },
-  // Node 5a: Prompt - Urgent alert (TRUE branch)
-  {
-    id: "threat-prompt-critical",
-    type: "prompt",
-    position: { x: 1300, y: 150 },
-    data: {
-      content: `URGENT THREAT ALERT
-
-You are a cybersecurity analyst. Generate an executive-level threat intelligence report based on this data:
-
-Risk Score: $input1.risk_score/100
-Priority: $input1.priority
-Critical Threats: $input1.critical_count
-Active Exploits: $input1.exploitable_count
-
-Format: Professional executive summary with:
-1. Overview (2-3 sentences)
-2. Critical threats list
-3. Affected systems
-4. Recommended immediate actions
-
-Tone: Urgent but professional.`,
-    },
-  },
-  // Node 5b: Prompt - Standard summary (FALSE branch)
-  {
-    id: "threat-prompt-standard",
-    type: "prompt",
-    position: { x: 1300, y: 450 },
-    data: {
-      content: `THREAT INTELLIGENCE SUMMARY
-
-Generate a standard threat intelligence report based on this data:
-
-Risk Score: $input1.risk_score/100
-Priority: $input1.priority
-Total Threats: $input1.total_threats
-
-Format: Professional summary with context and recommendations.`,
-    },
-  },
-  // Node 6: Text Model - Generate threat report
-  {
-    id: "threat-text-model",
-    type: "textModel",
-    position: { x: 1700, y: 300 },
-    data: {
-      model: "openai/gpt-4o",
-      temperature: 0.3,
-      maxTokens: 800,
-    },
-  },
-  // Node 7: Structured Output - Extract action items
-  {
-    id: "threat-structured",
-    type: "structuredOutput",
-    position: { x: 2050, y: 300 },
-    data: {
-      schemaName: "ThreatActions",
-      mode: "object",
-      schema: {
-        affected_systems: ["string"],
-        attack_vectors: ["string"],
-        mitigations: [
-          {
-            action: "string",
-            priority: "P1 | P2 | P3",
-            deadline: "string",
-            responsible_team: "string",
-          },
-        ],
-        compliance_requirements: ["string"],
-      },
-    },
-  },
-  // Node 8: Prompt - Visualization instructions
-  {
-    id: "threat-viz-prompt",
-    type: "prompt",
-    position: { x: 2400, y: 300 },
-    data: {
-      content: `Create a professional cybersecurity threat map visualization with the following elements:
-
-THREAT LANDSCAPE:
-- CVE-2026-1234 (Apache Struts RCE) - CRITICAL severity
-- CVE-2026-5678 (GitLab Auth Bypass) - CRITICAL severity
-- APT-29 Phishing Campaign - HIGH severity
-
-AFFECTED SYSTEMS:
-- Web Servers (3 instances)
-- GitLab Enterprise
-- Email Gateway
-
-VISUALIZATION STYLE:
-- Network diagram style with nodes and connections
-- Color-coded threat severity (red=critical, orange=high)
-- Show attack vectors as arrows between threat actors and systems
-- Include risk heat zones
-- Professional SOC dashboard aesthetic
-- Dark background with bright accent colors
-- Clean, modern design suitable for executive presentation
-
-Create a threat intelligence dashboard that looks professional and actionable.`,
-    },
-  },
-  // Node 9: Image Generation - Threat map
-  {
-    id: "threat-image",
-    type: "imageGeneration",
-    position: { x: 2850, y: 300 },
-    data: {
-      model: "gemini-2.5-flash-image",
-      aspectRatio: "16:9",
-      outputFormat: "png",
-    },
-  },
-  // Node 10: End - Display results
-  {
-    id: "threat-end",
-    type: "end",
-    position: { x: 3200, y: 300 },
-    data: {},
-  },
-]
-
-const initialEdges: Edge[] = [
-  // Linear flow: Start → HTTP → JavaScript → Conditional
-  { id: "e1", source: "threat-start", target: "threat-http" },
-  { id: "e2", source: "threat-http", target: "threat-calc" },
-  { id: "e3", source: "threat-calc", target: "threat-cond" },
-  // Conditional branches
-  {
-    id: "e4-true",
-    source: "threat-cond",
-    target: "threat-prompt-critical",
-    sourceHandle: "true",
-    label: "✓ CRITICAL",
-    style: { stroke: "#ef4444" }, // Red for critical
-  },
-  {
-    id: "e4-false",
-    source: "threat-cond",
-    target: "threat-prompt-standard",
-    sourceHandle: "false",
-    label: "○ Standard",
-    style: { stroke: "#3b82f6" }, // Blue for standard
-  },
-  // Both branches converge to text model
-  { id: "e5a", source: "threat-prompt-critical", target: "threat-text-model" },
-  { id: "e5b", source: "threat-prompt-standard", target: "threat-text-model" },
-  // Final linear flow: Text Model → Structured → Viz Prompt → Image → End
-  { id: "e6", source: "threat-text-model", target: "threat-structured" },
-  { id: "e7", source: "threat-structured", target: "threat-viz-prompt" },
-  { id: "e8", source: "threat-viz-prompt", target: "threat-image" },
-  { id: "e9", source: "threat-image", target: "threat-end" },
-]
+const initialEdges: Edge[] = GITHUB_SCANNER_EDGES
 
 const getDefaultNodeData = (type: string) => {
   switch (type) {
@@ -347,12 +145,17 @@ export default function AgentBuilder(): ReactElement {
   const [showVersionHistory, setShowVersionHistory] = useState(false)
   const [currentWorkflow, setCurrentWorkflow] = useState<StoredWorkflow | null>(null)
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
+  const [lastExecutionResults, setLastExecutionResults] = useState<Record<string, any> | null>(null)
+  const [showResultsDialog, setShowResultsDialog] = useState(false)
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const nodeIdCounter = useRef(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isPaletteOpen, setIsPaletteOpen] = useState(false)
   const [isPaletteCollapsed, setIsPaletteCollapsed] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -377,6 +180,19 @@ export default function AgentBuilder(): ReactElement {
   useEffect(() => {
     localStorage.setItem("palette-collapsed", isPaletteCollapsed.toString())
   }, [isPaletteCollapsed])
+
+  // Check if onboarding banner was dismissed
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('topflow-onboarding-dismissed')
+      setShowOnboarding(!dismissed)
+    }
+  }, [])
+
+  const handleDismissOnboarding = useCallback(() => {
+    localStorage.setItem('topflow-onboarding-dismissed', 'true')
+    setShowOnboarding(false)
+  }, [])
 
   useEffect(() => {
     const maxId = Math.max(...nodes.map((n) => Number.parseInt(n.id) || 0), 0)
@@ -468,7 +284,28 @@ export default function AgentBuilder(): ReactElement {
 
   const handleNodeOutputChange = useCallback((nodeId: string, output: any) => {
     setNodes((nds) => nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, output } } : node)))
-  }, [])
+
+    // Store execution results when any node completes
+    setLastExecutionResults((prev) => ({
+      ...(prev || {}),
+      [nodeId]: output
+    }))
+
+    // Auto-navigate to end node when GitHub Scanner completes
+    if (nodeId === "end" && currentWorkflow?.id === "github-security-scanner" && reactFlowInstance) {
+      setTimeout(() => {
+        const endNode = nodes.find((node) => node.id === "end")
+        if (endNode) {
+          reactFlowInstance.fitView({
+            nodes: [endNode],
+            duration: 800,
+            padding: { top: 0.2, right: 0.5, bottom: 0.2, left: 0.2 }, // Extra right padding for execution panel
+            maxZoom: 1.0,
+          })
+        }
+      }, 500) // Small delay to ensure rendering completes
+    }
+  }, [currentWorkflow?.id, reactFlowInstance, nodes])
 
   const handleDeleteNode = useCallback(() => {
     // Check if any edges are selected (ReactFlow adds selected property)
@@ -693,13 +530,86 @@ export default function AgentBuilder(): ReactElement {
       setEdges(workflow.edges)
       setCurrentWorkflow(workflow)
 
+      // Update URL to reflect loaded template
+      router.push(`/builder?template=${workflow.id}`, { scroll: false })
+
       toast({
         title: "Template loaded",
         description: `${workflow.name} has been loaded successfully`,
       })
     },
-    [toast],
+    [toast, router],
   )
+
+  // Handle template loading from URL params and localStorage (must be after handleUseTemplate definition)
+  useEffect(() => {
+    const templateId = searchParams.get("template")
+    const repoParam = searchParams.get("repo")
+
+    console.log('[Builder] URL params:', { templateId, repoParam })
+
+    // Priority 1: URL template parameter
+    if (templateId && !currentWorkflow) {
+      const templates = WorkflowStorage.getTemplates()
+      let template = templates.find((t) => t.id === templateId)
+
+      if (template) {
+        // Pre-fill start node with repo parameter BEFORE loading template (GitHub Scanner only)
+        if (templateId === "github-security-scanner" && repoParam) {
+          console.log('[Builder] Modifying template for repo:', repoParam)
+          const startNodeBefore = template.nodes.find(n => n.type === "start")
+          console.log('[Builder] Start node BEFORE:', JSON.stringify(startNodeBefore?.data, null, 2))
+
+          // Clone template and update start node
+          template = {
+            ...template,
+            nodes: template.nodes.map((node) =>
+              node.type === "start"
+                ? {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      defaultValue: `https://github.com/${repoParam}`
+                    }
+                  }
+                : node
+            )
+          }
+
+          const startNodeAfter = template.nodes.find(n => n.type === "start")
+          console.log('[Builder] Start node AFTER:', JSON.stringify(startNodeAfter?.data, null, 2))
+        }
+
+        handleUseTemplate(template)
+        return
+      }
+    }
+
+    // Priority 2: Pending template from homepage (localStorage)
+    if (!templateId && !currentWorkflow && typeof window !== 'undefined') {
+      const pendingTemplateStr = localStorage.getItem("pending-template")
+      if (pendingTemplateStr) {
+        try {
+          const template = JSON.parse(pendingTemplateStr)
+          console.log('[Builder] Loading pending template from homepage:', template.id)
+          handleUseTemplate(template)
+          localStorage.removeItem("pending-template") // Clear after loading
+          return
+        } catch (e) {
+          console.error('[Builder] Failed to load pending template:', e)
+          localStorage.removeItem("pending-template") // Clear invalid data
+        }
+      }
+
+      // Priority 3: Default to GitHub Scanner (MVP landing page)
+      const templates = WorkflowStorage.getTemplates()
+      const githubScanner = templates.find((t) => t.id === "github-security-scanner")
+      if (githubScanner) {
+        console.log('[Builder] Loading default GitHub Scanner template')
+        handleUseTemplate(githubScanner)
+      }
+    }
+  }, [searchParams, handleUseTemplate, currentWorkflow])
 
   const handleWorkflowSaved = useCallback(
     (workflow: StoredWorkflow) => {
@@ -743,11 +653,38 @@ export default function AgentBuilder(): ReactElement {
     }
   }, [nodes, reactFlowInstance])
 
+  // Callback for viewing GitHub Scanner results
+  const handleViewResults = useCallback(() => {
+    if (lastExecutionResults && currentWorkflow?.id === "github-security-scanner") {
+      setShowResultsDialog(true)
+    }
+  }, [lastExecutionResults, currentWorkflow?.id])
+
+  // Enrich nodes with workflowId and onViewResults callback for end nodes
+  const enrichedNodes = useMemo(() => {
+    return nodes.map((node) => {
+      if (node.type === "end") {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            workflowId: currentWorkflow?.id,
+            onViewResults: handleViewResults
+          }
+        }
+      }
+      return node
+    })
+  }, [nodes, currentWorkflow?.id, handleViewResults])
+
+  // Get repository name for results dialog
+  const repository = lastExecutionResults?.["start"] || ""
+
   return (
     <div className="flex h-screen w-full flex-col bg-background">
       <header className="flex flex-col gap-3 border-b border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
         <div className="flex items-center gap-3">
-          <Link href="/">
+          <Link href="/home">
             <Button variant="ghost" size="icon" aria-label="Go to homepage">
               <Home className="h-5 w-5" />
             </Button>
@@ -781,62 +718,89 @@ export default function AgentBuilder(): ReactElement {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          <Button variant="outline" size="sm" onClick={() => setShowTemplateGallery(true)}>
-            <FolderOpen className="mr-2 h-4 w-4" />
-            Templates
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowWorkflowManager(true)}>
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-          {currentWorkflow && (
-            <Button variant="outline" size="sm" onClick={() => setShowVersionHistory(true)}>
-              <History className="mr-2 h-4 w-4" />
-              History
+          {/* File Operations Group */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowTemplateGallery(true)}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Templates
             </Button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImportWorkflow}
-            className="hidden"
-            aria-label="Import workflow"
-          />
-          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportWorkflow}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button
-            variant={validationErrorsCount > 0 ? "destructive" : "outline"}
-            size="sm"
-            onClick={handleToggleValidation}
-            className="relative"
-          >
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            Validate
-            {validationErrorsCount > 0 && (
-              <Badge variant="destructive" className="absolute -right-2 -top-2 h-5 min-w-5 rounded-full px-1 text-xs">
-                {validationErrorsCount}
-              </Badge>
+            <Button variant="outline" size="sm" onClick={() => setShowWorkflowManager(true)}>
+              <Save className="mr-2 h-4 w-4" />
+              Save
+            </Button>
+            {currentWorkflow && (
+              <Button variant="outline" size="sm" onClick={() => setShowVersionHistory(true)}>
+                <History className="mr-2 h-4 w-4" />
+                History
+              </Button>
             )}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowApiSettings(true)}>
-            <Key className="mr-2 h-4 w-4" />
-            API Keys
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowCodeExport(true)}>
-            <Code2 className="mr-2 h-4 w-4" />
-            Export Code
-          </Button>
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={handleRun}>
-            <Play className="mr-2 h-4 w-4" />
-            Run
-          </Button>
+          </div>
+
+          {/* Separator */}
+          <div className="hidden md:block h-6 w-px bg-border" />
+
+          {/* Execution Group */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={validationErrorsCount > 0 ? "destructive" : "outline"}
+              size="sm"
+              onClick={handleToggleValidation}
+              className="relative"
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Validate
+              {validationErrorsCount > 0 && (
+                <Badge variant="destructive" className="absolute -right-2 -top-2 h-5 min-w-5 rounded-full px-1 text-xs">
+                  {validationErrorsCount}
+                </Badge>
+              )}
+            </Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 font-semibold" onClick={handleRun}>
+              <Play className="mr-2 h-4 w-4" />
+              Run Demo
+            </Button>
+          </div>
+
+          {/* Separator */}
+          <div className="hidden md:block h-6 w-px bg-border" />
+
+          {/* Settings & More Group */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowApiSettings(true)}>
+              <Key className="mr-2 h-4 w-4" />
+              API Keys
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImportWorkflow}
+              className="hidden"
+              aria-label="Import workflow"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" aria-label="More actions">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import Workflow
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportWorkflow}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Workflow
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowCodeExport(true)}>
+                  <Code2 className="mr-2 h-4 w-4" />
+                  Export Code
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
@@ -859,9 +823,27 @@ export default function AgentBuilder(): ReactElement {
           />
         </div>
 
-        <div className="flex-1" ref={reactFlowWrapper}>
+        <div className="flex-1 relative" ref={reactFlowWrapper}>
+          {showOnboarding && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 max-w-2xl animate-in slide-in-from-top-4 duration-500">
+              <div className="bg-primary border-2 border-primary-foreground/20 rounded-lg shadow-xl px-6 py-4 flex items-center gap-4">
+                <Sparkles className="h-5 w-5 text-primary-foreground shrink-0" />
+                <span className="text-sm md:text-base text-primary-foreground font-medium">
+                  <strong>Try the GitHub Security Scanner</strong> in demo mode — no API keys needed!
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDismissOnboarding}
+                  className="shrink-0 h-7 w-7 p-0 hover:bg-primary-foreground/20 text-primary-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
           <ReactFlow
-            nodes={nodes}
+            nodes={enrichedNodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
@@ -934,6 +916,7 @@ export default function AgentBuilder(): ReactElement {
             onClose={() => setSelectedNode(null)}
             onUpdate={onUpdateNode}
             onDelete={handleDeleteNode}
+            onShowFullReport={() => setShowResultsDialog(true)}
           />
         )}
 
@@ -945,6 +928,7 @@ export default function AgentBuilder(): ReactElement {
             onNodeStatusChange={handleNodeStatusChange}
             onNodeOutputChange={handleNodeOutputChange}
             onShowEndNode={handleShowEndNode}
+            onViewFullReport={handleViewResults}
             workflowId={currentWorkflow?.id || "template-threat-intel"}
           />
         )}
@@ -970,6 +954,12 @@ export default function AgentBuilder(): ReactElement {
         onOpenChange={setShowVersionHistory}
         workflowId={currentWorkflow?.id || null}
         onRestoreVersion={handleRestoreVersion}
+      />
+      <GitHubScannerResultsDialog
+        open={showResultsDialog}
+        onOpenChange={setShowResultsDialog}
+        outputs={lastExecutionResults || {}}
+        repository={repository}
       />
     </div>
   )

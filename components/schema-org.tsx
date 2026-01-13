@@ -7,7 +7,7 @@ export function SchemaOrg() {
     name: "TopFlow",
     url: "https://topflow.dev",
     logo: "https://topflow.dev/icon.svg",
-    description: "Privacy-first visual workflow builder for secure AI applications with GDPR, SOC 2, and HIPAA compliance templates",
+    description: "Privacy-first visual workflow builder for secure AI applications featuring GitHub Security Scanner, GDPR compliance, and automated security workflows. Built by former CISO.",
     founder: {
       "@type": "Person",
       name: "Charlie Su",
@@ -50,7 +50,7 @@ export function SchemaOrg() {
     "@type": "WebSite",
     name: "TopFlow",
     url: "https://topflow.dev",
-    description: "Privacy-first visual workflow builder for secure AI applications",
+    description: "Privacy-first visual workflow builder for secure AI applications with GitHub Security Scanner and automated security workflows",
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -72,9 +72,19 @@ export function SchemaOrg() {
       price: "0",
       priceCurrency: "USD",
     },
-    description: "Privacy-first visual workflow builder for AI applications with GDPR compliance, SSRF prevention, and 12+ security validations",
+    description: "Privacy-first visual workflow builder for AI applications featuring GitHub Security Scanner. Automate repository security analysis, vulnerability scanning, and compliance checks with GDPR compliance, SSRF prevention, and 12+ security validations. Built by former CISO.",
     url: "https://topflow.dev",
-    screenshot: "https://topflow.dev/og-image.png",
+    screenshot: "https://topflow.dev/demo-assets/images/github-security-dashboard.webp",
+    featureList: [
+      "GitHub Security Scanner",
+      "Automated Repository Analysis",
+      "Vulnerability Detection",
+      "Compliance Checking",
+      "Privacy-First Architecture",
+      "Zero Data Storage",
+      "BYOK Model",
+      "Demo Mode",
+    ],
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "5.0",

@@ -2,8 +2,8 @@ import type { Node, Edge } from "@xyflow/react"
 import { TopFlowExecutionEngine } from "@/lib/topflow-execution-engine"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
-import { shouldUseDemoMode } from "@/lib/demo-mode"
-import { getDemoWorkflowResult, hasDemoData } from "@/lib/demo-data"
+import { shouldUseDemoMode, hasDemoData as hasNewDemoData } from "@/lib/demo-mode"
+import { getDemoWorkflowResult, hasDemoData as hasLegacyDemoData } from "@/lib/demo-data"
 
 export const maxDuration = 30
 
@@ -88,12 +88,49 @@ export async function POST(req: Request) {
           edges,
           apiKeys = {},
           workflowId,
+          userInputs,
         }: {
           nodes: Node[]
           edges: Edge[]
           apiKeys?: Record<string, string>
           workflowId?: string
+          userInputs?: Record<string, string>
         } = await req.json()
+
+        console.log('[Execute Workflow] Request received:', {
+          workflowId,
+          nodeCount: nodes.length,
+          edgeCount: edges.length,
+          hasApiKeys: Object.keys(apiKeys).length > 0,
+          userInputs: userInputs
+        })
+
+        // Process start nodes - use userInputs if provided, otherwise use defaultValue
+        const processedNodes = nodes.map((node) => {
+          if (node.type === "start") {
+            // Priority: userInputs > existing output > defaultValue
+            const outputValue = (userInputs && userInputs[node.id]) || node.data.output || node.data.defaultValue
+
+            if (outputValue) {
+              console.log('[Execute Workflow] Setting start node output:', {
+                nodeId: node.id,
+                hasUserInput: !!(userInputs && userInputs[node.id]),
+                hasExistingOutput: !!node.data.output,
+                hasDefaultValue: !!node.data.defaultValue,
+                outputValue: outputValue
+              })
+
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  output: outputValue,
+                },
+              }
+            }
+          }
+          return node
+        })
 
         // ============================================================================
         // Demo Mode Handling
@@ -101,12 +138,35 @@ export async function POST(req: Request) {
 
         const demoMode = shouldUseDemoMode(apiKeys, workflowId)
 
-        if (demoMode) {
-          const demoResult = getDemoWorkflowResult(workflowId)
+        // Check both legacy and new demo mode systems
+        const hasLegacyDemo = hasLegacyDemoData(workflowId)
+        const hasNewDemo = hasNewDemoData(workflowId)
 
-          if (demoResult) {
-            // Stream demo execution with realistic timing
-            for (const [nodeId, nodeResult] of Object.entries(demoResult.nodeResults)) {
+        console.log('[Execute Workflow] Demo mode check:', {
+          workflowId,
+          demoMode,
+          hasLegacyDemo,
+          hasNewDemo
+        })
+
+        // For workflows without demo data, check early and show error
+        if (demoMode && !hasLegacyDemo && !hasNewDemo) {
+          // Demo mode enabled but no demo data available for this workflow
+          sendUpdate({
+            type: "error",
+            error: `Demo mode is active (no API keys configured), but this workflow does not have cached demo data. Please add API keys in Settings or use a template with demo data available.`,
+          })
+          controller.close()
+          return
+        }
+
+        // Use legacy demo system for workflows with pre-generated results
+        if (demoMode && hasLegacyDemo) {
+          const legacyDemoResult = getDemoWorkflowResult(workflowId)
+
+          if (legacyDemoResult) {
+            // Use legacy demo system for non-GitHub-Scanner workflows
+            for (const [nodeId, nodeResult] of Object.entries(legacyDemoResult.nodeResults)) {
               sendUpdate({
                 type: "node_start",
                 nodeId,
@@ -126,25 +186,27 @@ export async function POST(req: Request) {
             sendUpdate({ type: "complete" })
             controller.close()
             return
-          } else {
-            // Demo mode enabled but no demo data available for this workflow
-            sendUpdate({
-              type: "error",
-              error: `Demo mode is active (no API keys configured), but this workflow does not have cached demo data. Please add API keys in Settings or use a template with demo data available.`,
-            })
-            controller.close()
-            return
           }
         }
+
+        // If hasNewDemo is true, execution will continue to use TopFlowExecutionEngine with demo mode
 
         // ============================================================================
         // Input Sanitization
         // ============================================================================
 
-        const sanitizedNodes = nodes.map((node) => ({
+        const sanitizedNodes = processedNodes.map((node) => ({
           ...node,
-          data: sanitizeInput(node.data, ["code", "schema"]),
+          data: sanitizeInput(node.data, ["code", "schema", "output"]),
         }))
+
+        // Log sanitized start nodes to debug
+        const sanitizedStartNodes = sanitizedNodes.filter(n => n.type === "start")
+        if (sanitizedStartNodes.length > 0) {
+          console.log('[Execute Workflow] Start nodes after sanitization:',
+            sanitizedStartNodes.map(n => ({ id: n.id, output: n.data.output }))
+          )
+        }
 
         // ============================================================================
         // Validation (Cycles, SSRF)
@@ -181,14 +243,27 @@ export async function POST(req: Request) {
         // Execute Workflow using TopFlowExecutionEngine
         // ============================================================================
 
-        const engine = new TopFlowExecutionEngine()
+        const engine = new TopFlowExecutionEngine({
+          demoMode,
+          workflowId,
+        })
+
+        // Extract start node outputs as initial variables
+        const initialVariables: Record<string, any> = {}
+        sanitizedNodes.forEach((node) => {
+          if (node.type === "start" && node.data.output) {
+            initialVariables[node.id] = node.data.output
+          }
+        })
+
+        console.log('[Execute Workflow] Initial variables:', initialVariables)
 
         const result = await engine.executeWorkflow(
           sanitizedNodes,
           edges,
           {
             apiKeys,
-            variables: {},
+            variables: initialVariables,
           },
           sendUpdate
         )

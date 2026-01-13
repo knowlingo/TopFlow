@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/builder", "/reports/"],
+        disallow: ["/api/", "/reports/"],
       },
     ],
     sitemap: "https://topflow.dev/sitemap.xml",

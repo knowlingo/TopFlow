@@ -20,9 +20,10 @@ type NodeConfigPanelProps = {
   onClose: () => void
   onUpdate: (nodeId: string, data: any) => void
   onDelete?: () => void
+  onShowFullReport?: () => void
 }
 
-export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfigPanelProps) {
+export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullReport }: NodeConfigPanelProps) {
   const [copiedOutput, setCopiedOutput] = useState(false)
   if (!node) return null
 
@@ -47,7 +48,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
     let imageUrl: string | null = null
 
     // Handle different output formats
-    if (typeof node.data.output === "string") {
+    // Check for images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      const firstImage = node.data.output.images.find(
+        (item: any) => typeof item === "string"
+      )
+      if (firstImage) imageUrl = firstImage
+    } else if (typeof node.data.output === "string") {
       imageUrl = node.data.output
     } else if (node.data.output.url) {
       imageUrl = node.data.output.url
@@ -188,6 +195,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
       return str.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(str)
     }
 
+    // Check object with images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      return node.data.output.images.some(
+        (item: any) => typeof item === "string" && isImageUrl(item)
+      )
+    }
+
     // Check direct string
     if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
       return true
@@ -256,6 +270,14 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
       return str.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(str)
     }
 
+    // Check for images array property (Image Generation node / End node with images)
+    if (node.data.output.images && Array.isArray(node.data.output.images)) {
+      const firstImage = node.data.output.images.find(
+        (item: any) => typeof item === "string" && isImageUrl(item)
+      )
+      return firstImage || null
+    }
+
     if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
       return node.data.output
     }
@@ -289,18 +311,97 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
       case "start":
         return (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              The Start node marks the entry point of your workflow. No configuration needed.
-            </p>
+            <div className="space-y-2">
+              <Label htmlFor="start-label">Input Label (Optional)</Label>
+              <Input
+                id="start-label"
+                value={node.data.label || ""}
+                onChange={(e) => handleUpdate("label", e.target.value)}
+                placeholder="e.g., GitHub URL Input"
+              />
+              <p className="text-xs text-muted-foreground">
+                Custom label for the input field. If empty, node will not require user input.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-placeholder">Placeholder Text</Label>
+              <Input
+                id="start-placeholder"
+                value={node.data.placeholder || ""}
+                onChange={(e) => handleUpdate("placeholder", e.target.value)}
+                placeholder="e.g., https://github.com/owner/repo"
+                disabled={!node.data.label}
+              />
+              <p className="text-xs text-muted-foreground">
+                Example text shown in the input field
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-input-type">Input Type</Label>
+              <Select
+                value={node.data.inputType || "text"}
+                onValueChange={(value) => handleUpdate("inputType", value)}
+                disabled={!node.data.label}
+              >
+                <SelectTrigger id="start-input-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="url">URL</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Type of input validation to apply
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-default">Default Value (Optional)</Label>
+              <Input
+                id="start-default"
+                value={node.data.defaultValue || ""}
+                onChange={(e) => handleUpdate("defaultValue", e.target.value)}
+                placeholder="Optional pre-fill value"
+                disabled={!node.data.label}
+              />
+              <p className="text-xs text-muted-foreground">
+                Pre-filled value for the input field
+              </p>
+            </div>
+
+            {!node.data.label && (
+              <div className="rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
+                <p className="text-sm text-blue-900 dark:text-blue-100">
+                  <strong>No Input Configuration:</strong> This Start node will not require user input.
+                  To enable user input, add a custom label above.
+                </p>
+              </div>
+            )}
           </div>
         )
 
       case "end":
+        const isGitHubScanner = node.data.workflowId === "github-security-scanner"
         return (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               The End node marks the final output of your workflow.
             </p>
+            {node.data.output && isGitHubScanner && node.data.status === "completed" && onShowFullReport && (
+              <Button
+                onClick={onShowFullReport}
+                className="w-full"
+                variant="default"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Show Full Report
+              </Button>
+            )}
             {node.data.output && (
               <p className="text-sm text-muted-foreground">
                 View and download the workflow output below.
@@ -357,9 +458,6 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
                   <SelectItem value="anthropic/claude-3-5-haiku-20241022">Claude 3.5 Haiku</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                GPT-4o Mini is recommended for best compatibility with AI SDK 5 (v2 spec)
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -465,8 +563,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</SelectItem>
-                  <SelectItem value="openai/dall-e-3">DALL-E 3</SelectItem>
-                  <SelectItem value="stability-ai/stable-diffusion">Stable Diffusion</SelectItem>
+                  <SelectItem value="gpt-4o-mini">GPT-4o Mini (Image)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -474,7 +571,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
             <div className="space-y-2">
               <Label htmlFor="aspectRatio">Aspect Ratio</Label>
               <Select
-                value={node.data.aspectRatio || "1:1"}
+                value={node.data.aspectRatio || "16:9"}
                 onValueChange={(value) => handleUpdate("aspectRatio", value)}
               >
                 <SelectTrigger id="aspectRatio">
