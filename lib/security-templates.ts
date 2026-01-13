@@ -1198,7 +1198,7 @@ Tone: Informative, technical, proactive.`,
           type: "textModel",
           position: { x: 2200, y: 350 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.3,
             maxTokens: 2500,
             systemPrompt:
@@ -1306,7 +1306,7 @@ Tone: Informative, technical, proactive.`,
           type: "textModel",
           position: { x: 500, y: 300 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.2,
             maxTokens: 800,
             systemPrompt: "You are a security incident response specialist following the NIST Incident Response Framework (SP 800-61r2). Analyze incidents and provide structured assessments."
@@ -1387,7 +1387,7 @@ return {
           type: "textModel",
           position: { x: 1500, y: 200 },
           data: {
-            model: "openai/gpt-4o",
+            model: "openai/gpt-4o-mini",
             temperature: 0.3,
             maxTokens: 1000,
             systemPrompt: "Generate an incident response runbook following NIST guidelines. Include: 1) Containment steps, 2) Eradication procedures, 3) Recovery actions, 4) Lessons learned template."

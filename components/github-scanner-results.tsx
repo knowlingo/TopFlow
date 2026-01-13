@@ -28,18 +28,36 @@ interface GitHubScannerResultsProps {
 export function GitHubScannerResults({ outputs, repository }: GitHubScannerResultsProps) {
   const [copied, setCopied] = useState(false)
 
+  // Debug logging
+  console.log('[GitHubScannerResults] Rendering with:', {
+    outputKeys: Object.keys(outputs),
+    repository,
+    hasCalculateScore: !!outputs["calculate-score"],
+    calculateScoreData: outputs["calculate-score"],
+    hasFetchMetadata: !!outputs["fetch-metadata"],
+    metadataKeys: outputs["fetch-metadata"] ? Object.keys(outputs["fetch-metadata"]) : []
+  })
+
   // Extract data from workflow outputs
   const scoreData = outputs["calculate-score"] || outputs["score"] || {}
   const metadata = outputs["fetch-metadata"] || {}
   const actionData = outputs["extract-actions"] || {}
   const aiAnalysis = outputs["ai-analysis"] || ""
   const dashboardImage = outputs["generate-visual"]?.url || "/demo-assets/images/github-security-dashboard.webp"
+  const securityData = outputs["fetch-security"] || {}
 
   const score = scoreData.score || 85
   const grade = scoreData.grade || "B+"
-  const repoName = repository || metadata.full_name || "Unknown Repository"
   const stars = metadata.stargazers_count || 0
   const language = metadata.language || "Unknown"
+
+  // Check if using demo mode fallback
+  const isDemoMode = securityData._demoMode || false
+  const isUsingDefault = securityData._isUsingDefault || false
+  const requestedRepo = securityData._requestedRepo
+
+  // Use actual repo from metadata if using fallback, otherwise use requested repo
+  const repoName = (isUsingDefault && metadata.full_name) ? metadata.full_name : (repository || metadata.full_name || "Unknown Repository")
 
   // Get grade color
   const getGradeColor = (grade: string) => {
@@ -64,8 +82,29 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
   }
 
   const shareToLinkedIn = () => {
-    const url = `https://topflow.dev/builder?template=github-security-scanner`
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
+    // LinkedIn's share endpoint only accepts URL (no title/text parameters)
+    // Copy rich text to clipboard for user to paste
+    const shareText = `🔒 Security Analysis: ${repoName}
+
+Score: ${score}/100 (Grade: ${grade})
+Language: ${language}
+Stars: ${stars.toLocaleString()}
+
+I just scanned this repository with TopFlow's GitHub Security Scanner and got actionable security recommendations.
+
+Try it yourself: https://topflow.dev/builder?template=github-security-scanner
+
+#CyberSecurity #DevSecOps #GitHubSecurity #OpenSource`
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareText)
+    toast.success("LinkedIn post copied! Paste it when the share dialog opens.", { duration: 4000 })
+
+    // Open LinkedIn share dialog (user will paste the text)
+    setTimeout(() => {
+      const url = `https://topflow.dev/builder?template=github-security-scanner`
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
+    }, 500)
   }
 
   const copyBadge = () => {
@@ -84,6 +123,27 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
 
   return (
     <div className="space-y-6 pb-8">
+      {/* Demo Mode Banner */}
+      {isDemoMode && isUsingDefault && requestedRepo && (
+        <Card className="border-2 border-yellow-500/50 bg-yellow-500/10">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-yellow-600 dark:text-yellow-400 mb-1">Demo Mode Active</h4>
+                <p className="text-sm text-muted-foreground">
+                  You requested <span className="font-mono font-semibold">{requestedRepo}</span>, but it's not in our demo dataset.
+                  Showing example results for <span className="font-mono font-semibold">facebook/react</span> instead.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  💡 <strong>Want to scan your repository?</strong> Add your API keys (GitHub, OpenAI, and Gemini) in Settings to enable real security analysis.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Hero Section */}
       <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
         <CardHeader>

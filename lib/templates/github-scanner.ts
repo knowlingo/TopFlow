@@ -193,11 +193,11 @@ return {
     position: { x: 1200, y: 180 },
     data: {
       label: "Excellence Report",
-      template: `🎉 SECURITY EXCELLENCE REPORT
+      prompt: `🎉 SECURITY EXCELLENCE REPORT
 
 Repository: $input1.fullName
 Security Score: $input2.score/100 (Grade: $input2.grade)
-Stars: $input3.stars | Forks: $input3.forks | Language: $input3.language
+Stars: $input3.stargazers_count | Forks: $input3.forks_count | Language: $input3.language
 
 Generate a congratulatory security analysis report highlighting:
 
@@ -218,11 +218,11 @@ Tone: Professional but celebratory. Focus on positive reinforcement.`,
     position: { x: 1200, y: 420 },
     data: {
       label: "Improvement Report",
-      template: `📊 SECURITY IMPROVEMENT REPORT
+      prompt: `📊 SECURITY IMPROVEMENT REPORT
 
 Repository: $input1.fullName
 Security Score: $input2.score/100 (Grade: $input2.grade)
-Stars: $input3.stars | Forks: $input3.forks | Language: $input3.language
+Stars: $input3.stargazers_count | Forks: $input3.forks_count | Language: $input3.language
 
 Vulnerability Summary:
 - Critical: $input2.breakdown.vulnerabilities.critical
@@ -250,7 +250,7 @@ Tone: Supportive and actionable. Make improvements feel achievable.`,
     position: { x: 1420, y: 300 },
     data: {
       label: "AI Security Analysis",
-      model: "gpt-4-turbo",
+      model: "openai/gpt-4o-mini",
       temperature: 0.3,
       maxTokens: 1000,
       status: "idle"
@@ -295,7 +295,7 @@ Tone: Supportive and actionable. Make improvements feel achievable.`,
     position: { x: 1860, y: 300 },
     data: {
       label: "Generate Dashboard",
-      model: "dall-e-3",
+      model: "google/gemini-2.0-flash-exp",
       size: "1792x1024",
       prompt: `Create a professional security dashboard visualization for a GitHub repository:
 

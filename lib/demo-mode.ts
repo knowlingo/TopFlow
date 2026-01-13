@@ -292,19 +292,26 @@ export async function simulateDelay(delayMs: number): Promise<void> {
  */
 export function getGitHubScannerMockResponse(
   node: Node,
-  inputs: any[]
+  inputs: any[],
+  executionResults?: Map<string, any>
 ): any {
   const nodeType = node.type
   const nodeId = node.id
 
+  console.log('[Demo Mode] getGitHubScannerMockResponse - nodeId:', nodeId, 'inputs:', inputs)
+
   switch (nodeId) {
     case "start":
-      // Pass through user input
-      return inputs[0] || "https://github.com/facebook/react"
+      // Pass through user input (from dialog or URL param)
+      // User input is stored in node.data.output by the execution route
+      const startOutput = node.data.output || inputs[0] || node.data.defaultValue || "https://github.com/facebook/react"
+      console.log('[Demo Mode] start node - output:', startOutput)
+      return startOutput
 
     case "extract-repo": {
       // Parse repository from URL
       const url = inputs[0] || "https://github.com/facebook/react"
+      console.log('[Demo Mode] extract-repo node - input URL:', url)
       const patterns = [
         /github\.com\/([^/]+)\/([^/]+)/,
         /^([^/]+)\/([^/]+)$/
@@ -315,15 +322,18 @@ export function getGitHubScannerMockResponse(
         if (match) {
           const owner = match[1]
           const repo = match[2].replace(/\.git$/, '')
-          return {
+          const result = {
             owner,
             repo,
             fullName: `${owner}/${repo}`
           }
+          console.log('[Demo Mode] extract-repo node - extracted:', result)
+          return result
         }
       }
 
       // Fallback
+      console.log('[Demo Mode] extract-repo node - using fallback')
       return {
         owner: "facebook",
         repo: "react",
@@ -332,42 +342,104 @@ export function getGitHubScannerMockResponse(
     }
 
     case "fetch-metadata": {
-      // Mock GitHub API metadata
+      // Mock GitHub API metadata - use actual repo data
       const repoData = inputs[0] || { fullName: "facebook/react" }
+      const repoPath = repoData.fullName || "facebook/react"
+
+      // Get the full analysis to extract metadata
+      const analysis: RepoAnalysis = getRepoAnalysis(repoPath)
+
+      console.log('[Demo Mode] fetch-metadata - repoPath:', repoPath, 'stars:', analysis.stars)
+
       return {
-        name: repoData.repo || "react",
-        owner: { login: repoData.owner || "facebook" },
-        stargazers_count: 242192,
-        forks_count: 50363,
-        open_issues_count: 836,
-        updated_at: new Date().toISOString(),
+        name: repoData.repo || analysis.repository.split('/')[1],
+        owner: { login: repoData.owner || analysis.repository.split('/')[0] },
+        stargazers_count: analysis.stars,
+        forks_count: analysis.forks,
+        open_issues_count: 0,
+        updated_at: analysis.lastAnalyzed,
         default_branch: "main",
-        language: "JavaScript",
-        description: "A declarative, efficient, and flexible JavaScript library for building user interfaces."
+        language: analysis.language,
+        description: `${analysis.repository} - ${analysis.language} framework`,
+        full_name: analysis.repository
       }
     }
 
     case "fetch-security": {
       // Get mock security analysis
       const repoData = inputs[0] || { fullName: "facebook/react" }
-      const analysis: RepoAnalysis = getRepoAnalysis(repoData.fullName)
-      return analysis
+      const requestedRepo = repoData.fullName
+      console.log('[Demo Mode] fetch-security node - requested repo:', requestedRepo)
+
+      const analysis: RepoAnalysis = getRepoAnalysis(requestedRepo)
+
+      // Add metadata to indicate if we're using fallback
+      const isUsingDefault = analysis.repository !== requestedRepo
+      console.log('[Demo Mode] fetch-security node - returning data for:', analysis.repository,
+                  isUsingDefault ? '(FALLBACK - repo not in demo data)' : '(EXACT MATCH)')
+
+      return {
+        ...analysis,
+        _demoMode: true,
+        _requestedRepo: requestedRepo,
+        _isUsingDefault: isUsingDefault
+      }
     }
 
     case "calculate-score": {
       // Pre-calculated score from security data
       const security = inputs[1] || inputs[0]
+
       if (security && typeof security === 'object' && 'securityScore' in security) {
+        // Use gentler scoring formula that matches overall score better
+        const vulns = security.vulnerabilities || { critical: 0, high: 0, medium: 0, low: 0 }
+        const totalVulns = vulns.critical + vulns.high + vulns.medium + vulns.low
+
+        // Start from overall score and adjust components proportionally
+        const baseScore = security.securityScore || 85
+
+        // Vulnerability score: Deduct based on severity
+        const vulnDeduction = (vulns.critical * 8) + (vulns.high * 4) + (vulns.medium * 2) + (vulns.low * 0.5)
+        const vulnerabilityScore = Math.max(40, Math.min(100, baseScore - vulnDeduction + 5))
+
+        // Dependency score: Based on vulnerable packages
+        const depAudit = security.dependencyAudit || { vulnerable: 0, outdated: 0 }
+        const depScore = Math.max(60, 100 - (depAudit.vulnerable * 10) - (depAudit.outdated * 0.1))
+
+        // Practices: Percentage of enabled practices
+        const practices = security.securityPractices || {}
+        const practiceCount = Object.values(practices).filter(v => v === true).length
+        const practiceTotal = Object.keys(practices).length || 1
+        const practicesScore = Math.round((practiceCount / practiceTotal) * 100)
+
+        // OWASP: Percentage of passing checks
+        const owasp = security.owaspCompliance || {}
+        const owaspPass = Object.values(owasp).filter(v => v === "PASS").length
+        const owaspTotal = Object.keys(owasp).length || 1
+        const owaspScore = Math.round((owaspPass / owaspTotal) * 100)
+
+        console.log('[Demo Mode] calculate-score - calculated components:', {
+          vulnerability: Math.round(vulnerabilityScore),
+          dependency: Math.round(depScore),
+          practices: practicesScore,
+          owasp: owaspScore,
+          totalVulns,
+          baseScore
+        })
+
         return {
           score: security.securityScore,
           grade: security.grade,
           components: {
-            vulnerability: 85,
-            dependency: 75,
-            practices: 85,
-            owasp: 80
+            vulnerability: Math.round(vulnerabilityScore),
+            dependency: Math.round(depScore),
+            practices: practicesScore,
+            owasp: owaspScore
           },
-          breakdown: security.vulnerabilities
+          breakdown: {
+            vulnerabilities: vulns,
+            dependencies: { vulnerable: depAudit.vulnerable, outdated: depAudit.outdated }
+          }
         }
       }
 
@@ -392,153 +464,269 @@ export function getGitHubScannerMockResponse(
     }
 
     case "prompt-excellent": {
-      const score = inputs[1]?.score || 85
-      const repo = inputs[0]?.fullName || "facebook/react"
-      return `🎉 SECURITY EXCELLENCE REPORT\n\nRepository: ${repo}\nSecurity Score: ${score}/100\n\nGenerate a congratulatory security analysis...`
+      // After conditional branch, inputs only contains [true]
+      // Need to get upstream data from executionResults or reconstruct
+      let repoData, scoreData, metadata
+
+      if (executionResults) {
+        repoData = executionResults.get("extract-repo") || { fullName: "facebook/react" }
+        scoreData = executionResults.get("calculate-score") || { score: 85, grade: "B+" }
+        metadata = executionResults.get("fetch-metadata") || { stars: 0, forks: 0, language: "Unknown" }
+        const securityData = executionResults.get("fetch-security") || {}
+
+        // If using default fallback, use the actual repo from analysis (not requested repo)
+        if (securityData._isUsingDefault && metadata.full_name) {
+          repoData = { fullName: metadata.full_name }
+        }
+      } else {
+        // Fallback: try inputs array
+        repoData = inputs[0] || { fullName: "facebook/react" }
+        scoreData = inputs[1] || { score: 85, grade: "B+" }
+        metadata = inputs[2] || { stars: 0, forks: 0, language: "Unknown" }
+      }
+
+      console.log('[Demo Mode] prompt-excellent - repoData:', repoData)
+      console.log('[Demo Mode] prompt-excellent - scoreData:', scoreData)
+      console.log('[Demo Mode] prompt-excellent - metadata:', metadata)
+
+      return `🎉 SECURITY EXCELLENCE REPORT
+
+Repository: ${repoData.fullName}
+Security Score: ${scoreData.score}/100 (Grade: ${scoreData.grade})
+Stars: ${metadata.stars || metadata.stargazers_count || 0} | Forks: ${metadata.forks || metadata.forks_count || 0} | Language: ${metadata.language || "Unknown"}
+
+Generate a congratulatory security analysis report highlighting:
+
+1. **Top Security Strengths**: Identify 3 exceptional security practices
+2. **Why This Matters**: Explain why this repository sets a security standard
+3. **Minor Enhancements**: 2-3 low-effort improvements that could boost the score
+4. **Security Badges**: Recommend which security badges to display in README
+
+Tone: Professional but celebratory. Focus on positive reinforcement.`
     }
 
     case "prompt-improve": {
-      const score = inputs[1]?.score || 85
-      const repo = inputs[0]?.fullName || "facebook/react"
-      return `📊 SECURITY IMPROVEMENT REPORT\n\nRepository: ${repo}\nSecurity Score: ${score}/100\n\nGenerate a constructive security improvement report...`
+      // After conditional branch, inputs only contains [false]
+      // Need to get upstream data from executionResults or reconstruct
+      let repoData, scoreData, metadata
+
+      if (executionResults) {
+        repoData = executionResults.get("extract-repo") || { fullName: "facebook/react" }
+        scoreData = executionResults.get("calculate-score") || { score: 85, grade: "B+", breakdown: { vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 } } }
+        metadata = executionResults.get("fetch-metadata") || { stars: 0, forks: 0, language: "Unknown" }
+        const securityData = executionResults.get("fetch-security") || {}
+
+        // If using default fallback, use the actual repo from analysis (not requested repo)
+        if (securityData._isUsingDefault && metadata.full_name) {
+          repoData = { fullName: metadata.full_name }
+        }
+      } else {
+        // Fallback: try inputs array
+        repoData = inputs[0] || { fullName: "facebook/react" }
+        scoreData = inputs[1] || { score: 85, grade: "B+", breakdown: { vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 } } }
+        metadata = inputs[2] || { stars: 0, forks: 0, language: "Unknown" }
+      }
+
+      const vulns = scoreData.breakdown?.vulnerabilities || { critical: 0, high: 0, medium: 0, low: 0 }
+
+      console.log('[Demo Mode] prompt-improve - repoData:', repoData)
+      console.log('[Demo Mode] prompt-improve - scoreData:', scoreData)
+      console.log('[Demo Mode] prompt-improve - metadata:', metadata)
+
+      return `📊 SECURITY IMPROVEMENT REPORT
+
+Repository: ${repoData.fullName}
+Security Score: ${scoreData.score}/100 (Grade: ${scoreData.grade})
+Stars: ${metadata.stars || metadata.stargazers_count || 0} | Forks: ${metadata.forks || metadata.forks_count || 0} | Language: ${metadata.language || "Unknown"}
+
+Vulnerability Summary:
+- Critical: ${vulns.critical}
+- High: ${vulns.high}
+- Medium: ${vulns.medium}
+- Low: ${vulns.low}
+
+Generate a constructive security improvement report with:
+
+1. **Current Strengths**: What security practices are already in place
+2. **Priority Fixes**: Top 5 security improvements ranked by impact
+3. **Step-by-Step Guide**: Detailed instructions for each fix
+4. **Effort Estimates**: Time required for each improvement
+5. **Expected Impact**: How much each fix will improve the security score
+
+Tone: Supportive and actionable. Make improvements feel achievable.`
     }
 
     case "ai-analysis": {
-      // Mock AI analysis based on score
-      const score = inputs[1]?.score || inputs[0]?.score || 85
-      const repo = inputs[0]?.fullName || inputs[1]?.fullName || "facebook/react"
+      // The ai-analysis node receives the prompt text (not structured data)
+      // Parse the repository name and score from the prompt
+      const promptText = inputs[0] || ""
 
-      if (score >= 80) {
+      console.log('[Demo Mode] ai-analysis - promptText:', promptText.substring(0, 200))
+
+      // Extract repository name from prompt (e.g., "Repository: django/django")
+      const repoMatch = promptText.match(/Repository:\s*([^\s\n]+\/[^\s\n]+)/)
+      const repo = repoMatch ? repoMatch[1] : "facebook/react"
+
+      // Extract score from prompt (e.g., "Security Score: 85/100")
+      const scoreMatch = promptText.match(/Security Score:\s*(\d+)\/100/)
+      const score = scoreMatch ? parseInt(scoreMatch[1]) : 85
+
+      console.log('[Demo Mode] ai-analysis - extracted repo:', repo, 'score:', score)
+
+      // Get the full RepoAnalysis object
+      const analysis: RepoAnalysis = getRepoAnalysis(repo)
+
+      console.log('[Demo Mode] ai-analysis - using analysis for:', analysis.repository)
+
+      // Generate dynamic analysis based on actual data
+      const vulnSummary = `${analysis.vulnerabilities.critical} critical, ${analysis.vulnerabilities.high} high, ${analysis.vulnerabilities.medium} medium, ${analysis.vulnerabilities.low} low`
+
+      // Build security practices summary
+      const practices = analysis.securityPractices
+      const enabledPractices = []
+      const missingPractices = []
+
+      if (practices.has_security_policy) enabledPractices.push("Security policy documented")
+      else missingPractices.push("Security policy")
+
+      if (practices.code_scanning) enabledPractices.push("Code scanning enabled")
+      else missingPractices.push("Code scanning")
+
+      if (practices.branch_protection) enabledPractices.push("Branch protection rules")
+      else missingPractices.push("Branch protection")
+
+      if (practices.dependabot_enabled) enabledPractices.push("Dependabot monitoring")
+      else missingPractices.push("Dependabot alerts")
+
+      if (practices.secret_scanning) enabledPractices.push("Secret scanning active")
+      else missingPractices.push("Secret scanning")
+
+      if (score >= 90) {
         return `# Security Excellence Report
 
 **Repository:** ${repo}
 **Security Score:** ${score}/100
-**Overall Grade:** A-
+**Overall Grade:** ${analysis.grade}
 
 ## Top Security Strengths
 
-1. **Comprehensive Security Policy**: The repository maintains a detailed SECURITY.md file with clear vulnerability disclosure procedures.
+${enabledPractices.map((p, i) => `${i + 1}. **${p}**: ${repo} maintains strong security practices`).join('\n\n')}
 
-2. **Automated Security Scanning**: Dependabot and GitHub Advanced Security are enabled, providing continuous monitoring for vulnerabilities.
+## Code Quality Metrics
 
-3. **Strong Code Review Process**: Branch protection rules enforce code review requirements before merging, reducing the risk of security issues.
+- **Test Coverage**: ${analysis.codeQuality.coverage}%
+- **Code Complexity**: ${analysis.codeQuality.complexity}
+- **Documentation**: ${analysis.codeQuality.documentation}%
+- **Lines of Code**: ${analysis.codeQuality.linesOfCode.toLocaleString()}
+
+## Vulnerability Status
+
+Found ${vulnSummary} vulnerabilities across all categories.
 
 ## Why This Matters
 
-This repository sets a security standard for the open-source community by:
-- Proactively identifying and addressing security issues
-- Maintaining transparency in security practices
-- Demonstrating commitment to user safety
+This repository demonstrates security excellence by maintaining comprehensive security controls and proactive vulnerability management.
 
 ## Minor Enhancements
 
-1. **Enable Commit Signing** (5 minutes): Require GPG signatures on commits to prevent impersonation
-2. **Add SAST to CI/CD** (2 hours): Integrate static analysis tools for automated security testing
-3. **Document Security Champions** (30 minutes): Identify and list security point-of-contact in the team
+${analysis.recommendations.filter(r => r.priority !== 'HIGH').slice(0, 3).map((rec, i) =>
+  `${i + 1}. **${rec.title}** (${rec.effort}): ${rec.description}`
+).join('\n\n')}
 
-These improvements would elevate the security score to 98/100.`
+Implementing these improvements would elevate the security score to 98/100.`
       } else {
+        // Build priority recommendations from actual data
+        const highPriorityRecs = analysis.recommendations.filter(r => r.priority === 'HIGH')
+        const mediumPriorityRecs = analysis.recommendations.filter(r => r.priority === 'MEDIUM')
+
         return `# Security Improvement Report
 
 **Repository:** ${repo}
 **Security Score:** ${score}/100
-**Overall Grade:** B
+**Overall Grade:** ${analysis.grade}
 
 ## Current Strengths
 
-- Active maintenance with recent commits
-- Standard open-source license (MIT)
-- Public issue tracker for transparency
+${enabledPractices.map(p => `- ${p}`).join('\n')}
+- Test coverage: ${analysis.codeQuality.coverage}%
+- ${analysis.language} best practices followed
 
-## Priority Fixes
+## Vulnerability Summary
 
-### 1. HIGH: Patch Critical Vulnerabilities
-**Effort:** 30 minutes
-**Impact:** +10 points
+Found ${vulnSummary} vulnerabilities that need attention.
 
-Update dependencies with critical security issues.
+${analysis.vulnerabilities.details.slice(0, 2).map(vuln =>
+  `### ${vuln.severity}: ${vuln.id}
+**Component:** ${vuln.component}
+**Issue:** ${vuln.description}
+**Fix:** ${vuln.fix}
+**Effort:** ${vuln.effort}`
+).join('\n\n')}
 
-### 2. HIGH: Enable GitHub Security Features
-**Effort:** 15 minutes
-**Impact:** +8 points
+## Priority Recommendations
 
-Enable automated security scanning:
-1. Go to Settings > Security & analysis
-2. Enable Dependabot alerts
-3. Enable Dependabot security updates
-4. Enable Code scanning
+${highPriorityRecs.map((rec, i) =>
+  `### ${i + 1}. HIGH: ${rec.title}
+**Effort:** ${rec.effort}
+**Impact:** ${rec.impact}
 
-### 3. MEDIUM: Create SECURITY.md
-**Effort:** 1 hour
-**Impact:** +5 points
+${rec.description}`
+).join('\n\n')}
 
-Document your security policy with vulnerability disclosure process.
+${mediumPriorityRecs.slice(0, 2).map((rec, i) =>
+  `### ${highPriorityRecs.length + i + 1}. MEDIUM: ${rec.title}
+**Effort:** ${rec.effort}
+**Impact:** ${rec.impact}
 
-### 4. MEDIUM: Add Branch Protection
-**Effort:** 10 minutes
-**Impact:** +4 points
-
-Protect the main branch with required reviews.
-
-### 5. LOW: Enable Secret Scanning
-**Effort:** 5 minutes
-**Impact:** +2 points
-
-Prevent accidental credential commits.
+${rec.description}`
+).join('\n\n')}
 
 ## Expected Impact
 
-Implementing all 5 recommendations would increase your security score to 94/100 (A rating).`
+Implementing all ${highPriorityRecs.length + mediumPriorityRecs.length} priority recommendations would increase your security score to 94/100 (A rating).`
       }
     }
 
     case "extract-actions": {
-      const score = inputs[1]?.score || inputs[0]?.score || 85
+      const repoInfo = inputs[0] || { fullName: "facebook/react" }
+      const repo = repoInfo.fullName || "facebook/react"
+
+      // Get the full RepoAnalysis object
+      const analysis: RepoAnalysis = getRepoAnalysis(repo)
+
+      // Build strengths from enabled practices
+      const strengths = []
+      if (analysis.securityPractices.has_security_policy) strengths.push("Active security policy documentation")
+      if (analysis.securityPractices.code_scanning) strengths.push("Code scanning enabled")
+      if (analysis.securityPractices.branch_protection) strengths.push("Strong code review requirements")
+      if (analysis.securityPractices.dependabot_enabled) strengths.push("Automated dependency scanning enabled")
+      if (analysis.securityPractices.secret_scanning) strengths.push("Secret scanning protection")
+
+      // Get critical findings from actual vulnerabilities
+      const criticalFindings = analysis.vulnerabilities.details
+        .filter(v => v.severity === "CRITICAL" || v.severity === "HIGH")
+        .map(v => `${v.severity}: ${v.description}`)
+
       return {
         summary: "Security analysis complete with actionable recommendations",
-        score,
-        grade: score >= 90 ? "A" : score >= 80 ? "B+" : "B",
-        strengths: [
-          "Active security policy documentation",
-          "Automated dependency scanning enabled",
-          "Strong code review requirements"
-        ],
-        criticalFindings: score < 70 ? [
-          "Critical vulnerabilities in dependencies",
-          "Missing security disclosure policy"
-        ] : [],
-        recommendations: [
-          {
-            priority: "HIGH",
-            action: "Update vulnerable dependencies",
-            effort: "30 minutes",
-            impact: "+10 security score",
-            steps: [
-              "Run npm audit",
-              "Update packages with critical issues",
-              "Test thoroughly",
-              "Deploy updates"
-            ]
-          },
-          {
-            priority: "MEDIUM",
-            action: "Enable GitHub security features",
-            effort: "15 minutes",
-            impact: "+8 security score",
-            steps: [
-              "Navigate to repository settings",
-              "Enable Dependabot alerts",
-              "Enable code scanning"
-            ]
-          }
-        ],
+        score: analysis.securityScore,
+        grade: analysis.grade,
+        strengths,
+        criticalFindings,
+        recommendations: analysis.recommendations.map(rec => ({
+          priority: rec.priority,
+          action: rec.title,
+          effort: rec.effort,
+          impact: rec.impact,
+          timeline: rec.effort
+        })),
         badges: {
-          security: score >= 90 ? "A" : score >= 80 ? "B+" : "B",
-          coverage: 85,
+          security: analysis.grade,
+          coverage: analysis.codeQuality.coverage,
           maintained: true
         },
         nextSteps: [
-          "Review and implement high-priority recommendations",
+          `Review and implement ${analysis.recommendations.filter(r => r.priority === 'HIGH').length} high-priority recommendations`,
           "Set up automated security monitoring",
           "Establish regular security audit schedule"
         ]

@@ -42,9 +42,16 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
     }
 
     if (Array.isArray(data.output)) {
-      return data.output.some((item) => typeof item === "string" && item.startsWith("data:image/"))
+      return data.output.some((item) => {
+        if (typeof item !== "string") return false
+        // Check for data URL or raw base64 (starts with / or contains base64 pattern)
+        return item.startsWith("data:image/") || item.startsWith("/") || /^[A-Za-z0-9+/=]{20,}/.test(item)
+      })
     }
-    return typeof data.output === "string" && data.output.startsWith("data:image/")
+    if (typeof data.output === "string") {
+      return data.output.startsWith("data:image/") || data.output.startsWith("/") || /^[A-Za-z0-9+/=]{20,}/.test(data.output)
+    }
+    return false
   }
 
   const getImages = () => {
@@ -55,11 +62,26 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
       return [data.output.threat_map]
     }
 
-    if (Array.isArray(data.output)) {
-      return data.output.filter((item) => typeof item === "string" && item.startsWith("data:image/"))
+    const convertToDataUrl = (img: string) => {
+      if (typeof img !== "string") return ""
+      // If already a data URL or path, return as-is
+      if (img.startsWith("data:") || img.startsWith("/")) return img
+      // If raw base64, add data URL prefix
+      if (/^[A-Za-z0-9+/=]{20,}/.test(img)) {
+        return `data:image/png;base64,${img}`
+      }
+      return img
     }
-    if (typeof data.output === "string" && data.output.startsWith("data:image/")) {
-      return [data.output]
+
+    if (Array.isArray(data.output)) {
+      return data.output
+        .filter((item) => typeof item === "string")
+        .map(convertToDataUrl)
+        .filter(Boolean)
+    }
+    if (typeof data.output === "string") {
+      const converted = convertToDataUrl(data.output)
+      return converted ? [converted] : []
     }
     return []
   }

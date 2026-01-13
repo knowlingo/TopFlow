@@ -366,8 +366,8 @@ export const MOCK_REPO_ANALYSIS: Record<string, RepoAnalysis> = {
     language: "Python",
     lastAnalyzed: new Date().toISOString(),
 
-    securityScore: 85,
-    grade: "B+",
+    securityScore: 30,
+    grade: "D",
 
     vulnerabilities: {
       critical: 0,
@@ -1109,11 +1109,13 @@ export function generateDynamicAnalysis(repoPath: string): RepoAnalysis {
 // ============================================================================
 
 export function getRepoAnalysis(repoPath: string): RepoAnalysis {
-  // Check if we have pre-loaded data
+  // Check if we have pre-loaded data (7 repositories)
   if (MOCK_REPO_ANALYSIS[repoPath]) {
+    console.log('[Demo Data] Using pre-loaded mock data for:', repoPath)
     return MOCK_REPO_ANALYSIS[repoPath]
   }
 
-  // Generate dynamic analysis for unknown repos
-  return generateDynamicAnalysis(repoPath)
+  // Unknown repo in demo mode: return default (facebook/react)
+  console.log('[Demo Data] Unknown repo in demo mode:', repoPath, '- Using default: facebook/react')
+  return MOCK_REPO_ANALYSIS["facebook/react"]
 }

@@ -20,9 +20,10 @@ type NodeConfigPanelProps = {
   onClose: () => void
   onUpdate: (nodeId: string, data: any) => void
   onDelete?: () => void
+  onShowFullReport?: () => void
 }
 
-export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfigPanelProps) {
+export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullReport }: NodeConfigPanelProps) {
   const [copiedOutput, setCopiedOutput] = useState(false)
   if (!node) return null
 
@@ -364,11 +365,22 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
         )
 
       case "end":
+        const isGitHubScanner = node.data.workflowId === "github-security-scanner"
         return (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               The End node marks the final output of your workflow.
             </p>
+            {node.data.output && isGitHubScanner && node.data.status === "completed" && onShowFullReport && (
+              <Button
+                onClick={onShowFullReport}
+                className="w-full"
+                variant="default"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Show Full Report
+              </Button>
+            )}
             {node.data.output && (
               <p className="text-sm text-muted-foreground">
                 View and download the workflow output below.
@@ -425,9 +437,6 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete }: NodeConfi
                   <SelectItem value="anthropic/claude-3-5-haiku-20241022">Claude 3.5 Haiku</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                GPT-4o Mini is recommended for best compatibility with AI SDK 5 (v2 spec)
-              </p>
             </div>
 
             <div className="space-y-2">

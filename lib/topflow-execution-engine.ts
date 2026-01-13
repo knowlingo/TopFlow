@@ -2,10 +2,10 @@ import { ExecutionEngine } from '@charliesu/workflow-core'
 import type { Node } from '@xyflow/react'
 import type { ExecutionContext } from '@charliesu/workflow-core'
 import { generateText, generateObject, embed } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { anthropic } from '@ai-sdk/anthropic'
-import { google } from '@ai-sdk/google'
-import { groq } from '@ai-sdk/groq'
+import { createOpenAI } from '@ai-sdk/openai'
+import { createAnthropic } from '@ai-sdk/anthropic'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import {
   getNodeDelay,
@@ -22,12 +22,30 @@ import {
 export class TopFlowExecutionEngine extends ExecutionEngine {
   private demoMode: boolean = false
   private workflowId?: string
+  private executionResults: Map<string, any> = new Map()
 
   constructor(options?: { demoMode?: boolean; workflowId?: string }) {
     super()
     this.demoMode = options?.demoMode || false
     this.workflowId = options?.workflowId
   }
+
+  /**
+   * Override executeWorkflow to capture results
+   */
+  async executeWorkflow(
+    nodes: Node[],
+    edges: any[],
+    context: ExecutionContext,
+    onUpdate?: (update: any) => void
+  ): Promise<any> {
+    // Reset results for new execution
+    this.executionResults = new Map()
+
+    // Call parent executeWorkflow
+    return super.executeWorkflow(nodes, edges, context, onUpdate)
+  }
+
   /**
    * Override executeNode to handle TopFlow-specific node types
    */
@@ -38,6 +56,8 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
   ): Promise<any> {
     const data = node.data as any
 
+    let result: any
+
     // Demo mode: Return mock responses for GitHub Scanner workflow
     if (this.demoMode && this.workflowId === 'github-security-scanner' && hasDemoData(this.workflowId)) {
       // Add realistic delay based on node type
@@ -47,37 +67,59 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       // Convert inputs object to array for mock response function
       const inputArray = Object.values(inputs)
 
-      // Generate mock response
-      return getGitHubScannerMockResponse(node, inputArray)
+      // Generate mock response with access to all previous results
+      result = getGitHubScannerMockResponse(node, inputArray, this.executionResults)
+    } else {
+      // Handle TopFlow-specific nodes
+      switch (node.type) {
+        case 'start':
+          // Start nodes should output their stored value or context variable
+          result = data.output || context.variables?.[node.id] || data.defaultValue || ''
+          console.log('[TopFlowEngine] Start node output:', { nodeId: node.id, result })
+          break
+
+        case 'httpRequest':
+          result = await this.executeHttpRequestNode(node, inputs)
+          break
+
+        case 'textModel':
+          result = await this.executeTextModelNode(node, inputs, context)
+          break
+
+        case 'imageGeneration':
+          result = await this.executeImageGenerationNode(node, inputs, context)
+          break
+
+        case 'audio':
+          result = await this.executeAudioNode(node, inputs, context)
+          break
+
+        case 'embeddingModel':
+          result = await this.executeEmbeddingModelNode(node, inputs, context)
+          break
+
+        case 'structuredOutput':
+          result = await this.executeStructuredOutputNode(node, inputs, context)
+          break
+
+        case 'tool':
+          result = await this.executeToolNode(node, inputs)
+          break
+
+        case 'prompt':
+          result = await this.executePromptNode(node, inputs)
+          break
+
+        default:
+          // Fall back to base implementation for shared nodes
+          result = await super.executeNode(node, inputs, context)
+      }
     }
 
-    // Handle TopFlow-specific nodes
-    switch (node.type) {
-      case 'httpRequest':
-        return this.executeHttpRequestNode(node, inputs)
+    // Store result for future nodes to access
+    this.executionResults.set(node.id, result)
 
-      case 'textModel':
-        return this.executeTextModelNode(node, inputs, context)
-
-      case 'imageGeneration':
-        return this.executeImageGenerationNode(node, inputs, context)
-
-      case 'audio':
-        return this.executeAudioNode(node, inputs, context)
-
-      case 'embeddingModel':
-        return this.executeEmbeddingModelNode(node, inputs, context)
-
-      case 'structuredOutput':
-        return this.executeStructuredOutputNode(node, inputs, context)
-
-      case 'tool':
-        return this.executeToolNode(node, inputs)
-
-      default:
-        // Fall back to base implementation for shared nodes
-        return super.executeNode(node, inputs, context)
-    }
+    return result
   }
 
   private async executeHttpRequestNode(node: Node, inputs: Record<string, any>): Promise<any> {
@@ -87,12 +129,33 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     const headers = data.headers || {}
     const body = data.body || ''
 
-    // Variable interpolation for URL
+    // Variable interpolation for URL with property access support
     let interpolatedUrl = url
     Object.entries(inputs).forEach(([key, value]) => {
-      const varName = `$${key}`
-      interpolatedUrl = interpolatedUrl.replace(new RegExp(`\\${varName}`, 'g'), String(value))
+      // Support property access like $input1.fullName
+      const regex = new RegExp(`\\$${key}(?:\\.([\\w\\.]+))?`, 'g')
+      interpolatedUrl = interpolatedUrl.replace(regex, (match, propertyPath) => {
+        if (propertyPath && typeof value === 'object' && value !== null) {
+          // Access nested property
+          const props = propertyPath.split('.')
+          let result = value
+          for (const prop of props) {
+            result = result?.[prop]
+            if (result === undefined) break
+          }
+          return String(result ?? '')
+        }
+        return String(value)
+      })
     })
+
+    // Convert relative URLs to absolute URLs for server-side fetch
+    let finalUrl = interpolatedUrl
+    if (interpolatedUrl.startsWith('/')) {
+      // Server-side: use localhost
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+      finalUrl = `${baseUrl}${interpolatedUrl}`
+    }
 
     const options: RequestInit = {
       method,
@@ -112,7 +175,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       options.body = interpolatedBody
     }
 
-    const response = await fetch(interpolatedUrl, options)
+    const response = await fetch(finalUrl, options)
     const result = await response.json()
     return result
   }
@@ -149,12 +212,16 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     context: ExecutionContext
   ): Promise<any> {
     const data = node.data as any
-    const modelId = data.model || 'gemini-2.5-flash-image'
-
-    // Google Gemini for image generation
-    const model = google(modelId)
+    const modelId = data.model || 'gemini-2.0-flash-exp'
 
     const prompt = inputs.input1 || ''
+
+    // Use createGoogleGenerativeAI with custom API key
+    if (!context.apiKeys.google) {
+      throw new Error('Google API key required for image generation')
+    }
+    const googleClient = createGoogleGenerativeAI({ apiKey: context.apiKeys.google })
+    const model = googleClient(modelId)
 
     const result = await generateText({
       model,
@@ -209,8 +276,14 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
 
     const input = inputs.input1 || ''
 
+    // Use createOpenAI with custom API key
+    if (!context.apiKeys.openai) {
+      throw new Error('OpenAI API key required for embedding model')
+    }
+    const openaiClient = createOpenAI({ apiKey: context.apiKeys.openai })
+
     const result = await embed({
-      model: openai.embedding(modelId),
+      model: openaiClient.embedding(modelId),
       value: String(input),
     })
 
@@ -224,13 +297,22 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
   ): Promise<any> {
     const data = node.data as any
     const modelId = data.model || 'openai/gpt-4o-mini'
-    const schema = data.schema || {}
 
     const model = this.getModel(modelId, context.apiKeys)
     const prompt = inputs.input1 || ''
 
+    // Parse schema if it's a JSON string
+    let schemaDefinition = data.schema
+    if (typeof schemaDefinition === 'string') {
+      try {
+        schemaDefinition = JSON.parse(schemaDefinition)
+      } catch (e) {
+        throw new Error(`Failed to parse schema JSON: ${e}`)
+      }
+    }
+
     // Build Zod schema from the schema definition
-    const zodSchema = z.object(schema)
+    const zodSchema = this.convertToZodSchema(schemaDefinition)
 
     const result = await generateObject({
       model,
@@ -239,6 +321,110 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     })
 
     return JSON.stringify(result.object)
+  }
+
+  /**
+   * Convert JSON schema definition to Zod schema
+   * Handles types: "string", "number", "boolean", ["string"], [{...}], {...}
+   */
+  private convertToZodSchema(definition: any): any {
+    if (typeof definition === 'string') {
+      // Simple type definition: "string", "number", "boolean"
+      if (definition === 'string') return z.string()
+      if (definition === 'number') return z.number()
+      if (definition === 'boolean') return z.boolean()
+
+      // Enum definition: "HIGH | MEDIUM | LOW"
+      if (definition.includes('|')) {
+        const values = definition.split('|').map((v: string) => v.trim())
+        return z.enum(values as [string, ...string[]])
+      }
+
+      return z.string() // fallback
+    }
+
+    if (Array.isArray(definition)) {
+      // Array definition: ["string"] or [{...}]
+      if (definition.length === 0) {
+        return z.array(z.any())
+      }
+
+      const itemSchema = this.convertToZodSchema(definition[0])
+      return z.array(itemSchema)
+    }
+
+    if (typeof definition === 'object' && definition !== null) {
+      // Object definition: { key: type, ... }
+      const shape: Record<string, any> = {}
+
+      for (const [key, value] of Object.entries(definition)) {
+        shape[key] = this.convertToZodSchema(value)
+      }
+
+      return z.object(shape)
+    }
+
+    return z.any() // fallback
+  }
+
+  private async executePromptNode(node: Node, inputs: Record<string, any>): Promise<any> {
+    const data = node.data as any
+    let template = data.prompt || ''
+
+    // For GitHub Scanner workflow, enhance inputs with execution results
+    // This allows prompt nodes to access upstream data even after conditional branching
+    if (this.workflowId === 'github-security-scanner') {
+      const enhancedInputs: Record<string, any> = { ...inputs }
+
+      // Map execution results to input1, input2, input3 based on GitHub Scanner structure
+      if (this.executionResults.has('extract-repo')) {
+        enhancedInputs.input1 = this.executionResults.get('extract-repo')
+      }
+      if (this.executionResults.has('calculate-score')) {
+        enhancedInputs.input2 = this.executionResults.get('calculate-score')
+      }
+      if (this.executionResults.has('fetch-metadata')) {
+        enhancedInputs.input3 = this.executionResults.get('fetch-metadata')
+      }
+
+      console.log('[TopFlowEngine] Prompt node execution:', {
+        nodeId: node.id,
+        originalInputs: inputs,
+        enhancedInputInput1: enhancedInputs.input1,
+        enhancedInputInput2: enhancedInputs.input2,
+        enhancedInputInput3Keys: enhancedInputs.input3 ? Object.keys(enhancedInputs.input3) : []
+      })
+
+      // Perform variable interpolation with enhanced inputs
+      // Support both simple variables ($input1) and property access ($input1.fullName)
+      Object.entries(enhancedInputs).forEach(([key, value]) => {
+        // Property access pattern: $input1.property.nested
+        const regex = new RegExp(`\\$${key}(?:\\.([\\w\\.]+))?`, 'g')
+        template = template.replace(regex, (match, propertyPath) => {
+          if (propertyPath && typeof value === 'object' && value !== null) {
+            // Access nested property
+            const props = propertyPath.split('.')
+            let result = value
+            for (const prop of props) {
+              result = result?.[prop]
+              if (result === undefined) break
+            }
+            return String(result ?? '')
+          }
+          return String(value ?? '')
+        })
+      })
+
+      return template
+    }
+
+    // For other workflows, use standard variable interpolation
+    Object.entries(inputs).forEach(([key, value]) => {
+      const varName = `$${key}`
+      template = template.replace(new RegExp(`\\${varName}`, 'g'), String(value ?? ''))
+    })
+
+    return template
   }
 
   private async executeToolNode(node: Node, inputs: Record<string, any>): Promise<any> {
@@ -256,6 +442,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
 
   /**
    * Get AI model instance based on provider and API keys
+   * Wraps models with v2 spec compatibility shim for AI SDK 5
    */
   private getModel(modelId: string, apiKeys: Record<string, string>) {
     const [provider, model] = modelId.split('/')
@@ -263,22 +450,54 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     switch (provider) {
       case 'openai':
         if (!apiKeys.openai) throw new Error('OpenAI API key not configured')
-        return openai(model)
+        const openaiClient = createOpenAI({ apiKey: apiKeys.openai })
+        const openaiModel = openaiClient(model || 'gpt-4o-mini')
+        return this.wrapToSpecV2(openaiModel, provider, model || 'gpt-4o-mini')
 
       case 'anthropic':
         if (!apiKeys.anthropic) throw new Error('Anthropic API key not configured')
-        return anthropic(model)
+        const anthropicClient = createAnthropic({ apiKey: apiKeys.anthropic })
+        const anthropicModel = anthropicClient(model || 'claude-3-5-sonnet-20241022')
+        return this.wrapToSpecV2(anthropicModel, provider, model || 'claude-3-5-sonnet-20241022')
 
       case 'google':
         if (!apiKeys.google) throw new Error('Google API key not configured')
-        return google(model)
+        const googleClient = createGoogleGenerativeAI({ apiKey: apiKeys.google })
+        const googleModel = googleClient(model || 'gemini-1.5-flash')
+        return this.wrapToSpecV2(googleModel, provider, model || 'gemini-1.5-flash')
 
       case 'groq':
         if (!apiKeys.groq) throw new Error('Groq API key not configured')
-        return groq(model)
+        const groqClient = createGroq({ apiKey: apiKeys.groq })
+        const groqModel = groqClient(model || 'llama-3.3-70b-versatile')
+        return this.wrapToSpecV2(groqModel, provider, model || 'llama-3.3-70b-versatile')
 
       default:
         throw new Error(`Unknown model provider: ${provider}`)
+    }
+  }
+
+  /**
+   * Wrap model to report v2 spec for AI SDK 5 compatibility
+   * This prevents "Unsupported model version v3" errors
+   */
+  private wrapToSpecV2(model: any, provider: string, modelId: string) {
+    if (!model || typeof model !== 'object') {
+      throw new Error('Invalid language model instance')
+    }
+
+    const base = model as any
+    return {
+      specificationVersion: 'v2',
+      provider,
+      modelId,
+      supportedUrls: base.supportedUrls,
+      async doGenerate(options: any) {
+        return base.doGenerate(options)
+      },
+      async doStream(options: any) {
+        return base.doStream(options)
+      },
     }
   }
 }

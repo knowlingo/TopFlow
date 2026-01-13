@@ -13,11 +13,12 @@ import { getRepoAnalysis, type RepoAnalysis } from "@/lib/demo-data/github-repos
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { repo: string[] } }
+  { params }: { params: Promise<{ repo: string[] }> }
 ) {
   try {
-    // Parse repository path from URL segments
-    const repoPath = params.repo.join("/")
+    // Parse repository path from URL segments (Next.js 15 requires awaiting params)
+    const resolvedParams = await params
+    const repoPath = resolvedParams.repo.join("/")
 
     // Validate repository path format (owner/repo)
     if (!repoPath || !repoPath.includes("/")) {

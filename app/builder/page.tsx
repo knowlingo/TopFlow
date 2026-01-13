@@ -194,7 +194,7 @@ Format: Professional summary with context and recommendations.`,
     type: "textModel",
     position: { x: 1700, y: 300 },
     data: {
-      model: "openai/gpt-4o",
+      model: "openai/gpt-4o-mini",
       temperature: 0.3,
       maxTokens: 800,
     },
@@ -717,24 +717,40 @@ export default function AgentBuilder(): ReactElement {
     const templateId = searchParams.get("template")
     const repoParam = searchParams.get("repo")
 
+    console.log('[Builder] URL params:', { templateId, repoParam })
+
     if (templateId && !currentWorkflow) {
       const templates = WorkflowStorage.getTemplates()
-      const template = templates.find((t) => t.id === templateId)
-      if (template) {
-        handleUseTemplate(template)
+      let template = templates.find((t) => t.id === templateId)
 
-        // Pre-fill start node with repo parameter (GitHub Scanner only)
+      if (template) {
+        // Pre-fill start node with repo parameter BEFORE loading template (GitHub Scanner only)
         if (templateId === "github-security-scanner" && repoParam) {
-          setTimeout(() => {
-            setNodes((nds) =>
-              nds.map((node) =>
-                node.type === "start"
-                  ? { ...node, data: { ...node.data, defaultValue: `https://github.com/${repoParam}` } }
-                  : node
-              )
+          console.log('[Builder] Modifying template for repo:', repoParam)
+          const startNodeBefore = template.nodes.find(n => n.type === "start")
+          console.log('[Builder] Start node BEFORE:', JSON.stringify(startNodeBefore?.data, null, 2))
+
+          // Clone template and update start node
+          template = {
+            ...template,
+            nodes: template.nodes.map((node) =>
+              node.type === "start"
+                ? {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      defaultValue: `https://github.com/${repoParam}`
+                    }
+                  }
+                : node
             )
-          }, 100)
+          }
+
+          const startNodeAfter = template.nodes.find(n => n.type === "start")
+          console.log('[Builder] Start node AFTER:', JSON.stringify(startNodeAfter?.data, null, 2))
         }
+
+        handleUseTemplate(template)
       }
     }
   }, [searchParams, handleUseTemplate, currentWorkflow])
@@ -999,6 +1015,7 @@ export default function AgentBuilder(): ReactElement {
             onClose={() => setSelectedNode(null)}
             onUpdate={onUpdateNode}
             onDelete={handleDeleteNode}
+            onShowFullReport={() => setShowResultsDialog(true)}
           />
         )}
 

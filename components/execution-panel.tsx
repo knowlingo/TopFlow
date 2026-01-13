@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { Node, Edge } from "@xyflow/react"
-import { Play, X, CheckCircle, XCircle, Loader2, Copy, Download, Eye } from "lucide-react"
+import { Play, X, CheckCircle, XCircle, Loader2, Copy, Download, Eye, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -85,6 +85,38 @@ export function ExecutionPanel({
     onClose()
     if (onShowEndNode) {
       onShowEndNode()
+    }
+  }
+
+  const handleDownloadImage = (imageData: string, index: number) => {
+    try {
+      // Extract base64 data and mime type
+      const [metadata, base64] = imageData.split(',')
+      const mimeType = metadata.match(/:(.*?);/)?.[1] || 'image/png'
+      const extension = mimeType.split('/')[1] || 'png'
+
+      // Convert base64 to blob
+      const byteString = atob(base64)
+      const arrayBuffer = new ArrayBuffer(byteString.length)
+      const uint8Array = new Uint8Array(arrayBuffer)
+
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i)
+      }
+
+      const blob = new Blob([arrayBuffer], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+
+      // Download file
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `generated-image-${Date.now()}-${index + 1}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Failed to download image:", error)
     }
   }
 
@@ -272,6 +304,20 @@ export function ExecutionPanel({
 
   // Check if this is the GitHub Scanner workflow
   const isGitHubScanner = workflowId === "github-security-scanner"
+
+  // Debug logging for GitHub Scanner
+  if (isGitHubScanner && executionComplete) {
+    console.log('[ExecutionPanel] GitHub Scanner execution complete:', {
+      executionComplete,
+      isExecuting,
+      outputKeysCount: Object.keys(workflowOutputs).length,
+      outputKeys: Object.keys(workflowOutputs),
+      hasCalculateScore: !!workflowOutputs["calculate-score"],
+      hasFetchMetadata: !!workflowOutputs["fetch-metadata"],
+      hasExtractActions: !!workflowOutputs["extract-actions"],
+      repository
+    })
+  }
 
   return (
     <aside className="absolute right-0 top-0 z-10 h-full w-full border-l border-border bg-card md:relative md:w-96">
@@ -553,6 +599,75 @@ System: TopFlow GDPR Workflow Engine
                         <p className="text-sm font-medium text-foreground">{getNodeLabel(result.nodeId)}</p>
                         {result.error ? (
                           <p className="text-xs text-destructive">{result.error}</p>
+                        ) : result.type === "imageGeneration" && result.output ? (
+                          (() => {
+                            // Handle different image output formats
+                            let imageArray: string[] = []
+
+                            if (Array.isArray(result.output)) {
+                              imageArray = result.output
+                            } else if (typeof result.output === 'object' && result.output.images) {
+                              imageArray = result.output.images
+                            } else if (typeof result.output === 'string') {
+                              imageArray = [result.output]
+                            }
+
+                            // Convert base64 strings to data URLs if needed
+                            imageArray = imageArray.map((img: string) => {
+                              if (typeof img !== 'string') return ''
+                              // If already a data URL, return as-is
+                              if (img.startsWith('data:')) return img
+                              // If raw base64, add data URL prefix
+                              return `data:image/png;base64,${img}`
+                            }).filter(Boolean)
+
+                            if (imageArray.length === 0) {
+                              // No valid images, show raw output
+                              return (
+                                <div className="rounded bg-background p-2">
+                                  <pre className="max-h-32 overflow-auto text-xs text-muted-foreground">
+                                    {JSON.stringify(result.output, null, 2)}
+                                  </pre>
+                                </div>
+                              )
+                            }
+
+                            return (
+                              <div className="space-y-2">
+                                {imageArray.map((imageDataUrl: string, idx: number) => (
+                                  <div key={idx} className="space-y-1.5">
+                                    <div className="rounded bg-background/90 border border-border/30 p-2">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <span className="text-xs font-medium text-muted-foreground">Image {idx + 1}</span>
+                                      </div>
+                                      <img
+                                        src={imageDataUrl}
+                                        alt={`Generated image ${idx + 1}`}
+                                        className="w-full rounded border border-border/30"
+                                        onError={(e) => {
+                                          console.error("[ExecutionPanel] Image failed to load:", imageDataUrl.substring(0, 50))
+                                          e.currentTarget.src = "/image-error.png"
+                                        }}
+                                      />
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full h-7 text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDownloadImage(imageDataUrl, idx)
+                                      }}
+                                    >
+                                      <Download className="mr-1.5 h-3 w-3" />
+                                      Download Image {idx + 1}
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })()
                         ) : (
                           <div className="rounded bg-background p-2">
                             <pre className="max-h-32 overflow-auto text-xs text-muted-foreground">

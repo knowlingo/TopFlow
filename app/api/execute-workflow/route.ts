@@ -102,25 +102,35 @@ export async function POST(req: Request) {
           nodeCount: nodes.length,
           edgeCount: edges.length,
           hasApiKeys: Object.keys(apiKeys).length > 0,
-          userInputs: userInputs ? Object.keys(userInputs) : []
+          userInputs: userInputs
         })
 
-        // Process user inputs for start nodes
-        let processedNodes = nodes
-        if (userInputs) {
-          processedNodes = nodes.map((node) => {
-            if (node.type === "start" && userInputs[node.id]) {
+        // Process start nodes - use userInputs if provided, otherwise use defaultValue
+        const processedNodes = nodes.map((node) => {
+          if (node.type === "start") {
+            // Priority: userInputs > existing output > defaultValue
+            const outputValue = (userInputs && userInputs[node.id]) || node.data.output || node.data.defaultValue
+
+            if (outputValue) {
+              console.log('[Execute Workflow] Setting start node output:', {
+                nodeId: node.id,
+                hasUserInput: !!(userInputs && userInputs[node.id]),
+                hasExistingOutput: !!node.data.output,
+                hasDefaultValue: !!node.data.defaultValue,
+                outputValue: outputValue
+              })
+
               return {
                 ...node,
                 data: {
                   ...node.data,
-                  output: userInputs[node.id],
+                  output: outputValue,
                 },
               }
             }
-            return node
-          })
-        }
+          }
+          return node
+        })
 
         // ============================================================================
         // Demo Mode Handling
@@ -187,8 +197,16 @@ export async function POST(req: Request) {
 
         const sanitizedNodes = processedNodes.map((node) => ({
           ...node,
-          data: sanitizeInput(node.data, ["code", "schema"]),
+          data: sanitizeInput(node.data, ["code", "schema", "output"]),
         }))
+
+        // Log sanitized start nodes to debug
+        const sanitizedStartNodes = sanitizedNodes.filter(n => n.type === "start")
+        if (sanitizedStartNodes.length > 0) {
+          console.log('[Execute Workflow] Start nodes after sanitization:',
+            sanitizedStartNodes.map(n => ({ id: n.id, output: n.data.output }))
+          )
+        }
 
         // ============================================================================
         // Validation (Cycles, SSRF)
@@ -230,12 +248,22 @@ export async function POST(req: Request) {
           workflowId,
         })
 
+        // Extract start node outputs as initial variables
+        const initialVariables: Record<string, any> = {}
+        sanitizedNodes.forEach((node) => {
+          if (node.type === "start" && node.data.output) {
+            initialVariables[node.id] = node.data.output
+          }
+        })
+
+        console.log('[Execute Workflow] Initial variables:', initialVariables)
+
         const result = await engine.executeWorkflow(
           sanitizedNodes,
           edges,
           {
             apiKeys,
-            variables: {},
+            variables: initialVariables,
           },
           sendUpdate
         )

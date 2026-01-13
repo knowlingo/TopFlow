@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Node } from "@xyflow/react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,24 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel }: Wo
     return initialInputs
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Re-read defaultValues whenever dialog opens or startNodes change
+  useEffect(() => {
+    if (open) {
+      const newInputs: Record<string, string> = {}
+      startNodes.forEach((node) => {
+        console.log('[WorkflowInputDialog] Reading node defaultValue:', {
+          nodeId: node.id,
+          nodeType: node.type,
+          defaultValue: node.data.defaultValue
+        })
+        newInputs[node.id] = node.data.defaultValue || ""
+      })
+      console.log('[WorkflowInputDialog] Final inputs:', newInputs)
+      setInputs(newInputs)
+      setErrors({})
+    }
+  }, [open, startNodes])
 
   const validateInput = (nodeId: string, value: string, inputType: string): string | null => {
     if (!value.trim()) {
