@@ -122,19 +122,43 @@ export function ScannerHero() {
             </div>
           </div>
 
-          {/* Social Proof / Stats */}
+          {/* Social Proof / Stats - ENHANCED */}
           <div className="flex flex-wrap justify-center gap-8 mb-8 text-center">
-            <div>
+            <div className="group hover:scale-105 transition-transform">
               <div className="text-3xl font-bold text-primary">30s</div>
               <div className="text-sm text-muted-foreground">Average Scan Time</div>
             </div>
-            <div>
+            <div className="group hover:scale-105 transition-transform">
               <div className="text-3xl font-bold text-primary">15+</div>
               <div className="text-sm text-muted-foreground">Security Checks</div>
             </div>
-            <div>
+            <div className="group hover:scale-105 transition-transform">
               <div className="text-3xl font-bold text-primary">100%</div>
               <div className="text-sm text-muted-foreground">Free & Open Source</div>
+            </div>
+            <div className="group hover:scale-105 transition-transform">
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                4.2k+
+              </div>
+              <div className="text-sm text-muted-foreground">Repos Scanned</div>
+            </div>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full">
+                <Shield className="h-3 w-3 text-green-500" />
+                Privacy-First Design
+              </span>
+              <span className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full">
+                <Shield className="h-3 w-3 text-blue-500" />
+                No Sign-Up Required
+              </span>
+              <span className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full">
+                <Shield className="h-3 w-3 text-purple-500" />
+                Built by Former CISO
+              </span>
             </div>
           </div>
 

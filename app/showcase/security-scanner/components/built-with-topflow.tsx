@@ -2,8 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Code2, Sparkles, Github, Workflow } from "lucide-react"
-import Image from "next/image"
+import { ArrowRight, Code2, Sparkles, Github, Workflow, Share2 } from "lucide-react"
 
 export function BuiltWithTopFlow() {
   return (
@@ -120,6 +119,42 @@ export function BuiltWithTopFlow() {
                     <ArrowRight className="h-5 w-5" />
                   </a>
                 </Button>
+              </div>
+
+              {/* Viral Sharing Section - NEW */}
+              <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 rounded-lg p-6 border-2 border-primary/20">
+                <h4 className="font-semibold mb-2 text-center">Love This Scanner? Help Us Spread the Word!</h4>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  Every share helps more developers discover security issues and improve their code
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button size="sm" variant="outline" asChild>
+                    <a
+                      href="https://twitter.com/intent/tweet?text=Check%20out%20this%20free%20GitHub%20Security%20Scanner!%20Scans%20any%20repo%20in%2030%20seconds%20with%20OWASP%20checks%2C%20dependency%20analysis%2C%20and%20compliance%20insights.%20%40TopFlowDev%20https%3A%2F%2Ftopflow.dev%2Fshowcase%2Fsecurity-scanner"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share on Twitter
+                    </a>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <a
+                      href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftopflow.dev%2Fshowcase%2Fsecurity-scanner"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share on LinkedIn
+                    </a>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <a href="https://github.com/csupenn/topflow" target="_blank" rel="noopener noreferrer">
+                      <Github className="h-4 w-4 mr-2" />
+                      Star on GitHub
+                    </a>
+                  </Button>
+                </div>
               </div>
 
               {/* Build Your Own */}

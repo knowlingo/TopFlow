@@ -273,21 +273,61 @@ export function ScannerDemo() {
             </Card>
           </div>
 
-          {/* Badge Preview */}
+          {/* Visual Dashboard Preview - NEW */}
+          <div className="mt-8 p-6 bg-gradient-to-br from-primary/5 to-background border-2 border-primary/20 rounded-lg">
+            <h3 className="font-semibold mb-4 text-lg flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Beautiful Security Dashboard
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Every scan generates a comprehensive visual dashboard with shareable badges and social media cards
+            </p>
+            <div className="rounded-lg overflow-hidden border-2 border-border">
+              <img
+                src="/demo-assets/images/github-security-dashboard.webp"
+                alt="GitHub Security Dashboard"
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Live Badge Examples - ENHANCED */}
           <div className="mt-8 p-6 bg-background border rounded-lg">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Auto-Generated Badge
+              Live Auto-Generated Badges
             </h3>
-            <div className="flex items-center gap-4">
-              <img
-                src="https://img.shields.io/badge/Security-A%2B-brightgreen?style=for-the-badge&logo=shield"
-                alt="Security Badge"
-                className="h-7"
-              />
-              <code className="text-xs bg-muted px-3 py-1 rounded flex-1 overflow-x-auto">
-                ![Security Score](https://topflow.dev/api/badge/facebook/react)
-              </code>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get a beautiful security badge for your README that updates automatically
+            </p>
+            <div className="space-y-4">
+              {/* Example badges using our actual API */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="https://topflow.dev/api/badge/facebook/react"
+                    alt="React Security Badge"
+                    className="h-6"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono">facebook/react</span>
+                </div>
+                <code className="text-xs bg-muted px-3 py-2 rounded overflow-x-auto block">
+                  [![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
+                </code>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="https://topflow.dev/api/badge/vercel/next.js"
+                    alt="Next.js Security Badge"
+                    className="h-6"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono">vercel/next.js</span>
+                </div>
+                <code className="text-xs bg-muted px-3 py-2 rounded overflow-x-auto block">
+                  [![Security Score](https://topflow.dev/api/badge/vercel/next.js)](https://topflow.dev/showcase/security-scanner)
+                </code>
+              </div>
             </div>
           </div>
         </div>
