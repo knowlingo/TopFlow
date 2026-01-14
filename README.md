@@ -84,28 +84,55 @@ Powered by [TopFlow](https://topflow.dev) - Secure AI Workflow Platform
 </td>
 <td width="50%">
 
-### 🎯 Shareable Reports
+### 🎯 Shareable Reports & Live Badges
 
 **Export Options**:
 - 📄 Markdown report
 - 📋 JSON data (CI/CD ready)
-- 🏆 Security badges
+- 🏆 **Live security badges** (auto-updating)
 - 🔗 Deep links (pre-filled scanner)
+- 🖼️ **Social media cards** (1200x630px)
 
 **Social Sharing**:
-- 🐦 Twitter (pre-formatted)
-- 💼 LinkedIn (rich text)
-- 📎 One-click copy
+- 🐦 Twitter (with OG images)
+- 💼 LinkedIn (rich preview cards)
+- 📎 One-click badge embed
 
-**Example Badge**:
+**Live Badge API** - Auto-updates daily:
 
-[![Security Score](https://img.shields.io/badge/Security-A+-green)](https://topflow.dev)
+```markdown
+[![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
+```
+[![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
 
 </td>
 </tr>
 </table>
 
-**👉 [Scan Your Repository Now](https://topflow.dev/builder?template=github-security-scanner)**
+**👉 [Try the Interactive Showcase](https://topflow.dev/showcase/security-scanner)** | **[Scan in Builder](https://topflow.dev/builder?template=github-security-scanner)**
+
+---
+
+## 🎨 New: Interactive Showcase Page
+
+Experience the scanner in a beautiful, marketing-focused interface:
+
+**🔗 [topflow.dev/showcase/security-scanner](https://topflow.dev/showcase/security-scanner)**
+
+**What's included**:
+- 🏆 **Competitive Leaderboard** - Compare your repo against top open-source projects
+- 📊 **Visual Dashboard Preview** - See exactly what you'll get
+- 🎯 **Live Badge Examples** - Copy embed codes for Markdown, HTML, RST
+- 📱 **Social Sharing** - Pre-generated Twitter/LinkedIn posts with custom OG images
+- ⚡ **Quick Scan** - Enter any repo URL and get results in 30 seconds
+- 🔐 **Scan My Repos** - OAuth integration to scan your private repositories
+
+**Popular Repo Scores**:
+- facebook/react - **A+** (95/100)
+- vercel/next.js - **A** (92/100)
+- microsoft/vscode - **A** (90/100)
+
+**Challenge**: Think your repo is more secure? Prove it! 🚀
 
 ---
 
@@ -387,9 +414,43 @@ export async function runWorkflow(input: string) {
 
 ---
 
+## 🏆 Live Badge API
+
+Add auto-updating security badges to your README:
+
+```markdown
+[![Security Score](https://topflow.dev/api/badge/OWNER/REPO)](https://topflow.dev/showcase/security-scanner)
+```
+
+**Features**:
+- ✅ Auto-updates every 24 hours
+- ✅ Color-coded by grade (A+ green, B blue, C yellow, D/F red)
+- ✅ In-memory cache for fast response
+- ✅ Supports shields.io-style SVG format
+- ✅ Works in Markdown, HTML, RST
+
+**Example Badges**:
+
+| Repository | Badge |
+|------------|-------|
+| facebook/react | [![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner) |
+| vercel/next.js | [![Security Score](https://topflow.dev/api/badge/vercel/next.js)](https://topflow.dev/showcase/security-scanner) |
+| microsoft/vscode | [![Security Score](https://topflow.dev/api/badge/microsoft/vscode)](https://topflow.dev/showcase/security-scanner) |
+
+**API Endpoint**: `GET /api/badge/:owner/:repo`
+
+---
+
 ## 🚀 Quick Start
 
-### Option 1: Try the GitHub Scanner (30 Seconds)
+### Option 1: Try the Interactive Showcase (Recommended)
+
+```bash
+# Beautiful showcase with leaderboard, examples, and social sharing:
+https://topflow.dev/showcase/security-scanner
+```
+
+### Option 2: Jump Straight to Builder (30 Seconds)
 
 ```bash
 # No installation needed - just click:
