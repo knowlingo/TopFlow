@@ -19,6 +19,7 @@ import {
 import { useState } from "react"
 import { toast } from "sonner"
 import { AnimatedScore } from "@/components/animated-score"
+import { BadgeDisplay } from "@/components/badge-display"
 
 interface GitHubScannerResultsProps {
   outputs: Record<string, any>
@@ -58,6 +59,9 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
 
   // Use actual repo from metadata if using fallback, otherwise use requested repo
   const repoName = (isUsingDefault && metadata.full_name) ? metadata.full_name : (repository || metadata.full_name || "Unknown Repository")
+
+  // Extract owner and repo for badge
+  const [owner = "unknown", repo = "unknown"] = repoName.includes("/") ? repoName.split("/") : ["unknown", "unknown"]
 
   // Get grade color
   const getGradeColor = (grade: string) => {
@@ -227,6 +231,9 @@ Try it yourself: https://topflow.dev/builder?template=github-security-scanner
           </CardContent>
         </Card>
       )}
+
+      {/* Badge Display */}
+      <BadgeDisplay owner={owner} repo={repo} grade={grade} score={score} />
 
       {/* AI Analysis */}
       {aiAnalysis && (
