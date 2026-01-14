@@ -20,6 +20,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { AnimatedScore } from "@/components/animated-score"
 import { BadgeDisplay } from "@/components/badge-display"
+import { ShareResultsCard } from "@/components/share-results-card"
 
 interface GitHubScannerResultsProps {
   outputs: Record<string, any>
@@ -62,6 +63,10 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
 
   // Extract owner and repo for badge
   const [owner = "unknown", repo = "unknown"] = repoName.includes("/") ? repoName.split("/") : ["unknown", "unknown"]
+
+  // Extract vulnerability counts for sharing
+  const vulnerabilities = scoreData.breakdown?.vulnerabilities?.critical || 0
+  const vulnerableDeps = scoreData.breakdown?.dependencies?.vulnerable || 0
 
   // Get grade color
   const getGradeColor = (grade: string) => {
@@ -234,6 +239,16 @@ Try it yourself: https://topflow.dev/builder?template=github-security-scanner
 
       {/* Badge Display */}
       <BadgeDisplay owner={owner} repo={repo} grade={grade} score={score} />
+
+      {/* Share Results */}
+      <ShareResultsCard
+        owner={owner}
+        repo={repo}
+        grade={grade}
+        score={score}
+        vulnerabilities={vulnerabilities}
+        vulnerableDeps={vulnerableDeps}
+      />
 
       {/* AI Analysis */}
       {aiAnalysis && (
