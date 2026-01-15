@@ -136,6 +136,75 @@ Experience the scanner in a beautiful, marketing-focused interface:
 
 ---
 
+## 🚀 Coming Soon: Real Vulnerability Data with Google OSV
+
+We're integrating **Google's Open Source Vulnerabilities (OSV) database** to provide **real-time CVE data** for scanned repositories!
+
+**What's changing** (launching soon):
+
+### 📊 Enhanced Vulnerability Detection
+- ✅ **Real CVE data** from Google OSV (authoritative vulnerability database)
+- ✅ **Multi-language support**: npm, PyPI, Go, Rust, Maven, Ruby, PHP (7 ecosystems)
+- ✅ **Commit hash querying**: Scan entire repos at specific commits (faster!)
+- ✅ **Batch vulnerability queries**: Performance-optimized scanning
+- ✅ **CVSS severity scoring**: Critical, High, Medium, Low classifications
+
+### 🔧 OSV Scanner as Reusable Node ⭐
+This is the **big one** - transforming the scanner into a composable platform component:
+
+```
+🎯 "Build Your Own Snyk" Vision
+┌─────────────────────────────────────────────┐
+│  OSV Scanner Node (new!)                    │
+│  ├─ Input Modes:                            │
+│  │  1. Repository URL → Auto-detect manifests│
+│  │  2. Manifest content → Direct scan        │
+│  │  3. Commit hash → Full repo scan         │
+│  ├─ Options:                                │
+│  │  • Severity filter (critical/high/medium)│
+│  │  • Include dev dependencies toggle       │
+│  │  • Include unfixed vulnerabilities       │
+│  └─ Available in Node Palette → Security    │
+└─────────────────────────────────────────────┘
+```
+
+**Why This Matters**:
+- 🔄 **Composable workflows**: Use OSV Scanner node in ANY workflow, not just GitHub Scanner
+- 🛠️ **Custom security tools**: Build your own Snyk/Dependabot with visual workflows
+- 🔗 **Platform vision**: Example workflows users can build:
+  - CI/CD Security: OSV Scanner → Slack notification if critical vulns
+  - Multi-Repo Audit: Loop through repos → OSV Scanner → Aggregate dashboard
+  - Dependency SBOM: OSV Scanner → Generate report → Email
+
+### 🔐 Private Repository Support
+- ✅ **GitHub Personal Access Token (PAT)** field in settings
+- ✅ **Authenticated API calls** for private repos
+- ✅ **Client-side only**: Token stored in localStorage (never on servers)
+- ✅ **Privacy-preserving**: No repo cloning, uses GitHub API
+
+### 📚 Enhanced Documentation
+- ✅ `docs/OSV-INTEGRATION.md` - Technical integration details
+- ✅ `docs/API.md` - Public API documentation for developers
+- ✅ "Powered by Google OSV" attribution in scanner UI
+
+**Timeline**: Post-launch implementation (~21 hours)
+
+**Success Criteria**:
+- 80%+ of scans return real OSV data (vs demo data)
+- OSV Scanner node used in 3+ non-GitHub-Scanner workflows
+- Support 4+ language ecosystems live
+
+**Why OSV?**
+- ✅ **Authoritative**: Google's comprehensive vulnerability database
+- ✅ **Free**: Open-source, no API costs
+- ✅ **Complete**: Covers 13+ package ecosystems
+- ✅ **Fast**: Query by commit hash (no manifest parsing needed)
+- ✅ **Trusted**: Used by GitHub, npm, and major platforms
+
+**Demo mode will remain available** - Test instantly without API keys, get real data when you're ready!
+
+---
+
 ## 🔒 Built by Former CISO - Security You Can Trust
 
 This isn't just another GitHub scanner. It's built with **enterprise-grade security architecture** by someone who understands the stakes.

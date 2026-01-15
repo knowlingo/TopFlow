@@ -18,6 +18,53 @@ export function ScannerDemo() {
     <div className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
+          {/* Coming Soon Banner - OSV Integration */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-background border-2 border-primary/30 rounded-lg">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/20 rounded-full">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                  🚀 Coming Soon: Real Vulnerability Data
+                  <Badge className="bg-primary">Launching Next</Badge>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  We're integrating <strong>Google's Open Source Vulnerabilities (OSV) database</strong> to provide real-time CVE data for all your scans!
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <strong>Real CVE data</strong> from Google OSV
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <strong>7 ecosystems</strong>: npm, PyPI, Go, Rust, Maven, Ruby, PHP
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <strong>OSV Scanner node</strong>: Reusable in any workflow
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5" />
+                    <div>
+                      <strong>Private repo support</strong> with GitHub PAT
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  💡 <strong>Build Your Own Snyk</strong>: The OSV Scanner will be available as a composable node in the workflow builder, enabling custom security workflows!
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Section Header */}
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">See It In Action</h2>

@@ -52,6 +52,44 @@ export function BuiltWithTopFlow() {
                 </ul>
               </div>
 
+              {/* Coming Soon: Composable Security Workflows */}
+              <div className="bg-gradient-to-br from-primary/10 to-background rounded-lg p-6 border-2 border-primary/30">
+                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Coming Soon: Build Your Own Security Tools
+                </h3>
+                <p className="text-muted-foreground mb-4 text-sm">
+                  We're transforming the scanner into a <strong className="text-foreground">composable platform</strong>.
+                  Soon, you'll be able to use the OSV Scanner as a reusable node in ANY workflow!
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                  <div className="p-3 bg-background/50 rounded border">
+                    <div className="font-semibold mb-1">CI/CD Security</div>
+                    <div className="text-xs text-muted-foreground">
+                      OSV Scanner → Slack notification if critical vulns
+                    </div>
+                  </div>
+                  <div className="p-3 bg-background/50 rounded border">
+                    <div className="font-semibold mb-1">Multi-Repo Audit</div>
+                    <div className="text-xs text-muted-foreground">
+                      Loop → OSV Scanner → Aggregate dashboard
+                    </div>
+                  </div>
+                  <div className="p-3 bg-background/50 rounded border">
+                    <div className="font-semibold mb-1">SBOM Generation</div>
+                    <div className="text-xs text-muted-foreground">
+                      OSV Scanner → Generate report → Email
+                    </div>
+                  </div>
+                  <div className="p-3 bg-background/50 rounded border">
+                    <div className="font-semibold mb-1">Custom Workflows</div>
+                    <div className="text-xs text-muted-foreground">
+                      Build your own Snyk with drag-and-drop
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* How This Scanner Works */}
               <div className="bg-background/50 rounded-lg p-6 border">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
