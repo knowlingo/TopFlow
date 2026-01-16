@@ -111,7 +111,8 @@ export function ScannerHero() {
                 </Button>
               ))}
             </div>
-            {/* OAuth Button */}
+            {/* Temporarily hidden - will add OAuth Week 2 */}
+            {/*
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 border-t" />
               <span className="text-sm text-muted-foreground">or</span>
@@ -120,6 +121,7 @@ export function ScannerHero() {
             <div className="flex justify-center">
               <ScanMyReposDialog />
             </div>
+            */}
           </div>
 
           {/* Social Proof / Stats - ENHANCED */}
