@@ -37,6 +37,7 @@ next-env.d.ts
 /docs/reference
 /docs/repositioning-proposal
 /docs/v0-documentation
+/docs/launch-materials
 
 # private project instructions (not for public repo)
 CLAUDE.md
