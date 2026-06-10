@@ -85,7 +85,8 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
 
     if (Array.isArray(data.output)) {
       return data.output
-        .filter((item) => typeof item === "string")
+        .filter((item): item is string => typeof item === "string")
+        .filter((item) => item.startsWith("data:image/") || item.startsWith("/") || /^[A-Za-z0-9+/=]{20,}/.test(item))
         .map(convertToDataUrl)
         .filter(Boolean)
     }

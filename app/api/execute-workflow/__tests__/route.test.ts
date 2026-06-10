@@ -21,6 +21,7 @@ jest.mock('@charliesu/workflow-core', () => ({
 // Mock demo mode utilities
 jest.mock('@/lib/demo-mode', () => ({
   shouldUseDemoMode: jest.fn(() => false),
+  hasDemoData: jest.fn(() => false),
 }))
 
 jest.mock('@/lib/demo-data', () => ({
@@ -31,13 +32,14 @@ jest.mock('@/lib/demo-data', () => ({
 import { TopFlowExecutionEngine } from '@/lib/topflow-execution-engine'
 import { validateWorkflow, validateApiKeys } from '@charliesu/workflow-core'
 import { shouldUseDemoMode } from '@/lib/demo-mode'
-import { getDemoWorkflowResult } from '@/lib/demo-data'
+import { getDemoWorkflowResult, hasDemoData as legacyHasDemoData } from '@/lib/demo-data'
 
 const mockTopFlowExecutionEngine = TopFlowExecutionEngine as jest.MockedClass<typeof TopFlowExecutionEngine>
 const mockValidateWorkflow = validateWorkflow as jest.MockedFunction<typeof validateWorkflow>
 const mockValidateApiKeys = validateApiKeys as jest.MockedFunction<typeof validateApiKeys>
 const mockShouldUseDemoMode = shouldUseDemoMode as jest.MockedFunction<typeof shouldUseDemoMode>
 const mockGetDemoWorkflowResult = getDemoWorkflowResult as jest.MockedFunction<typeof getDemoWorkflowResult>
+const mockLegacyHasDemoData = legacyHasDemoData as jest.MockedFunction<typeof legacyHasDemoData>
 
 describe('POST /api/execute-workflow', () => {
   let mockNodes: Node[]
@@ -57,6 +59,7 @@ describe('POST /api/execute-workflow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockLegacyHasDemoData.mockReturnValue(false)
 
     // Create simple test workflow
     mockNodes = [
@@ -243,6 +246,7 @@ describe('POST /api/execute-workflow', () => {
 
     it('should skip API key validation in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
+      mockLegacyHasDemoData.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
         templateId: 'test-template',
         workflowName: 'Test Workflow',
@@ -288,6 +292,7 @@ describe('POST /api/execute-workflow', () => {
   describe('Demo Mode', () => {
     it('should stream demo results when in demo mode', async () => {
       mockShouldUseDemoMode.mockReturnValue(true)
+      mockLegacyHasDemoData.mockReturnValue(true)
       mockGetDemoWorkflowResult.mockReturnValue({
         templateId: 'test-template',
         workflowName: 'Test Workflow',

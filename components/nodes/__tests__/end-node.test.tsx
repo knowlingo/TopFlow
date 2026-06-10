@@ -314,7 +314,7 @@ describe('EndNode', () => {
     })
 
     it('should show output in scrollable container for text', () => {
-      const longOutput = 'A'.repeat(1000)
+      const longOutput = 'This is a long text output. '.repeat(50)
       const { container } = renderNode({ output: longOutput })
 
       const scrollable = container.querySelector('.overflow-y-auto')
