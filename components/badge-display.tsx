@@ -19,7 +19,10 @@ export function BadgeDisplay({ owner, repo, grade, score }: BadgeDisplayProps) {
   const { toast } = useToast()
 
   const repoPath = `${owner}/${repo}`
+  // Absolute URL for copy-paste embed snippets (go into external READMEs)
   const badgeUrl = `https://topflow.dev/api/badge/${owner}/${repo}`
+  // Relative URL for in-app preview/download/view (resolves to current origin: works locally and in prod)
+  const badgeSrc = `/api/badge/${owner}/${repo}`
   const scanUrl = `https://topflow.dev/builder?template=github-security-scanner&repo=${encodeURIComponent(repoPath)}`
 
   const markdownCode = `[![Security Score](${badgeUrl})](${scanUrl})`
@@ -46,7 +49,7 @@ export function BadgeDisplay({ owner, repo, grade, score }: BadgeDisplayProps) {
 
   const downloadBadge = () => {
     const link = document.createElement("a")
-    link.href = badgeUrl
+    link.href = badgeSrc
     link.download = `security-badge-${owner}-${repo}.svg`
     link.click()
   }
@@ -66,7 +69,7 @@ export function BadgeDisplay({ owner, repo, grade, score }: BadgeDisplayProps) {
       <CardContent className="space-y-4">
         {/* Badge Preview */}
         <div className="flex items-center justify-center p-6 bg-muted/50 rounded-lg">
-          <img src={badgeUrl} alt="Security Badge" className="h-5" />
+          <img src={badgeSrc} alt="Security Badge" className="h-5" />
         </div>
 
         {/* Embed Codes */}
@@ -150,7 +153,7 @@ export function BadgeDisplay({ owner, repo, grade, score }: BadgeDisplayProps) {
             Download SVG
           </Button>
           <Button variant="outline" className="flex-1" asChild>
-            <a href={badgeUrl} target="_blank" rel="noopener noreferrer">
+            <a href={badgeSrc} target="_blank" rel="noopener noreferrer">
               View Badge
             </a>
           </Button>

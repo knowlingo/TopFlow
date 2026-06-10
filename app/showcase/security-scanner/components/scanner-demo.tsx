@@ -352,7 +352,7 @@ export function ScannerDemo() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src="https://topflow.dev/api/badge/facebook/react"
+                    src="/api/badge/facebook/react"
                     alt="React Security Badge"
                     className="h-6"
                   />
@@ -365,7 +365,7 @@ export function ScannerDemo() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src="https://topflow.dev/api/badge/vercel/next.js"
+                    src="/api/badge/vercel/next.js"
                     alt="Next.js Security Badge"
                     className="h-6"
                   />

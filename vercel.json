@@ -48,7 +48,7 @@
   "redirects": [
     {
       "source": "/github",
-      "destination": "https://github.com/charliesu/topflow",
+      "destination": "https://github.com/csupenn/topflow",
       "permanent": false
     }
   ],

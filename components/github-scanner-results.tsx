@@ -20,7 +20,6 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { AnimatedScore } from "@/components/animated-score"
 import { BadgeDisplay } from "@/components/badge-display"
-import { ShareResultsCard } from "@/components/share-results-card"
 
 interface GitHubScannerResultsProps {
   outputs: Record<string, any>
@@ -59,14 +58,18 @@ export function GitHubScannerResults({ outputs, repository }: GitHubScannerResul
   const requestedRepo = securityData._requestedRepo
 
   // Use actual repo from metadata if using fallback, otherwise use requested repo
-  const repoName = (isUsingDefault && metadata.full_name) ? metadata.full_name : (repository || metadata.full_name || "Unknown Repository")
+  const rawRepo = (isUsingDefault && metadata.full_name) ? metadata.full_name : (repository || metadata.full_name || "Unknown Repository")
 
-  // Extract owner and repo for badge
-  const [owner = "unknown", repo = "unknown"] = repoName.includes("/") ? repoName.split("/") : ["unknown", "unknown"]
-
-  // Extract vulnerability counts for sharing
-  const vulnerabilities = scoreData.breakdown?.vulnerabilities?.critical || 0
-  const vulnerableDeps = scoreData.breakdown?.dependencies?.vulnerable || 0
+  // Normalize to "owner/repo" from any input format (full URL, github.com/owner/repo, or owner/repo)
+  const repoParts = rawRepo
+    .replace(/^https?:\/\//i, "")
+    .replace(/^github\.com\//i, "")
+    .replace(/\.git$/i, "")
+    .split("/")
+    .filter(Boolean)
+  const owner = repoParts[0] || "unknown"
+  const repo = repoParts[1] || "unknown"
+  const repoName = repoParts.length >= 2 ? `${owner}/${repo}` : rawRepo
 
   // Get grade color
   const getGradeColor = (grade: string) => {
@@ -239,16 +242,6 @@ Try it yourself: https://topflow.dev/builder?template=github-security-scanner
 
       {/* Badge Display */}
       <BadgeDisplay owner={owner} repo={repo} grade={grade} score={score} />
-
-      {/* Share Results */}
-      <ShareResultsCard
-        owner={owner}
-        repo={repo}
-        grade={grade}
-        score={score}
-        vulnerabilities={vulnerabilities}
-        vulnerableDeps={vulnerableDeps}
-      />
 
       {/* AI Analysis */}
       {aiAnalysis && (

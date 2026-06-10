@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Shield, ArrowRight, Github } from "lucide-react"
-import { ScanMyReposDialog } from "@/components/scan-my-repos-dialog"
 
 export function ScannerHero() {
   const [repoUrl, setRepoUrl] = useState("")
@@ -111,17 +110,6 @@ export function ScannerHero() {
                 </Button>
               ))}
             </div>
-            {/* Temporarily hidden - will add OAuth Week 2 */}
-            {/*
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 border-t" />
-              <span className="text-sm text-muted-foreground">or</span>
-              <div className="flex-1 border-t" />
-            </div>
-            <div className="flex justify-center">
-              <ScanMyReposDialog />
-            </div>
-            */}
           </div>
 
           {/* Social Proof / Stats - ENHANCED */}
@@ -137,12 +125,6 @@ export function ScannerHero() {
             <div className="group hover:scale-105 transition-transform">
               <div className="text-3xl font-bold text-primary">100%</div>
               <div className="text-sm text-muted-foreground">Free & Open Source</div>
-            </div>
-            <div className="group hover:scale-105 transition-transform">
-              <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
-                4.2k+
-              </div>
-              <div className="text-sm text-muted-foreground">Repos Scanned</div>
             </div>
           </div>
 

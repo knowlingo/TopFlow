@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateSecurityBadge, generateFlatBadge, getGradeFromScore } from "@/lib/badge-generator"
-import { getGitHubScannerMockData } from "@/lib/demo-data/github-repos"
+import { getRepoAnalysis } from "@/lib/demo-data/github-repos"
 
 // In-memory cache for badge data (upgrade to Redis/KV for production)
 const badgeCache = new Map<string, { grade: string; score: number; timestamp: number }>()
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       score = cached.score
     } else {
       // Try to get demo data for this repo
-      const demoData = getGitHubScannerMockData(repoPath)
+      const demoData = getRepoAnalysis(repoPath)
 
       if (demoData) {
         // Found demo data
