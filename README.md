@@ -125,7 +125,6 @@ Experience the scanner in a beautiful, marketing-focused interface:
 - 🎯 **Live Badge Examples** - Copy embed codes for Markdown, HTML, RST
 - 📱 **Social Sharing** - Pre-generated Twitter/LinkedIn posts with custom OG images
 - ⚡ **Quick Scan** - Enter any repo URL and get results in 30 seconds
-- 🔐 **Scan My Repos** - OAuth integration to scan your private repositories
 
 **Popular Repo Scores**:
 - facebook/react - **A+** (95/100)
@@ -754,10 +753,6 @@ Your star helps other security teams discover these tools.
 <a href="https://github.com/csupenn/topflow">
 <img src="https://img.shields.io/github/stars/csupenn/topflow?style=social" alt="GitHub stars">
 </a>
-
-<br/>
-
-[![Star History Chart](https://api.star-history.com/svg?repos=csupenn/topflow&type=Date)](https://star-history.com/#csupenn/topflow&Date)
 
 </div>
 
