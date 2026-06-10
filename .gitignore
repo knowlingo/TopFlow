@@ -42,6 +42,8 @@ next-env.d.ts
 # private project instructions (not for public repo)
 CLAUDE.md
 AGENTS.md
+claude.md
+agents.md
 .claude/
 
 # backup and temporary files

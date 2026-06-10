@@ -10,9 +10,9 @@
 
 <img src="public/demo-assets/images/github-security-dashboard.webp" alt="GitHub Security Scanner Dashboard" width="100%">
 
-**Analyze any GitHub repository's security posture in 30 seconds**
+**Analyze a GitHub repository's security posture in 30 seconds.**
 
-Powered by [TopFlow](https://topflow.dev) - Secure AI Workflow Platform
+Powered by [TopFlow](https://topflow.dev), a secure AI workflow platform.
 
 [🎯 Scan facebook/react](https://topflow.dev/builder?template=github-security-scanner&repo=facebook/react) • [📖 How It Works](https://topflow.dev/docs) • [⭐ Star on GitHub](https://github.com/csupenn/topflow)
 
@@ -20,38 +20,16 @@ Powered by [TopFlow](https://topflow.dev) - Secure AI Workflow Platform
 
 ---
 
-## 🔍 Live Example: facebook/react
+## 🔍 Example Scan: facebook/react
 
 **Score**: 95/100 (Grade: **A+**) ⭐
 
-<table>
-<tr>
-<td width="50%">
-
-**✅ Security Excellence**
-- Active security policy & code scanning
-- Dependabot monitoring enabled
-- Branch protection rules enforced
-- Secret scanning active
-
-**📊 Vulnerability Status**
-- 0 critical, 1 high, 3 medium, 7 low
-
-</td>
-<td width="50%">
-
-**🎯 OWASP Compliance**
-- 8 of 10 controls passing
-- Code coverage: 87%
-- Documentation: 92%
-
-**🔐 Best Practices**
-- GPG commit signing recommended
-- SAST scanning suggested
-
-</td>
-</tr>
-</table>
+| Area | Result |
+|------|--------|
+| Security controls | Security policy, code scanning, Dependabot, branch protection, and secret scanning detected |
+| Vulnerabilities | 0 critical, 1 high, 3 medium, 7 low |
+| OWASP coverage | 8 of 10 controls passing |
+| Recommendations | Add GPG commit signing and expand SAST coverage |
 
 **Try it yourself** → [Scan any repo in 30 seconds](https://topflow.dev/builder?template=github-security-scanner)
 
@@ -61,146 +39,62 @@ Powered by [TopFlow](https://topflow.dev) - Secure AI Workflow Platform
 
 ## 🚀 What You Get in 30 Seconds
 
-<table>
-<tr>
-<td width="50%">
+| Capability | What it includes |
+|------------|------------------|
+| Security analysis | OWASP Top 10 checks, vulnerability severity summary, dependency and license risk review, code quality signals, and branch protection checks |
+| Actionable guidance | Prioritized recommendations, effort estimates, and impact notes for the most important fixes |
+| Shareable outputs | Markdown reports, JSON data, pre-filled scan links, social cards, and auto-updating security badges |
+| Badge API | Daily-updated badges for README files, docs, and security dashboards |
 
-### 📊 Comprehensive Security Analysis
-
-**Automated Checks**:
-- ✅ OWASP Top 10 compliance
-- ✅ Vulnerability detection (all severities)
-- ✅ Dependency audit & license risks
-- ✅ Security best practices scorecard
-- ✅ Code quality metrics
-- ✅ Branch protection analysis
-
-**AI-Powered Insights**:
-- Contextualized recommendations
-- Priority-ranked action items
-- Effort estimates for fixes
-- Impact analysis
-
-</td>
-<td width="50%">
-
-### 🎯 Shareable Reports & Live Badges
-
-**Export Options**:
-- 📄 Markdown report
-- 📋 JSON data (CI/CD ready)
-- 🏆 **Live security badges** (auto-updating)
-- 🔗 Deep links (pre-filled scanner)
-- 🖼️ **Social media cards** (1200x630px)
-
-**Social Sharing**:
-- 🐦 Twitter (with OG images)
-- 💼 LinkedIn (rich preview cards)
-- 📎 One-click badge embed
-
-**Live Badge API** - Auto-updates daily:
+**Live badge example:**
 
 ```markdown
 [![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
 ```
-[![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
 
-</td>
-</tr>
-</table>
+[![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner)
 
 **👉 [Try the Interactive Showcase](https://topflow.dev/showcase/security-scanner)** | **[Scan in Builder](https://topflow.dev/builder?template=github-security-scanner)**
 
 ---
 
-## 🎨 New: Interactive Showcase Page
+## 🎨 Interactive Showcase
 
-Experience the scanner in a beautiful, marketing-focused interface:
+Explore the scanner UI, compare repository scores, and copy badge snippets:
 
 **🔗 [topflow.dev/showcase/security-scanner](https://topflow.dev/showcase/security-scanner)**
 
 **What's included**:
-- 🏆 **Competitive Leaderboard** - Compare your repo against top open-source projects
-- 📊 **Visual Dashboard Preview** - See exactly what you'll get
-- 🎯 **Live Badge Examples** - Copy embed codes for Markdown, HTML, RST
-- 📱 **Social Sharing** - Pre-generated Twitter/LinkedIn posts with custom OG images
-- ⚡ **Quick Scan** - Enter any repo URL and get results in 30 seconds
+- 🏆 Competitive leaderboard for open-source projects
+- 📊 Dashboard preview with scan results
+- 🎯 Badge snippets for Markdown, HTML, and RST
+- 📱 Social sharing cards for Twitter and LinkedIn
+- ⚡ Quick scan for any public GitHub repo
 
 **Popular Repo Scores**:
 - facebook/react - **A+** (95/100)
-- vercel/next.js - **A** (92/100)
-- microsoft/vscode - **A** (90/100)
-
-**Challenge**: Think your repo is more secure? Prove it! 🚀
+- aquasecurity/trivy - **A** (90/100)
+- django/django - **B+** (85/100)
 
 ---
 
-## 🚀 Coming Soon: Real Vulnerability Data with Google OSV
+## 🚀 Coming Soon: Google OSV Integration
 
-We're integrating **Google's Open Source Vulnerabilities (OSV) database** to provide **real-time CVE data** for scanned repositories!
+The scanner is adding Google OSV vulnerability data for real CVE results across npm, PyPI, Go, Rust, Maven, Ruby, and PHP projects.
 
-**What's changing** (launching soon):
+| Upgrade | Benefit |
+|---------|---------|
+| Real OSV data | Replace demo vulnerability summaries with authoritative CVE results |
+| Commit and manifest scans | Scan a repository, a commit, or direct dependency manifest content |
+| Reusable OSV node | Add vulnerability checks to custom TopFlow workflows |
+| Private repo support | Use a GitHub PAT stored client-side in localStorage |
 
-### 📊 Enhanced Vulnerability Detection
-- ✅ **Real CVE data** from Google OSV (authoritative vulnerability database)
-- ✅ **Multi-language support**: npm, PyPI, Go, Rust, Maven, Ruby, PHP (7 ecosystems)
-- ✅ **Commit hash querying**: Scan entire repos at specific commits (faster!)
-- ✅ **Batch vulnerability queries**: Performance-optimized scanning
-- ✅ **CVSS severity scoring**: Critical, High, Medium, Low classifications
+Example workflows this enables:
+- CI/CD Security: OSV scan → Slack alert for critical vulnerabilities
+- Multi-Repo Audit: repo list → OSV scan → aggregate dashboard
+- Dependency Report: OSV scan → Markdown or JSON export
 
-### 🔧 OSV Scanner as Reusable Node ⭐
-This is the **big one** - transforming the scanner into a composable platform component:
-
-```
-🎯 "Build Your Own Snyk" Vision
-┌─────────────────────────────────────────────┐
-│  OSV Scanner Node (new!)                    │
-│  ├─ Input Modes:                            │
-│  │  1. Repository URL → Auto-detect manifests│
-│  │  2. Manifest content → Direct scan        │
-│  │  3. Commit hash → Full repo scan         │
-│  ├─ Options:                                │
-│  │  • Severity filter (critical/high/medium)│
-│  │  • Include dev dependencies toggle       │
-│  │  • Include unfixed vulnerabilities       │
-│  └─ Available in Node Palette → Security    │
-└─────────────────────────────────────────────┘
-```
-
-**Why This Matters**:
-- 🔄 **Composable workflows**: Use OSV Scanner node in ANY workflow, not just GitHub Scanner
-- 🛠️ **Custom security tools**: Build your own Snyk/Dependabot with visual workflows
-- 🔗 **Platform vision**: Example workflows users can build:
-  - CI/CD Security: OSV Scanner → Slack notification if critical vulns
-  - Multi-Repo Audit: Loop through repos → OSV Scanner → Aggregate dashboard
-  - Dependency SBOM: OSV Scanner → Generate report → Email
-
-### 🔐 Private Repository Support
-- ✅ **GitHub Personal Access Token (PAT)** field in settings
-- ✅ **Authenticated API calls** for private repos
-- ✅ **Client-side only**: Token stored in localStorage (never on servers)
-- ✅ **Privacy-preserving**: No repo cloning, uses GitHub API
-
-### 📚 Enhanced Documentation
-- ✅ `docs/OSV-INTEGRATION.md` - Technical integration details
-- ✅ `docs/API.md` - Public API documentation for developers
-- ✅ "Powered by Google OSV" attribution in scanner UI
-
-**Timeline**: Post-launch implementation (~21 hours)
-
-**Success Criteria**:
-- 80%+ of scans return real OSV data (vs demo data)
-- OSV Scanner node used in 3+ non-GitHub-Scanner workflows
-- Support 4+ language ecosystems live
-
-**Why OSV?**
-- ✅ **Authoritative**: Google's comprehensive vulnerability database
-- ✅ **Free**: Open-source, no API costs
-- ✅ **Complete**: Covers 13+ package ecosystems
-- ✅ **Fast**: Query by commit hash (no manifest parsing needed)
-- ✅ **Trusted**: Used by GitHub, npm, and major platforms
-
-**Demo mode will remain available** - Test instantly without API keys, get real data when you're ready!
+Demo mode will remain available for instant scans without API keys.
 
 ---
 
@@ -304,7 +198,7 @@ This isn't just another GitHub scanner. It's built with **enterprise-grade secur
 
 **The Problem:** Current AI workflow builders store your data, require subscriptions, and lock you into their platforms.
 
-**TopFlow's Solution:** Built by a former CISO with security as the #1 priority:
+**TopFlow's Solution:** a security-first workflow builder with local storage, bring-your-own-key AI providers, and TypeScript export.
 
 <table>
 <tr>
@@ -325,56 +219,6 @@ This isn't just another GitHub scanner. It's built with **enterprise-grade secur
 - **🎓 Educators**: Teach secure AI architecture patterns
 - **🔬 Researchers**: Experiment with AI workflows safely
 
-## 🎨 Build Custom Security Workflows
-
-TopFlow is a **visual workflow platform** designed for security professionals.
-
-**What Makes TopFlow Different**:
-
-<table>
-<tr>
-<td width="50%">
-
-### 🔒 Security-First Architecture
-
-**5-Layer Defense Model**:
-1. **Client-Side**: XSS prevention, input sanitization
-2. **Transport**: TLS 1.3, HSTS headers
-3. **API Gateway**: Rate limiting, DDoS protection
-4. **Execution**: SSRF prevention, sandboxed JS
-5. **External APIs**: BYOK model, no shared secrets
-
-**Built by Former CISO**:
-- OWASP Top 10 coverage built-in
-- Threat modeling at design time
-- Defense-in-depth patterns
-- Compliance-conscious (GDPR, SOC 2, HIPAA)
-
-</td>
-<td width="50%">
-
-### 🛡️ Privacy-Preserving Design
-
-**Zero Data Storage**:
-- All workflows stored in browser localStorage
-- No backend database
-- No server-side data processing
-- Zero data breach risk
-
-**BYOK Model**:
-- Use your own AI provider keys
-- Keys never sent to our servers
-- No ongoing API costs for platform
-
-**GDPR Compliant**:
-- Data sovereignty (you own 100%)
-- No tracking or analytics
-- Right to be forgotten (clear browser data)
-
-</td>
-</tr>
-</table>
-
 ---
 
 ### How TopFlow Compares
@@ -392,20 +236,7 @@ TopFlow is a **visual workflow platform** designed for security professionals.
 
 ---
 
-## 🎥 See It In Action
-
-<div align="center">
-
-<!-- Replace with actual workflow execution GIF -->
-<img src="public/demo-assets/images/placeholder-landscape.webp" alt="TopFlow Workflow Demo" width="80%">
-
-**Build → Validate → Execute → Export Code**
-
-</div>
-
----
-
-## ✨ Features That Make Us Different
+## ✨ Core Features
 
 ### 🔒 **Privacy-First Architecture**
 ```yaml
@@ -415,7 +246,7 @@ Result: Zero data breach risk
 ```
 
 ### 🛡️ **5-Layer Security Model**
-Every request passes through comprehensive security controls:
+Every request passes through layered security controls:
 1. **Client-Side**: Input sanitization, XSS prevention
 2. **Transport**: TLS 1.3, HSTS headers
 3. **API Gateway**: Rate limiting, DDoS protection
@@ -502,8 +333,8 @@ Add auto-updating security badges to your README:
 | Repository | Badge |
 |------------|-------|
 | facebook/react | [![Security Score](https://topflow.dev/api/badge/facebook/react)](https://topflow.dev/showcase/security-scanner) |
-| vercel/next.js | [![Security Score](https://topflow.dev/api/badge/vercel/next.js)](https://topflow.dev/showcase/security-scanner) |
-| microsoft/vscode | [![Security Score](https://topflow.dev/api/badge/microsoft/vscode)](https://topflow.dev/showcase/security-scanner) |
+| aquasecurity/trivy | [![Security Score](https://topflow.dev/api/badge/aquasecurity/trivy)](https://topflow.dev/showcase/security-scanner) |
+| django/django | [![Security Score](https://topflow.dev/api/badge/django/django)](https://topflow.dev/showcase/security-scanner) |
 
 **API Endpoint**: `GET /api/badge/:owner/:repo`
 
@@ -532,7 +363,7 @@ https://topflow.dev/builder?template=github-security-scanner&repo=YOUR_USERNAME/
 
 ---
 
-### Option 2: Run TopFlow Locally (5 Minutes)
+### Option 3: Run TopFlow Locally (5 Minutes)
 
 ```bash
 # Clone and install
@@ -554,7 +385,7 @@ pnpm dev
 
 ---
 
-### Option 3: Use in Your Projects (Advanced)
+### Option 4: Use in Your Projects (Advanced)
 
 ```bash
 # Install the workflow core package
@@ -597,10 +428,10 @@ import { validateWorkflow, executeWorkflow } from '@charliesu/workflow-core'
 
 <table>
 <tr>
-<td align="center"><b>OpenAI</b><br/>GPT-4, GPT-3.5</td>
-<td align="center"><b>Anthropic</b><br/>Claude 3</td>
-<td align="center"><b>Google</b><br/>Gemini Pro</td>
-<td align="center"><b>Groq</b><br/>Fast Inference</td>
+<td align="center"><b>OpenAI</b><br/>GPT models</td>
+<td align="center"><b>Anthropic</b><br/>Claude models</td>
+<td align="center"><b>Google</b><br/>Gemini models</td>
+<td align="center"><b>Groq</b><br/>Fast inference</td>
 </tr>
 </table>
 
@@ -675,7 +506,7 @@ import { validateWorkflow, executeWorkflow } from '@charliesu/workflow-core'
 - 🚀 **v1.1.0** (Jan 2025) - WebP optimization (97.7% size reduction)
 - 🛡️ **v1.0.0** (Dec 2024) - Initial release with 12 node types
 - 📊 **8 security templates** - Enterprise-ready workflows
-- ⭐ **Growing fast** - Join 1,000+ security-conscious developers
+- 🌐 **Open source** - MIT licensed, built in the open
 
 ---
 
