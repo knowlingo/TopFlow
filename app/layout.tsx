@@ -6,7 +6,6 @@ import { Suspense } from "react"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { CookieNotice } from "@/components/cookie-notice"
 import { SchemaOrg } from "@/components/schema-org"
-import { AuthProvider } from "@/components/auth-provider"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -88,14 +87,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
-        <AuthProvider>
-          <SchemaOrg />
-          <ErrorBoundary>
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-          </ErrorBoundary>
-          <CookieNotice />
-          <Analytics />
-        </AuthProvider>
+        <SchemaOrg />
+        <ErrorBoundary>
+          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        </ErrorBoundary>
+        <CookieNotice />
+        <Analytics />
       </body>
     </html>
   )
