@@ -9,6 +9,11 @@ running, testing, and extending the real (OSV-powered) GitHub vulnerability scan
 
 A real scan path alongside the existing demo. Demo mode is untouched.
 
+> **BYOK is two keys, two axes** (see §9 and design doc §6): a **GitHub token** gates the *scan-data*
+> axis (real vs mock), and an **AI provider key** gates the *report-narrative* axis (LLM vs templated).
+> This PR delivers the scan-data engine + endpoint; the per-axis gating and UI for both keys are the
+> follow-up.
+
 | File | Purpose |
 |---|---|
 | `lib/osv/scanner.ts` | Framework-agnostic scan engine (GitHub + OSV clients, manifest parsers, severity model, `RepoAnalysis` mapping). Pure helpers exported for tests. |
@@ -47,6 +52,10 @@ curl -s "http://localhost:3000/api/scan/github/knowlingo/TopFlow" \
 > `502` advising you to supply one.
 
 ## 4. API reference
+
+> This endpoint returns scan **data** (`RepoAnalysis`). The human-readable **report** is produced
+> downstream by the workflow's AI Security Analysis node — an LLM when an AI key is present, otherwise
+> a templated render (§9). Data and narrative are gated by two different keys.
 
 ### `GET /api/scan/github/[...repo]`
 
@@ -150,19 +159,54 @@ curl -s -X POST https://api.osv.dev/v1/query \
   -d '{"package":{"name":"lodash","ecosystem":"npm"},"version":"4.17.4"}' | jq '.vulns | length'   # -> 10
 ```
 
-## 9. Wiring into the product (follow-up PR)
+## 9. Wiring into the product: two BYOK axes (follow-up PR)
+
+"Bring your own key" is **two independent keys** gating **two independent axes**. Neither implies the
+other; each degrades gracefully. (Design doc §6 has the full rationale.)
+
+| Axis | Key | Node | Transport |
+|---|---|---|---|
+| Scan **data** | GitHub token | `Security Scan` (httpRequest) → `/api/scan/github` | `x-github-token` header |
+| Report **narrative** | AI provider key | `AI Security Analysis` (text-model) | `apiKeys` in the `execute-workflow` body |
 
 1. **Token capture (UI).** Add an optional "GitHub token" field to the scanner input dialog
    (`components/workflow-input-dialog.tsx`) and/or `components/api-settings-dialog.tsx`. Persist it in
    `localStorage` (suggested key `ai-agent-github-token`) — same lifecycle as the AI provider keys.
-2. **Mode toggle.** Add a demo/real switch. In real mode, the workflow's **Security Scan** node
-   (`lib/templates/github-scanner.ts`) targets `/api/scan/github/$input1.fullName` and the client
-   attaches the `x-github-token` header; in demo mode it keeps `/api/demo/github-scan/...`.
-3. **No downstream changes.** Output conforms to `RepoAnalysis`, so the "Calculate Score (Real API
-   mode)" node, results dialog, and visualization work unchanged.
+   The AI key reuses the existing `ai-agent-api-keys` settings; no change there.
+2. **Decoupled gating.** Today `lib/demo-mode.ts › shouldUseDemoMode` keys only on the AI key and
+   returns one boolean for the whole workflow — so a GitHub token alone can't trigger a real scan.
+   Split the decision per axis:
+   - **scan-data axis = real** when a GitHub token is present *or* the user toggles real mode (public
+     repos scan tokenless at 60/hr; private + 5,000/hr need the token); else mock.
+   - **narrative axis = LLM** when any AI key is present; else the templated report.
+   In real mode the **Security Scan** node (`lib/templates/github-scanner.ts`) targets
+   `/api/scan/github/$input1.fullName` with the `x-github-token` header; in demo it keeps
+   `/api/demo/github-scan/...`.
+3. **Provider-agnostic report model.** The template hardcodes `openai/gpt-4o-mini`, so an
+   Anthropic-only user hits *"OpenAI API key not configured."* Resolve the report model from whichever
+   provider key exists (suggested priority `anthropic → openai → google → groq`) instead of a fixed
+   model string.
+4. **Templated (no-LLM) report fallback.** A real scan must not *require* an AI key. Factor the
+   `RepoAnalysis → markdown` rendering that `getGitHubScannerMockResponse` already performs into a
+   shared `renderReport(analysis)` helper, and use it whenever no AI key is present (for both real and
+   demo data). Reserve the LLM path for the richer narrative when a key is available.
+5. **No downstream changes.** Output conforms to `RepoAnalysis`, so the "Calculate Score (Real API
+   mode)" node, results dialog, and visualization work unchanged regardless of which combination is active.
+
+### Behavior matrix
+
+| GitHub token | AI key | Scan data | Report | Effective mode |
+|:---:|:---:|---|---|---|
+| – | – | mock | templated mock | Demo (zero-setup default) |
+| – | ✓ | real (public, 60/hr) | real LLM | Live narrative, public data |
+| ✓ | – | real (public + private, 5,000/hr) | templated (no LLM) | Real scan, no AI key |
+| ✓ | ✓ | real | real LLM | Fully real |
 
 ## 10. Productionization checklist
 
+- [ ] **Decoupled gating** — make `shouldUseDemoMode` (or a scanner-specific resolver) GitHub-token / `scanMode` aware so a real scan can run without an AI key (§9).
+- [ ] **Provider-agnostic report model** — resolve the report model from the available provider key instead of hardcoded `openai/gpt-4o-mini` (§9).
+- [ ] **Shared `renderReport(analysis)`** — extract the `RepoAnalysis → markdown` renderer so the templated (no-LLM) fallback and the demo path share it (§9).
 - [ ] Chunk `/v1/querybatch` for very large lockfiles (batch in groups of, e.g., 500).
 - [ ] Add parsers: `yarn.lock`, `Pipfile.lock`, `poetry.lock`, `composer.lock`, `Gemfile.lock`.
 - [ ] Populate `dependencyAudit.outdated` via registry latest-version lookups.
