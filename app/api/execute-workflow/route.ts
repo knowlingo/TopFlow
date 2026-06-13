@@ -89,12 +89,16 @@ export async function POST(req: Request) {
           apiKeys = {},
           workflowId,
           userInputs,
+          githubToken,
+          scanMode,
         }: {
           nodes: Node[]
           edges: Edge[]
           apiKeys?: Record<string, string>
           workflowId?: string
           userInputs?: Record<string, string>
+          githubToken?: string
+          scanMode?: ScanMode
         } = await req.json()
 
         console.log('[Execute Workflow] Request received:', {
@@ -136,7 +140,16 @@ export async function POST(req: Request) {
         // Demo Mode Handling
         // ============================================================================
 
-        const demoMode = shouldUseDemoMode(apiKeys, workflowId)
+        // Two-axis BYOK resolution for the GitHub Scanner (see lib/demo-mode).
+        // GitHub token => real scan DATA; AI key => LLM report NARRATIVE.
+        // Real-scan per-axis behavior is strictly opt-in: with no token / no
+        // explicit scanMode, this collapses to the prior single-boolean demo gate.
+        const isScanner = workflowId === "github-security-scanner"
+        const scanAxes = isScanner
+          ? resolveScanModes({ apiKeys, githubToken, scanMode })
+          : null
+        const realScan = Boolean(isScanner && scanAxes && scanAxes.dataMode === "real")
+        const demoMode = isScanner ? scanAxes!.demoMode : shouldUseDemoMode(apiKeys, workflowId)
 
         // Check both legacy and new demo mode systems
         const hasLegacyDemo = hasLegacyDemoData(workflowId)
@@ -224,8 +237,12 @@ export async function POST(req: Request) {
           return
         }
 
-        // API key validation - only if NOT in demo mode
-        if (!demoMode) {
+        // API key validation - only when an LLM will actually run.
+        // (A real scan with a templated, no-LLM report needs no AI key.)
+        const needsAiKeyValidation = isScanner
+          ? scanAxes!.narrativeMode === "llm"
+          : !demoMode
+        if (needsAiKeyValidation) {
           const apiKeyIssues = validateApiKeys(apiKeys, sanitizedNodes)
           const apiKeyErrors = apiKeyIssues.filter((issue) => issue.type === "error")
 
@@ -243,10 +260,19 @@ export async function POST(req: Request) {
         // Execute Workflow using TopFlowExecutionEngine
         // ============================================================================
 
-        const engine = new TopFlowExecutionEngine({
-          demoMode,
-          workflowId,
-        })
+        // Pass per-axis options only for an opt-in real scan; otherwise keep the
+        // exact legacy construction so demo/live behavior is unchanged.
+        const engine = new TopFlowExecutionEngine(
+          realScan
+            ? {
+                demoMode,
+                workflowId,
+                dataMode: scanAxes!.dataMode,
+                narrativeMode: scanAxes!.narrativeMode,
+                githubToken,
+              }
+            : { demoMode, workflowId }
+        )
 
         // Extract start node outputs as initial variables
         const initialVariables: Record<string, any> = {}
