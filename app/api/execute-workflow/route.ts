@@ -4,34 +4,16 @@ import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
 import { shouldUseDemoMode, hasDemoData as hasNewDemoData, resolveScanModes, type ScanMode } from "@/lib/demo-mode"
 import { getDemoWorkflowResult, hasDemoData as hasLegacyDemoData } from "@/lib/demo-data"
+import { RateLimiter, rateLimitKey } from "@/lib/security/rate-limit"
+import { detectWorkflowCycle } from "@/lib/security/workflow-graph"
 
 export const maxDuration = 30
 
 // ============================================================================
-// Rate Limiting
+// Rate Limiting (sliding window; in-memory store, pluggable for Redis/KV)
 // ============================================================================
 
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
-
-function checkRateLimit(identifier: string): boolean {
-  const now = Date.now()
-  const limit = rateLimitStore.get(identifier)
-
-  if (!limit || now > limit.resetTime) {
-    rateLimitStore.set(identifier, {
-      count: 1,
-      resetTime: now + 60000, // 10 requests per minute
-    })
-    return true
-  }
-
-  if (limit.count >= 10) {
-    return false
-  }
-
-  limit.count++
-  return true
-}
+const limiter = new RateLimiter({ limit: 10, windowMs: 60_000 }) // 10 requests / minute / client
 
 // ============================================================================
 // Input Sanitization
@@ -63,14 +45,20 @@ function sanitizeInput(input: any, skipKeys: string[] = []): any {
 // ============================================================================
 
 export async function POST(req: Request) {
-  // Rate limiting
-  const clientId = req.headers.get("x-forwarded-for") || "anonymous"
-  if (!checkRateLimit(clientId)) {
+  // Rate limiting (per client IP)
+  const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "anonymous"
+  const rl = await limiter.check(rateLimitKey(clientIp))
+  if (!rl.allowed) {
     return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Please try again in a minute." }),
+      JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
       {
         status: 429,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(Math.ceil(rl.resetMs / 1000)),
+          "X-RateLimit-Limit": String(rl.limit),
+          "X-RateLimit-Remaining": String(rl.remaining),
+        },
       }
     )
   }
@@ -224,6 +212,18 @@ export async function POST(req: Request) {
         // ============================================================================
         // Validation (Cycles, SSRF)
         // ============================================================================
+
+        // Fail-closed cycle detection before execution (independent of the engine's
+        // own validation) — a cyclic graph could otherwise drive an infinite loop.
+        const cycleCheck = detectWorkflowCycle(sanitizedNodes, edges)
+        if (cycleCheck.hasCycle) {
+          sendUpdate({
+            type: "error",
+            error: `Workflow contains a cycle (${(cycleCheck.cycle || []).join(" → ")}). Remove the circular dependency before running.`,
+          })
+          controller.close()
+          return
+        }
 
         const validationIssues = validateWorkflow(sanitizedNodes, edges)
         const errors = validationIssues.filter((issue) => issue.type === "error")

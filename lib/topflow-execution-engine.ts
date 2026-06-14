@@ -15,6 +15,7 @@ import {
   renderReport,
   resolveReportModel
 } from './demo-mode'
+import { assertSafeOutboundUrl } from './security/ssrf'
 
 /**
  * TopFlow-specific execution engine
@@ -234,6 +235,11 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       // Server-side: use localhost
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
       finalUrl = `${baseUrl}${interpolatedUrl}`
+    } else {
+      // SSRF guard: applied to user-supplied absolute URLs only. Engine-generated
+      // relative app routes (handled above, e.g. the scanner's /api/scan/github)
+      // are trusted internal calls and are intentionally exempt.
+      assertSafeOutboundUrl(finalUrl)
     }
 
     const options: RequestInit = {
