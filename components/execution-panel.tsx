@@ -135,10 +135,13 @@ export function ExecutionPanel({
     }
   }
 
-  const handleInputSubmit = (inputs: Record<string, string>) => {
+  const handleInputSubmit = (
+    inputs: Record<string, string>,
+    scanOptions?: { githubToken?: string; scanMode?: "demo" | "real" }
+  ) => {
     setShowInputDialog(false)
     setPendingUserInputs(inputs)
-    executeWorkflow(inputs)
+    executeWorkflow(inputs, scanOptions)
   }
 
   const handleInputCancel = () => {
@@ -146,7 +149,10 @@ export function ExecutionPanel({
     setStartNodesWithInput([])
   }
 
-  const executeWorkflow = async (userInputs: Record<string, string> | null) => {
+  const executeWorkflow = async (
+    userInputs: Record<string, string> | null,
+    scanOptions?: { githubToken?: string; scanMode?: "demo" | "real" }
+  ) => {
     setIsExecuting(true)
     setExecutionLog([])
     setError(null)
@@ -162,6 +168,12 @@ export function ExecutionPanel({
       const apiKeys = typeof window !== "undefined" ? localStorage.getItem("ai-agent-api-keys") : null
       const keys = apiKeys ? JSON.parse(apiKeys) : {}
 
+      // Two-axis BYOK: GitHub token => real scan DATA; AI key (in `keys`) => LLM NARRATIVE.
+      // Use the dialog's choice when present; otherwise fall back to any saved token.
+      const githubToken = scanOptions
+        ? scanOptions.githubToken
+        : (typeof window !== "undefined" ? localStorage.getItem("ai-agent-github-token") || undefined : undefined)
+
       const response = await fetch("/api/execute-workflow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -171,6 +183,8 @@ export function ExecutionPanel({
           apiKeys: keys,
           workflowId: workflowId || "template-threat-intel", // Default to threat intel workflow
           userInputs: userInputs, // Pass user inputs to API
+          githubToken, // BYOK scan-data axis (scanner only; undefined => demo data)
+          scanMode: scanOptions?.scanMode, // "real" | "demo" | undefined (auto)
         }),
       })
 
@@ -715,6 +729,7 @@ System: TopFlow GDPR Workflow Engine
         startNodes={startNodesWithInput}
         onSubmit={handleInputSubmit}
         onCancel={handleInputCancel}
+        workflowId={workflowId}
       />
     </aside>
   )

@@ -237,7 +237,7 @@ export default function SecurityOverviewPage() {
         </Card>
 
         <DocsFooter
-          prevPage={{
+          previousPage={{
             title: "Build Section",
             href: "/docs/build",
           }}

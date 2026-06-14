@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { GitBranch } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -12,7 +12,7 @@ export type ConditionalNodeData = {
   output?: any
 }
 
-function ConditionalNode({ data, selected }: NodeProps<ConditionalNodeData>) {
+function ConditionalNode({ data, selected }: NodeProps<Node<ConditionalNodeData>>) {
   const status = data.status || "idle"
 
   return (

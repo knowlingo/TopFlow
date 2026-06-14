@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ReactFlowProvider } from '@xyflow/react'
 import EndNode, { type EndNodeData } from '../end-node'
-import type { NodeProps } from '@xyflow/react'
+import type { NodeProps, Node } from '@xyflow/react'
 
 // Mock the status color utility
 jest.mock('@charliesu/workflow-core', () => ({
@@ -24,13 +24,11 @@ jest.mock('next/link', () => {
   }
 })
 
-const createNodeProps = (data: EndNodeData, selected = false): NodeProps<EndNodeData> => ({
+const createNodeProps = (data: EndNodeData, selected = false): any => ({
   id: 'end-1',
   data,
   selected,
   type: 'end',
-  xPos: 0,
-  yPos: 0,
   zIndex: 0,
   isConnectable: true,
   positionAbsoluteX: 0,

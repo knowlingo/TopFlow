@@ -514,7 +514,7 @@ export default function TutorialsPage() {
         </Card>
 
         <DocsFooter
-          prevPage={{
+          previousPage={{
             title: "Core Concepts",
             href: "/docs/learn/core-concepts",
           }}

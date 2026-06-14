@@ -94,7 +94,7 @@ export function ValidationPanel({ nodes, edges, apiKeys, onClose, onNodeHighligh
     const frameworks = new Set<string>()
 
     nodes.forEach(node => {
-      const label = node.data?.label?.toLowerCase() || ""
+      const label = String(node.data?.label ?? "").toLowerCase()
       const type = node.type || ""
 
       if (label.includes("gdpr") || label.includes("privacy")) frameworks.add("GDPR")

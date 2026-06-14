@@ -7,7 +7,8 @@ jest.mock('react-hotkeys-hook', () => ({
   useHotkeys: jest.fn(),
 }))
 
-const mockUseHotkeys = useHotkeys as jest.MockedFunction<typeof useHotkeys>
+ 
+const mockUseHotkeys = useHotkeys as jest.Mock
 
 describe('useKeyboardShortcuts', () => {
   let mockCallbacks: any
@@ -71,11 +72,13 @@ describe('useKeyboardShortcuts', () => {
   })
 
   it('should call onDelete when delete shortcut handler is triggered', () => {
-    let deleteHandler: Function | null = null
+    let deleteHandler:  
+((event: any, hotkey: any) => void) | null = null
 
     mockUseHotkeys.mockImplementation((keys, handler) => {
       if (Array.isArray(keys) && keys.includes('delete')) {
-        deleteHandler = handler as Function
+        deleteHandler =  
+handler as (event: any, hotkey: any) => void
       }
     })
 
@@ -89,7 +92,7 @@ describe('useKeyboardShortcuts', () => {
     )
 
     const mockEvent = { preventDefault: jest.fn() }
-    deleteHandler?.(mockEvent as any, {} as any)
+    if (deleteHandler) (deleteHandler as (e: unknown, h: unknown) => void)(mockEvent, {})
 
     expect(mockEvent.preventDefault).toHaveBeenCalled()
     expect(mockCallbacks.onDelete).toHaveBeenCalled()
@@ -306,11 +309,13 @@ describe('useKeyboardShortcuts', () => {
   })
 
   it('should call reactFlowInstance.zoomIn when zoom in handler is triggered', () => {
-    let zoomInHandler: Function | null = null
+    let zoomInHandler:  
+((event: any, hotkey: any) => void) | null = null
 
     mockUseHotkeys.mockImplementation((keys, handler) => {
       if (keys === 'mod+plus') {
-        zoomInHandler = handler as Function
+        zoomInHandler =  
+handler as (event: any, hotkey: any) => void
       }
     })
 
@@ -324,18 +329,20 @@ describe('useKeyboardShortcuts', () => {
     )
 
     const mockEvent = { preventDefault: jest.fn() }
-    zoomInHandler?.(mockEvent as any, {} as any)
+    if (zoomInHandler) (zoomInHandler as (e: unknown, h: unknown) => void)(mockEvent, {})
 
     expect(mockEvent.preventDefault).toHaveBeenCalled()
     expect(mockReactFlowInstance.zoomIn).toHaveBeenCalled()
   })
 
   it('should call reactFlowInstance.zoomOut when zoom out handler is triggered', () => {
-    let zoomOutHandler: Function | null = null
+    let zoomOutHandler:  
+((event: any, hotkey: any) => void) | null = null
 
     mockUseHotkeys.mockImplementation((keys, handler) => {
       if (keys === 'mod+minus') {
-        zoomOutHandler = handler as Function
+        zoomOutHandler =  
+handler as (event: any, hotkey: any) => void
       }
     })
 
@@ -349,7 +356,7 @@ describe('useKeyboardShortcuts', () => {
     )
 
     const mockEvent = { preventDefault: jest.fn() }
-    zoomOutHandler?.(mockEvent as any, {} as any)
+    if (zoomOutHandler) (zoomOutHandler as (e: unknown, h: unknown) => void)(mockEvent, {})
 
     expect(mockEvent.preventDefault).toHaveBeenCalled()
     expect(mockReactFlowInstance.zoomOut).toHaveBeenCalled()
@@ -398,11 +405,13 @@ describe('useKeyboardShortcuts', () => {
   })
 
   it('should handle null reactFlowInstance gracefully', () => {
-    let zoomInHandler: Function | null = null
+    let zoomInHandler:  
+((event: any, hotkey: any) => void) | null = null
 
     mockUseHotkeys.mockImplementation((keys, handler) => {
       if (keys === 'mod+plus') {
-        zoomInHandler = handler as Function
+        zoomInHandler =  
+handler as (event: any, hotkey: any) => void
       }
     })
 
@@ -419,7 +428,7 @@ describe('useKeyboardShortcuts', () => {
 
     // Should not throw even with null instance
     expect(() => {
-      zoomInHandler?.(mockEvent as any, {} as any)
+      if (zoomInHandler) (zoomInHandler as (e: unknown, h: unknown) => void)(mockEvent, {})
     }).not.toThrow()
 
     expect(mockEvent.preventDefault).toHaveBeenCalled()

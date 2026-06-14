@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Globe } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -15,7 +15,7 @@ export type HttpRequestNodeData = {
   output?: any
 }
 
-function HttpRequestNode({ data, selected }: NodeProps<HttpRequestNodeData>) {
+function HttpRequestNode({ data, selected }: NodeProps<Node<HttpRequestNodeData>>) {
   const status = data.status || "idle"
 
   return (

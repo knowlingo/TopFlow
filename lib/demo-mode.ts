@@ -44,22 +44,86 @@ export function shouldUseDemoMode(
   workflowId?: string,
   userPreference: DemoModePreference = "auto"
 ): boolean {
-  // Explicit user override
-  if (userPreference === "demo") return true
-  if (userPreference === "live") return false
+  // Back-compat wrapper. "Demo mode" == BOTH axes non-live (mock scan data AND a
+  // templated, no-LLM report). See resolveScanModes for the two-axis model.
+  return resolveScanModes({ apiKeys, userPreference }).demoMode
+}
 
-  // Auto mode: check if any API keys are configured
-  const hasAnyKey = Boolean(
+// ============================================================================
+// Two-axis BYOK model (see docs/architecture/osv-real-scan-design.md §6)
+// ----------------------------------------------------------------------------
+// "Bring your own key" is TWO independent keys gating TWO independent axes:
+//   - scan-DATA axis      -> GitHub token (real vs mock vulnerabilities)
+//   - report-NARRATIVE ax -> AI provider key (LLM-written vs templated report)
+// Each axis degrades gracefully; neither implies the other.
+// ============================================================================
+
+/** Explicit per-scan override for the data axis. */
+export type ScanMode = "auto" | "demo" | "real"
+
+export interface ScanAxes {
+  /** "real" => fetch live data (GitHub + OSV); "demo" => curated mock data. */
+  dataMode: "real" | "demo"
+  /** "llm" => a provider LLM writes the report; "templated" => deterministic render. */
+  narrativeMode: "llm" | "templated"
+  /** Back-compat: true only when BOTH axes are non-live (pure zero-setup demo). */
+  demoMode: boolean
+}
+
+/**
+ * Resolve the two scan axes from the available keys + explicit preferences.
+ *
+ * - narrative: explicit demo/live preference wins; otherwise LLM iff an AI key exists.
+ * - data:      explicit scanMode wins; a "demo" preference forces mock data; otherwise
+ *              real iff a GitHub token is present. (Public repos can scan tokenless at
+ *              the lower rate limit, but we only flip to "real" on an explicit signal so
+ *              the zero-setup demo stays the default.)
+ */
+export function resolveScanModes(opts: {
+  apiKeys?: ApiKeys
+  githubToken?: string
+  scanMode?: ScanMode
+  userPreference?: DemoModePreference
+}): ScanAxes {
+  const apiKeys = opts.apiKeys || {}
+  const hasAiKey = Boolean(
     apiKeys.openai || apiKeys.anthropic || apiKeys.google || apiKeys.groq
   )
+  const hasGithubToken = Boolean(opts.githubToken)
+  const scanMode: ScanMode = opts.scanMode || "auto"
+  const pref: DemoModePreference = opts.userPreference || "auto"
 
-  // If no keys, we MUST use demo mode (if available)
-  if (!hasAnyKey) {
-    return true
+  let narrativeMode: "llm" | "templated"
+  if (pref === "demo") narrativeMode = "templated"
+  else if (pref === "live") narrativeMode = "llm"
+  else narrativeMode = hasAiKey ? "llm" : "templated"
+
+  let dataMode: "real" | "demo"
+  if (scanMode === "real") dataMode = "real"
+  else if (scanMode === "demo") dataMode = "demo"
+  else if (pref === "demo") dataMode = "demo"
+  else dataMode = hasGithubToken ? "real" : "demo"
+
+  return {
+    dataMode,
+    narrativeMode,
+    demoMode: dataMode === "demo" && narrativeMode === "templated",
   }
+}
 
-  // If user has keys, prefer live execution
-  return false
+/**
+ * Provider-agnostic report model: pick a sensible model id from whichever AI
+ * provider key the user actually has. Returns null when no AI key is present.
+ */
+export function resolveReportModel(apiKeys: ApiKeys): string | null {
+  const order: Array<[keyof ApiKeys, string]> = [
+    ["anthropic", "anthropic/claude-3-5-sonnet-20241022"],
+    ["openai", "openai/gpt-4o-mini"],
+    ["google", "google/gemini-1.5-flash"],
+    ["groq", "groq/llama-3.3-70b-versatile"],
+  ]
+  for (const [key, model] of order) if (apiKeys[key]) return model
+  return null
 }
 
 /**
@@ -285,6 +349,133 @@ export function getNodeDelay(nodeType: string): number {
  */
 export async function simulateDelay(delayMs: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, delayMs))
+}
+
+/**
+ * Render a human-readable Markdown security report from a RepoAnalysis-shaped
+ * object. Shared by demo mode AND the real-scan "templated" (no-LLM) fallback,
+ * so a real scan can produce a real report even without an AI provider key.
+ *
+ * Defensive about fields the real scan does not populate (codeQuality,
+ * recommendations) so it works for both curated mock data and live scan output.
+ */
+export function renderReport(
+  analysis: any,
+  opts?: { repo?: string; score?: number }
+): string {
+  const repo = opts?.repo || analysis?.repository || "the repository"
+  const score = opts?.score ?? analysis?.securityScore ?? 0
+  const grade = analysis?.grade || "N/A"
+  const vulns = analysis?.vulnerabilities || { critical: 0, high: 0, medium: 0, low: 0 }
+  const details: any[] = Array.isArray(vulns.details) ? vulns.details : []
+  const vulnSummary = `${vulns.critical || 0} critical, ${vulns.high || 0} high, ${vulns.medium || 0} medium, ${vulns.low || 0} low`
+  const language = analysis?.language || "the project"
+
+  // Only assert practices explicitly true/false; a real scan leaves some null/unknown.
+  const practices = analysis?.securityPractices || {}
+  const practiceLabels: Array<[string, string]> = [
+    ["has_security_policy", "Security policy documented"],
+    ["code_scanning", "Code scanning enabled"],
+    ["branch_protection", "Branch protection rules"],
+    ["dependabot_enabled", "Dependabot monitoring"],
+    ["secret_scanning", "Secret scanning active"],
+  ]
+  const enabledPractices = practiceLabels.filter(([k]) => practices[k] === true).map(([, l]) => l)
+
+  const cq = analysis?.codeQuality
+  const recs: any[] = Array.isArray(analysis?.recommendations) ? analysis.recommendations : []
+
+  const codeQualityBullets = cq ? `\n- Test coverage: ${cq.coverage}%\n- ${language} best practices followed` : ""
+  const codeQualitySection = cq
+    ? `\n\n## Code Quality Metrics\n\n- **Test Coverage**: ${cq.coverage}%\n- **Code Complexity**: ${cq.complexity}\n- **Documentation**: ${cq.documentation}%\n- **Lines of Code**: ${(cq.linesOfCode ?? 0).toLocaleString()}`
+    : ""
+
+  const strengthsBlock = enabledPractices.length
+    ? enabledPractices.map((p) => `- ${p}`).join("\n")
+    : "- No automated security controls detected yet"
+
+  const findingsBlock = details.slice(0, 5).map((v) =>
+    `### ${v.severity}: ${v.id}\n**Component:** ${v.component}\n**Issue:** ${v.description}\n**Fix:** ${v.fix}\n**Effort:** ${v.effort}`
+  ).join("\n\n")
+
+  // Prefer curated recommendations (mock data); otherwise derive remediations
+  // from the actual findings (real scan).
+  const recommendationsBlock = recs.length
+    ? recs.slice(0, 5).map((r, i) => `${i + 1}. **${r.title}** (${r.effort}): ${r.description}`).join("\n\n")
+    : (details.slice(0, 5).map((v, i) => `${i + 1}. **Upgrade ${v.component}** (${v.effort}): ${v.fix} — resolves ${v.id} (${v.severity}).`).join("\n\n")
+      || "No dependency vulnerabilities detected. Maintain current practices.")
+
+  if (score >= 90) {
+    return `# 🎉 Security Excellence Report
+
+**Repository:** ${repo}
+**Security Score:** ${score}/100
+**Overall Grade:** ${grade}
+
+## Top Security Strengths
+
+${(enabledPractices.length ? enabledPractices : ["Clean dependency tree", "Maintained codebase"]).map((p, i) => `${i + 1}. **${p}**: ${repo} maintains strong security practices`).join("\n\n")}${codeQualitySection}
+
+## Vulnerability Status
+
+Found ${vulnSummary} vulnerabilities across all categories.
+
+## Why This Matters
+
+This repository demonstrates security excellence by maintaining comprehensive security controls and proactive vulnerability management.
+
+## Minor Enhancements
+
+${recommendationsBlock}
+
+Maintaining these practices keeps the security score high.`
+  } else if (score >= 80) {
+    return `# Strong Security Report
+
+**Repository:** ${repo}
+**Security Score:** ${score}/100
+**Overall Grade:** ${grade}
+
+## Security Strengths
+
+${strengthsBlock}${codeQualityBullets}
+
+## Areas for Improvement
+
+Found ${vulnSummary} vulnerabilities that should be addressed.
+
+${findingsBlock}
+
+## Recommended Actions
+
+${recommendationsBlock}
+
+Implementing these improvements would elevate the security score further.`
+  } else {
+    return `# Security Improvement Report
+
+**Repository:** ${repo}
+**Security Score:** ${score}/100
+**Overall Grade:** ${grade}
+
+## Current Strengths
+
+${strengthsBlock}${codeQualityBullets}
+
+## Vulnerability Summary
+
+Found ${vulnSummary} vulnerabilities that need attention.
+
+${findingsBlock}
+
+## Priority Recommendations
+
+${recommendationsBlock}
+
+## Expected Impact
+
+Implementing the priority recommendations above would meaningfully increase your security score.`
+  }
 }
 
 /**
@@ -578,145 +769,9 @@ Tone: Supportive and actionable. Make improvements feel achievable.`
 
       console.log('[Demo Mode] ai-analysis - using analysis for:', analysis.repository)
 
-      // Generate dynamic analysis based on actual data
-      const vulnSummary = `${analysis.vulnerabilities.critical} critical, ${analysis.vulnerabilities.high} high, ${analysis.vulnerabilities.medium} medium, ${analysis.vulnerabilities.low} low`
-
-      // Build security practices summary
-      const practices = analysis.securityPractices
-      const enabledPractices = []
-      const missingPractices = []
-
-      if (practices.has_security_policy) enabledPractices.push("Security policy documented")
-      else missingPractices.push("Security policy")
-
-      if (practices.code_scanning) enabledPractices.push("Code scanning enabled")
-      else missingPractices.push("Code scanning")
-
-      if (practices.branch_protection) enabledPractices.push("Branch protection rules")
-      else missingPractices.push("Branch protection")
-
-      if (practices.dependabot_enabled) enabledPractices.push("Dependabot monitoring")
-      else missingPractices.push("Dependabot alerts")
-
-      if (practices.secret_scanning) enabledPractices.push("Secret scanning active")
-      else missingPractices.push("Secret scanning")
-
-      if (score >= 90) {
-        return `# 🎉 Security Excellence Report
-
-**Repository:** ${repo}
-**Security Score:** ${score}/100
-**Overall Grade:** ${analysis.grade}
-
-## Top Security Strengths
-
-${enabledPractices.map((p, i) => `${i + 1}. **${p}**: ${repo} maintains strong security practices`).join('\n\n')}
-
-## Code Quality Metrics
-
-- **Test Coverage**: ${analysis.codeQuality.coverage}%
-- **Code Complexity**: ${analysis.codeQuality.complexity}
-- **Documentation**: ${analysis.codeQuality.documentation}%
-- **Lines of Code**: ${analysis.codeQuality.linesOfCode.toLocaleString()}
-
-## Vulnerability Status
-
-Found ${vulnSummary} vulnerabilities across all categories.
-
-## Why This Matters
-
-This repository demonstrates security excellence by maintaining comprehensive security controls and proactive vulnerability management.
-
-## Minor Enhancements
-
-${analysis.recommendations.filter(r => r.priority !== 'HIGH').slice(0, 3).map((rec, i) =>
-  `${i + 1}. **${rec.title}** (${rec.effort}): ${rec.description}`
-).join('\n\n')}
-
-Implementing these improvements would elevate the security score to 98/100.`
-      } else if (score >= 80) {
-        return `# Strong Security Report
-
-**Repository:** ${repo}
-**Security Score:** ${score}/100
-**Overall Grade:** ${analysis.grade}
-
-## Security Strengths
-
-${enabledPractices.map(p => `- ${p}`).join('\n')}
-- Test coverage: ${analysis.codeQuality.coverage}%
-- ${analysis.language} best practices followed
-
-## Areas for Improvement
-
-Found ${vulnSummary} vulnerabilities that should be addressed.
-
-${analysis.vulnerabilities.details.slice(0, 2).map(vuln =>
-  `### ${vuln.severity}: ${vuln.id}
-**Component:** ${vuln.component}
-**Issue:** ${vuln.description}
-**Fix:** ${vuln.fix}
-**Effort:** ${vuln.effort}`
-).join('\n\n')}
-
-## Recommended Actions
-
-${analysis.recommendations.filter(r => r.priority === 'HIGH').slice(0, 3).map((rec, i) =>
-  `${i + 1}. **${rec.title}** (${rec.effort}): ${rec.description}`
-).join('\n\n')}
-
-Implementing these improvements would elevate the security score to 95+/100.`
-      } else {
-        // Build priority recommendations from actual data
-        const highPriorityRecs = analysis.recommendations.filter(r => r.priority === 'HIGH')
-        const mediumPriorityRecs = analysis.recommendations.filter(r => r.priority === 'MEDIUM')
-
-        return `# Security Improvement Report
-
-**Repository:** ${repo}
-**Security Score:** ${score}/100
-**Overall Grade:** ${analysis.grade}
-
-## Current Strengths
-
-${enabledPractices.map(p => `- ${p}`).join('\n')}
-- Test coverage: ${analysis.codeQuality.coverage}%
-- ${analysis.language} best practices followed
-
-## Vulnerability Summary
-
-Found ${vulnSummary} vulnerabilities that need attention.
-
-${analysis.vulnerabilities.details.slice(0, 2).map(vuln =>
-  `### ${vuln.severity}: ${vuln.id}
-**Component:** ${vuln.component}
-**Issue:** ${vuln.description}
-**Fix:** ${vuln.fix}
-**Effort:** ${vuln.effort}`
-).join('\n\n')}
-
-## Priority Recommendations
-
-${highPriorityRecs.map((rec, i) =>
-  `### ${i + 1}. HIGH: ${rec.title}
-**Effort:** ${rec.effort}
-**Impact:** ${rec.impact}
-
-${rec.description}`
-).join('\n\n')}
-
-${mediumPriorityRecs.slice(0, 2).map((rec, i) =>
-  `### ${highPriorityRecs.length + i + 1}. MEDIUM: ${rec.title}
-**Effort:** ${rec.effort}
-**Impact:** ${rec.impact}
-
-${rec.description}`
-).join('\n\n')}
-
-## Expected Impact
-
-Implementing all ${highPriorityRecs.length + mediumPriorityRecs.length} priority recommendations would increase your security score to 94/100 (A rating).`
-      }
+      // Render the report from the analysis via the shared renderer (also used
+      // by the real-scan templated/no-LLM fallback in the execution engine).
+      return renderReport(analysis, { repo, score })
     }
 
     case "extract-actions": {

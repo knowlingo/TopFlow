@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { ReactFlowProvider } from '@xyflow/react'
 import PromptNode, { type PromptNodeData } from '../prompt-node'
-import type { NodeProps } from '@xyflow/react'
+import type { NodeProps, Node } from '@xyflow/react'
 
 // Mock the status color utility
 jest.mock('@charliesu/workflow-core', () => ({
@@ -17,13 +17,11 @@ jest.mock('@charliesu/workflow-core', () => ({
   }),
 }))
 
-const createNodeProps = (data: PromptNodeData, selected = false): NodeProps<PromptNodeData> => ({
+const createNodeProps = (data: PromptNodeData, selected = false): any => ({
   id: 'prompt-1',
   data,
   selected,
   type: 'prompt',
-  xPos: 0,
-  yPos: 0,
   zIndex: 0,
   isConnectable: true,
   positionAbsoluteX: 0,

@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Code, Settings } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -12,7 +12,7 @@ export type JavaScriptNodeData = {
   output?: any
 }
 
-function JavaScriptNode({ data, selected }: NodeProps<JavaScriptNodeData>) {
+function JavaScriptNode({ data, selected }: NodeProps<Node<JavaScriptNodeData>>) {
   const status = data.status || "idle"
 
   return (

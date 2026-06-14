@@ -179,7 +179,7 @@ export default function BuildOverviewPage() {
         </Card>
 
         <DocsFooter
-          prevPage={{
+          previousPage={{
             title: "Learn Section",
             href: "/docs/learn",
           }}

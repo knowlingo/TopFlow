@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Flag, Download, FileText } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ export type EndNodeData = {
   onViewResults?: () => void
 }
 
-function EndNode({ data, selected }: NodeProps<EndNodeData>) {
+function EndNode({ data, selected }: NodeProps<Node<EndNodeData>>) {
   const status = data.status || "idle"
 
   // Check if this is a threat intelligence report output
@@ -168,7 +168,7 @@ function EndNode({ data, selected }: NodeProps<EndNodeData>) {
           <p className="mb-1.5 text-xs font-semibold text-muted-foreground/90 uppercase tracking-wide">Final Output:</p>
           {hasImages() ? (
             <div className="space-y-2">
-              {getImages().map((img, idx) => (
+              {getImages().map((img: string, idx: number) => (
                 <div key={idx} className="space-y-1.5">
                   <img
                     src={img || "/placeholder.svg"}
