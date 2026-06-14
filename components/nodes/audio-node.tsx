@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Mic } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -14,7 +14,7 @@ export type AudioNodeData = {
   output?: any
 }
 
-function AudioNode({ data, selected }: NodeProps<AudioNodeData>) {
+function AudioNode({ data, selected }: NodeProps<Node<AudioNodeData>>) {
   const status = data.status || "idle"
 
   return (

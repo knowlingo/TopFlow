@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Play } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -18,7 +18,7 @@ export type StartNodeData = {
   output?: any
 }
 
-function StartNode({ data, selected }: NodeProps<StartNodeData>) {
+function StartNode({ data, selected }: NodeProps<Node<StartNodeData>>) {
   const status = data.status || "idle"
   const displayLabel = data.label || "Start"
   const displayDescription = data.label ? (data.placeholder || "User input required") : "Workflow entry point"

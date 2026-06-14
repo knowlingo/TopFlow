@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Flag, Download, FileText } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ export type EndNodeData = {
   onViewResults?: () => void
 }
 
-function EndNode({ data, selected }: NodeProps<EndNodeData>) {
+function EndNode({ data, selected }: NodeProps<Node<EndNodeData>>) {
   const status = data.status || "idle"
 
   // Check if this is a threat intelligence report output

@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { FileJson, Settings } from "lucide-react"
 import { Card } from "@/components/ui/card"
 
@@ -10,7 +10,7 @@ export type StructuredOutputNodeData = {
   mode: "object" | "array"
 }
 
-function StructuredOutputNode({ data, selected }: NodeProps<StructuredOutputNodeData>) {
+function StructuredOutputNode({ data, selected }: NodeProps<Node<StructuredOutputNodeData>>) {
   return (
     <Card
       className={`min-w-[220px] border-2 bg-card transition-all ${
