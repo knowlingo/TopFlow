@@ -2,9 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [master, main]
+    branches: [master, main, dev]
   pull_request:
-    branches: [master, main]
+    branches: [master, main, dev]
 
 jobs:
   lint-and-typecheck:
@@ -46,8 +46,7 @@ jobs:
         run: pnpm lint
 
       - name: Run type check
-        run: pnpm type-check || true
-        continue-on-error: true
+        run: pnpm type-check
 
   test:
     name: Run Tests

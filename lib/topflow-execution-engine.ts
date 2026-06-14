@@ -11,7 +11,9 @@ import {
   getNodeDelay,
   simulateDelay,
   getGitHubScannerMockResponse,
-  hasDemoData
+  hasDemoData,
+  renderReport,
+  resolveReportModel
 } from './demo-mode'
 
 /**
@@ -23,11 +25,29 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
   private demoMode: boolean = false
   private workflowId?: string
   private executionResults: Map<string, any> = new Map()
+  // Two-axis real-scan controls (opt-in; only set when a real scan is requested).
+  private perAxis: boolean = false
+  private dataMode: 'real' | 'demo' = 'demo'
+  private narrativeMode: 'llm' | 'templated' = 'templated'
+  private githubToken?: string
 
-  constructor(options?: { demoMode?: boolean; workflowId?: string }) {
+  constructor(options?: {
+    demoMode?: boolean
+    workflowId?: string
+    dataMode?: 'real' | 'demo'
+    narrativeMode?: 'llm' | 'templated'
+    githubToken?: string
+  }) {
     super()
     this.demoMode = options?.demoMode || false
     this.workflowId = options?.workflowId
+    // Per-axis mode is engaged only when explicit axes are provided (real scan).
+    if (options?.dataMode || options?.narrativeMode) {
+      this.perAxis = true
+      this.dataMode = options?.dataMode || (this.demoMode ? 'demo' : 'real')
+      this.narrativeMode = options?.narrativeMode || (this.demoMode ? 'templated' : 'llm')
+      this.githubToken = options?.githubToken
+    }
   }
 
   /**
@@ -54,66 +74,21 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     inputs: Record<string, any>,
     context: ExecutionContext
   ): Promise<any> {
-    const data = node.data as any
-
     let result: any
 
-    // Demo mode: Return mock responses for GitHub Scanner workflow
-    if (this.demoMode && this.workflowId === 'github-security-scanner' && hasDemoData(this.workflowId)) {
-      // Add realistic delay based on node type
-      const delay = getNodeDelay(node.type || 'default')
-      await simulateDelay(delay)
+    const isScanner =
+      this.workflowId === 'github-security-scanner' && hasDemoData(this.workflowId)
 
-      // Convert inputs object to array for mock response function
-      const inputArray = Object.values(inputs)
-
-      // Generate mock response with access to all previous results
-      result = getGitHubScannerMockResponse(node, inputArray, this.executionResults)
+    if (isScanner && this.perAxis) {
+      // Per-axis real scan: decide mock/templated vs real per node.
+      const decided = await this.executeScannerNode(node, inputs, context)
+      result = decided.handled ? decided.result : await this.executeRealNode(node, inputs, context)
+    } else if (isScanner && this.demoMode) {
+      // Legacy demo path (unchanged): mock every node of the scanner workflow.
+      await simulateDelay(getNodeDelay(node.type || 'default'))
+      result = getGitHubScannerMockResponse(node, Object.values(inputs), this.executionResults)
     } else {
-      // Handle TopFlow-specific nodes
-      switch (node.type) {
-        case 'start':
-          // Start nodes should output their stored value or context variable
-          result = data.output || context.variables?.[node.id] || data.defaultValue || ''
-          console.log('[TopFlowEngine] Start node output:', { nodeId: node.id, result })
-          break
-
-        case 'httpRequest':
-          result = await this.executeHttpRequestNode(node, inputs)
-          break
-
-        case 'textModel':
-          result = await this.executeTextModelNode(node, inputs, context)
-          break
-
-        case 'imageGeneration':
-          result = await this.executeImageGenerationNode(node, inputs, context)
-          break
-
-        case 'audio':
-          result = await this.executeAudioNode(node, inputs, context)
-          break
-
-        case 'embeddingModel':
-          result = await this.executeEmbeddingModelNode(node, inputs, context)
-          break
-
-        case 'structuredOutput':
-          result = await this.executeStructuredOutputNode(node, inputs, context)
-          break
-
-        case 'tool':
-          result = await this.executeToolNode(node, inputs)
-          break
-
-        case 'prompt':
-          result = await this.executePromptNode(node, inputs)
-          break
-
-        default:
-          // Fall back to base implementation for shared nodes
-          result = await super.executeNode(node, inputs, context)
-      }
+      result = await this.executeRealNode(node, inputs, context)
     }
 
     // Store result for future nodes to access
@@ -122,12 +97,116 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     return result
   }
 
+  /**
+   * Per-axis routing for the GitHub Scanner (only when real-scan is engaged).
+   * Returns { handled: true, result } for nodes served from mock/templated data,
+   * or { handled: false } to let the node run for real (data axis) / via the LLM
+   * (narrative axis). See lib/demo-mode resolveScanModes.
+   */
+  private async executeScannerNode(
+    node: Node,
+    inputs: Record<string, any>,
+    context: ExecutionContext
+  ): Promise<{ handled: boolean; result?: any }> {
+    const id = node.id
+    const mock = async () => {
+      await simulateDelay(getNodeDelay(node.type || 'default'))
+      return getGitHubScannerMockResponse(node, Object.values(inputs), this.executionResults)
+    }
+
+    const dataLogicNodes = ['start', 'extract-repo', 'fetch-metadata', 'fetch-security', 'calculate-score', 'grade-check', 'end']
+    const narrativeNodes = ['prompt-excellent', 'prompt-improve', 'ai-analysis', 'extract-actions']
+
+    // Data axis: mock when demo, real otherwise.
+    if (dataLogicNodes.includes(id)) {
+      return this.dataMode === 'demo' ? { handled: true, result: await mock() } : { handled: false }
+    }
+
+    // Narrative axis: real LLM when "llm"; templated render otherwise.
+    if (narrativeNodes.includes(id)) {
+      if (this.narrativeMode === 'llm') return { handled: false }
+      if (id === 'ai-analysis') {
+        // Templated (no-LLM) report from the ACTUAL analysis (real or mock).
+        const analysis = this.executionResults.get('fetch-security') || {}
+        return { handled: true, result: renderReport(analysis) }
+      }
+      return { handled: true, result: await mock() }
+    }
+
+    // Dashboard image: only generate for real when an LLM narrative AND a Google key exist.
+    if (id === 'generate-visual') {
+      const canImage = this.narrativeMode === 'llm' && Boolean((context.apiKeys as any)?.google)
+      return canImage ? { handled: false } : { handled: true, result: await mock() }
+    }
+
+    return { handled: false }
+  }
+
+  /**
+   * Real execution for TopFlow-specific node types (the original switch).
+   */
+  private async executeRealNode(
+    node: Node,
+    inputs: Record<string, any>,
+    context: ExecutionContext
+  ): Promise<any> {
+    const data = node.data as any
+
+    switch (node.type) {
+      case 'start':
+        // Start nodes should output their stored value or context variable
+        console.log('[TopFlowEngine] Start node output:', { nodeId: node.id })
+        return data.output || context.variables?.[node.id] || data.defaultValue || ''
+
+      case 'httpRequest':
+        return this.executeHttpRequestNode(node, inputs)
+
+      case 'textModel':
+        return this.executeTextModelNode(node, inputs, context)
+
+      case 'imageGeneration':
+        return this.executeImageGenerationNode(node, inputs, context)
+
+      case 'audio':
+        return this.executeAudioNode(node, inputs, context)
+
+      case 'embeddingModel':
+        return this.executeEmbeddingModelNode(node, inputs, context)
+
+      case 'structuredOutput':
+        return this.executeStructuredOutputNode(node, inputs, context)
+
+      case 'tool':
+        return this.executeToolNode(node, inputs)
+
+      case 'prompt':
+        return this.executePromptNode(node, inputs)
+
+      default:
+        // Fall back to base implementation for shared nodes
+        return super.executeNode(node, inputs, context)
+    }
+  }
+
   private async executeHttpRequestNode(node: Node, inputs: Record<string, any>): Promise<any> {
     const data = node.data as any
-    const url = data.url || ''
+    let url = data.url || ''
     const method = (data.method || 'GET').toUpperCase()
-    const headers = data.headers || {}
+    // Templates may store headers as a JSON string; only spread real objects.
+    const headers: Record<string, string> = (data.headers && typeof data.headers === 'object') ? { ...data.headers } : {}
     const body = data.body || ''
+
+    // Real-scan (per-axis) overrides for the GitHub Scanner data nodes:
+    //  - point the security node at the real OSV endpoint
+    //  - attach the user's GitHub token (BYOK): private repos + 5,000 req/hr
+    if (this.perAxis && this.dataMode === 'real' && this.workflowId === 'github-security-scanner') {
+      if (node.id === 'fetch-security') {
+        url = '/api/scan/github/$input1.fullName'
+        if (this.githubToken) headers['x-github-token'] = this.githubToken
+      } else if (node.id === 'fetch-metadata' && this.githubToken) {
+        headers['Authorization'] = `Bearer ${this.githubToken}`
+      }
+    }
 
     // Variable interpolation for URL with property access support
     let interpolatedUrl = url
@@ -186,7 +265,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     context: ExecutionContext
   ): Promise<any> {
     const data = node.data as any
-    const modelId = data.model || 'openai/gpt-4o-mini'
+    const modelId = this.resolveModelId(data.model || 'openai/gpt-4o-mini', context.apiKeys)
     const temperature = data.temperature || 0.7
     const maxTokens = data.maxTokens || 2000
 
@@ -299,7 +378,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     context: ExecutionContext
   ): Promise<any> {
     const data = node.data as any
-    const modelId = data.model || 'openai/gpt-4o-mini'
+    const modelId = this.resolveModelId(data.model || 'openai/gpt-4o-mini', context.apiKeys)
 
     const model = this.getModel(modelId, context.apiKeys)
     const prompt = inputs.input1 || ''
@@ -441,6 +520,18 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     } catch (error) {
       throw new Error(`Tool execution failed: ${error}`)
     }
+  }
+
+  /**
+   * Provider-agnostic model resolution: if the requested provider's key is
+   * missing but another provider key exists, fall back to an available model.
+   * Prevents "OpenAI API key not configured" for users who only have, e.g., an
+   * Anthropic key (the scanner template hardcodes an OpenAI model).
+   */
+  private resolveModelId(modelId: string, apiKeys: Record<string, string>): string {
+    const [provider] = (modelId || '').split('/')
+    if (apiKeys && (apiKeys as any)[provider]) return modelId
+    return resolveReportModel(apiKeys || {}) || modelId
   }
 
   /**

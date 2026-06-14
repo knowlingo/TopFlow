@@ -7,16 +7,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import type { StartNodeData } from "@/components/nodes/start-node"
+
+type ScanOptions = { githubToken?: string; scanMode?: "demo" | "real" }
 
 type WorkflowInputDialogProps = {
   open: boolean
   startNodes: Node<StartNodeData>[]
-  onSubmit: (inputs: Record<string, string>) => void
+  onSubmit: (inputs: Record<string, string>, scanOptions?: ScanOptions) => void
   onCancel: () => void
+  workflowId?: string
 }
 
-export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel }: WorkflowInputDialogProps) {
+export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel, workflowId }: WorkflowInputDialogProps) {
+  // GitHub Scanner gets an extra control: a real/demo toggle + an optional BYOK
+  // GitHub token (scan-DATA axis). The AI key (report-NARRATIVE axis) is handled
+  // separately via the existing API Settings.
+  const isScanner = workflowId === "github-security-scanner"
+  const [githubToken, setGithubToken] = useState("")
+  const [realScan, setRealScan] = useState(false)
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
     const initialInputs: Record<string, string> = {}
     startNodes.forEach((node) => {
@@ -31,18 +41,19 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel }: Wo
     if (open) {
       const newInputs: Record<string, string> = {}
       startNodes.forEach((node) => {
-        console.log('[WorkflowInputDialog] Reading node defaultValue:', {
-          nodeId: node.id,
-          nodeType: node.type,
-          defaultValue: node.data.defaultValue
-        })
         newInputs[node.id] = node.data.defaultValue || ""
       })
-      console.log('[WorkflowInputDialog] Final inputs:', newInputs)
       setInputs(newInputs)
       setErrors({})
+
+      // Scanner: load any saved GitHub token and default the toggle accordingly.
+      if (isScanner && typeof window !== "undefined") {
+        const savedToken = localStorage.getItem("ai-agent-github-token") || ""
+        setGithubToken(savedToken)
+        setRealScan(Boolean(savedToken))
+      }
     }
-  }, [open, startNodes])
+  }, [open, startNodes, isScanner])
 
   const validateInput = (nodeId: string, value: string, inputType: string): string | null => {
     if (!value.trim()) {
@@ -97,7 +108,18 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel }: Wo
       return
     }
 
-    onSubmit(inputs)
+    let scanOptions: ScanOptions | undefined
+    if (isScanner) {
+      const token = githubToken.trim()
+      if (typeof window !== "undefined") {
+        if (token) localStorage.setItem("ai-agent-github-token", token)
+        else localStorage.removeItem("ai-agent-github-token")
+      }
+      // realScan off => force demo; on => real (token optional: public repos scan tokenless).
+      scanOptions = { githubToken: realScan && token ? token : undefined, scanMode: realScan ? "real" : "demo" }
+    }
+
+    onSubmit(inputs, scanOptions)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -148,6 +170,37 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel }: Wo
               </div>
             )
           })}
+
+          {isScanner && (
+            <div className="space-y-3 rounded-md border border-border p-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="real-scan-toggle">Run a real scan</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Off = instant demo (sample data). On = live scan via OSV + the GitHub API.
+                  </p>
+                </div>
+                <Switch id="real-scan-toggle" checked={realScan} onCheckedChange={setRealScan} />
+              </div>
+
+              {realScan && (
+                <div className="space-y-2">
+                  <Label htmlFor="github-token">GitHub token (optional)</Label>
+                  <Input
+                    id="github-token"
+                    type="password"
+                    value={githubToken}
+                    onChange={(e) => setGithubToken(e.target.value)}
+                    placeholder="ghp_… — for private repos & higher rate limits"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Stored only in your browser, sent per-scan, never saved on our servers. Public
+                    repos work without a token (lower rate limit).
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
