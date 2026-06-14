@@ -2,7 +2,7 @@ import type { Node, Edge } from "@xyflow/react"
 import { TopFlowExecutionEngine } from "@/lib/topflow-execution-engine"
 import { validateWorkflow, validateApiKeys } from "@charliesu/workflow-core"
 import type { ExecutionUpdate } from "@charliesu/workflow-core"
-import { shouldUseDemoMode, hasDemoData as hasNewDemoData } from "@/lib/demo-mode"
+import { shouldUseDemoMode, hasDemoData as hasNewDemoData, resolveScanModes, type ScanMode } from "@/lib/demo-mode"
 import { getDemoWorkflowResult, hasDemoData as hasLegacyDemoData } from "@/lib/demo-data"
 
 export const maxDuration = 30
