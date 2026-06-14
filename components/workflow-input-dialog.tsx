@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { encryptValue, decryptValue } from "@/lib/security/encryption"
 import type { StartNodeData } from "@/components/nodes/start-node"
 
 type ScanOptions = { githubToken?: string; scanMode?: "demo" | "real" }
@@ -46,11 +47,23 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel, work
       setInputs(newInputs)
       setErrors({})
 
-      // Scanner: load any saved GitHub token and default the toggle accordingly.
+      // Scanner: load + decrypt any saved GitHub token (legacy plaintext passes through).
       if (isScanner && typeof window !== "undefined") {
-        const savedToken = localStorage.getItem("ai-agent-github-token") || ""
-        setGithubToken(savedToken)
-        setRealScan(Boolean(savedToken))
+        const stored = localStorage.getItem("ai-agent-github-token") || ""
+        if (stored) {
+          decryptValue(stored)
+            .then((token) => {
+              setGithubToken(token)
+              setRealScan(Boolean(token))
+            })
+            .catch(() => {
+              setGithubToken("")
+              setRealScan(false)
+            })
+        } else {
+          setGithubToken("")
+          setRealScan(false)
+        }
       }
     }
   }, [open, startNodes, isScanner])
@@ -90,7 +103,7 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel, work
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: Record<string, string> = {}
 
     // Validate all inputs
@@ -112,7 +125,7 @@ export function WorkflowInputDialog({ open, startNodes, onSubmit, onCancel, work
     if (isScanner) {
       const token = githubToken.trim()
       if (typeof window !== "undefined") {
-        if (token) localStorage.setItem("ai-agent-github-token", token)
+        if (token) localStorage.setItem("ai-agent-github-token", await encryptValue(token))
         else localStorage.removeItem("ai-agent-github-token")
       }
       // realScan off => force demo; on => real (token optional: public repos scan tokenless).
