@@ -136,7 +136,7 @@ export async function getMockImageOutput(
   return {
     type: "image",
     url: demoImages[aspectRatio] || demoImages["1:1"],
-    format: "webp",
+    format: "png",
     dimensions: dimensions[aspectRatio] || dimensions["1:1"],
   }
 }
@@ -411,7 +411,7 @@ export function generateMockPromptOutput(
 
   // Replace variables with demo values
   const variables = template.match(/\$\w+/g) || []
-  variables.forEach((variable) => {
+  variables.forEach((variable: string) => {
     const inputKey = variable.slice(1) // Remove $
     const value = inputs[inputKey] || `[Demo ${inputKey}]`
     template = template.replace(

@@ -9,8 +9,18 @@ import { getCategoryOverviews } from "@/lib/docs/unified-navigation"
 import { searchDocs } from "@/lib/docs/generate-search-index"
 import type { SearchResult } from "@/lib/docs/generate-search-index"
 
-export function DocsSearch() {
-  const [open, setOpen] = useState(false)
+interface DocsSearchProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function DocsSearch({ open: controlledOpen, onOpenChange }: DocsSearchProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = (value: boolean) => {
+    setInternalOpen(value)
+    onOpenChange?.(value)
+  }
   const [query, setQuery] = useState("")
   const router = useRouter()
 
@@ -19,7 +29,7 @@ export function DocsSearch() {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen((open) => !open)
+        setOpen(!open)
       }
     }
 

@@ -73,7 +73,7 @@ export interface SecurityPractices {
 }
 
 export interface Recommendation {
-  priority: "HIGH" | "MEDIUM" | "LOW"
+  priority: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
   title: string
   description: string
   effort: string

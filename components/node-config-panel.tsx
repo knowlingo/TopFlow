@@ -27,13 +27,16 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   const [copiedOutput, setCopiedOutput] = useState(false)
   if (!node) return null
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = node.data as any
+
   const handleUpdate = (field: string, value: any) => {
     onUpdate(node.id, { ...node.data, [field]: value })
   }
 
   const handleCopyOutput = () => {
     if (!node.data || typeof navigator === "undefined") return
-    const rawOutput = node.data.output
+    const rawOutput = data.output
     if (rawOutput === undefined || rawOutput === null) return
     const value = typeof rawOutput === "string" ? rawOutput : JSON.stringify(rawOutput, null, 2)
     navigator.clipboard?.writeText(value).then(() => {
@@ -43,30 +46,30 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const handleDownloadImage = async () => {
-    if (!node.data || !node.data.output) return
+    if (!node.data || !data.output) return
 
     let imageUrl: string | null = null
 
     // Handle different output formats
     // Check for images array property (Image Generation node / End node with images)
-    if (node.data.output.images && Array.isArray(node.data.output.images)) {
-      const firstImage = node.data.output.images.find(
+    if (data.output.images && Array.isArray(data.output.images)) {
+      const firstImage = data.output.images.find(
         (item: any) => typeof item === "string"
       )
       if (firstImage) imageUrl = firstImage
-    } else if (typeof node.data.output === "string") {
-      imageUrl = node.data.output
-    } else if (node.data.output.url) {
-      imageUrl = node.data.output.url
-    } else if (node.data.output.threat_map) {
+    } else if (typeof data.output === "string") {
+      imageUrl = data.output
+    } else if (data.output.url) {
+      imageUrl = data.output.url
+    } else if (data.output.threat_map) {
       // End node demo mode
-      imageUrl = node.data.output.threat_map
-    } else if (node.data.output.finalOutput && typeof node.data.output.finalOutput === "string") {
+      imageUrl = data.output.threat_map
+    } else if (data.output.finalOutput && typeof data.output.finalOutput === "string") {
       // End node live mode
-      imageUrl = node.data.output.finalOutput
-    } else if (Array.isArray(node.data.output)) {
+      imageUrl = data.output.finalOutput
+    } else if (Array.isArray(data.output)) {
       // Take first image if array
-      const firstImage = node.data.output.find(
+      const firstImage = data.output.find(
         (item: any) => typeof item === "string" && (item.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(item))
       )
       if (firstImage) imageUrl = firstImage
@@ -125,15 +128,15 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const handleDownloadAudio = async () => {
-    if (!node.data || !node.data.output) return
+    if (!node.data || !data.output) return
 
     let audioUrl: string | null = null
 
     // Handle different output formats
-    if (typeof node.data.output === "string") {
-      audioUrl = node.data.output
-    } else if (node.data.output.url) {
-      audioUrl = node.data.output.url
+    if (typeof data.output === "string") {
+      audioUrl = data.output
+    } else if (data.output.url) {
+      audioUrl = data.output.url
     }
 
     if (!audioUrl) return
@@ -189,42 +192,42 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const hasImageOutput = () => {
-    if (!node.data || !node.data.output) return false
+    if (!node.data || !data.output) return false
 
     const isImageUrl = (str: string) => {
       return str.startsWith("data:image/") || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(str)
     }
 
     // Check object with images array property (Image Generation node / End node with images)
-    if (node.data.output.images && Array.isArray(node.data.output.images)) {
-      return node.data.output.images.some(
+    if (data.output.images && Array.isArray(data.output.images)) {
+      return data.output.images.some(
         (item: any) => typeof item === "string" && isImageUrl(item)
       )
     }
 
     // Check direct string
-    if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
+    if (typeof data.output === "string" && isImageUrl(data.output)) {
       return true
     }
 
     // Check object with url property (Image Generation node)
-    if (node.data.output.url && isImageUrl(node.data.output.url)) {
+    if (data.output.url && isImageUrl(data.output.url)) {
       return true
     }
 
     // Check object with threat_map property (End node demo mode)
-    if (node.data.output.threat_map && isImageUrl(node.data.output.threat_map)) {
+    if (data.output.threat_map && isImageUrl(data.output.threat_map)) {
       return true
     }
 
     // Check object with finalOutput property (End node live mode)
-    if (node.data.output.finalOutput && typeof node.data.output.finalOutput === "string" && isImageUrl(node.data.output.finalOutput)) {
+    if (data.output.finalOutput && typeof data.output.finalOutput === "string" && isImageUrl(data.output.finalOutput)) {
       return true
     }
 
     // Check array
-    if (Array.isArray(node.data.output)) {
-      return node.data.output.some(
+    if (Array.isArray(data.output)) {
+      return data.output.some(
         (item: any) => typeof item === "string" && isImageUrl(item)
       )
     }
@@ -233,19 +236,19 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const hasAudioOutput = () => {
-    if (!node.data || !node.data.output) return false
+    if (!node.data || !data.output) return false
 
     const isAudioUrl = (str: string) => {
       return str.startsWith("data:audio/") || /\.(mp3|wav|ogg|m4a)$/i.test(str)
     }
 
     // Check direct string
-    if (typeof node.data.output === "string" && isAudioUrl(node.data.output)) {
+    if (typeof data.output === "string" && isAudioUrl(data.output)) {
       return true
     }
 
     // Check object with url property
-    if (node.data.output.url && isAudioUrl(node.data.output.url)) {
+    if (data.output.url && isAudioUrl(data.output.url)) {
       return true
     }
 
@@ -253,13 +256,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const isThreatIntelReport = () => {
-    if (!node.data || !node.data.output) return false
+    if (!node.data || !data.output) return false
 
     // Check if this is a threat intelligence report output
     return (
-      typeof node.data.output === "object" &&
-      "report" in node.data.output &&
-      "threat_map" in node.data.output
+      typeof data.output === "object" &&
+      "report" in data.output &&
+      "threat_map" in data.output
     )
   }
 
@@ -271,33 +274,33 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
     }
 
     // Check for images array property (Image Generation node / End node with images)
-    if (node.data.output.images && Array.isArray(node.data.output.images)) {
-      const firstImage = node.data.output.images.find(
+    if (data.output.images && Array.isArray(data.output.images)) {
+      const firstImage = data.output.images.find(
         (item: any) => typeof item === "string" && isImageUrl(item)
       )
       return firstImage || null
     }
 
-    if (typeof node.data.output === "string" && isImageUrl(node.data.output)) {
-      return node.data.output
+    if (typeof data.output === "string" && isImageUrl(data.output)) {
+      return data.output
     }
 
-    if (node.data.output.url && isImageUrl(node.data.output.url)) {
-      return node.data.output.url
+    if (data.output.url && isImageUrl(data.output.url)) {
+      return data.output.url
     }
 
     // Check for threat_map property (End node demo mode)
-    if (node.data.output.threat_map && isImageUrl(node.data.output.threat_map)) {
-      return node.data.output.threat_map
+    if (data.output.threat_map && isImageUrl(data.output.threat_map)) {
+      return data.output.threat_map
     }
 
     // Check for finalOutput property (End node live mode)
-    if (node.data.output.finalOutput && typeof node.data.output.finalOutput === "string" && isImageUrl(node.data.output.finalOutput)) {
-      return node.data.output.finalOutput
+    if (data.output.finalOutput && typeof data.output.finalOutput === "string" && isImageUrl(data.output.finalOutput)) {
+      return data.output.finalOutput
     }
 
-    if (Array.isArray(node.data.output)) {
-      const firstImage = node.data.output.find(
+    if (Array.isArray(data.output)) {
+      const firstImage = data.output.find(
         (item: any) => typeof item === "string" && isImageUrl(item)
       )
       return firstImage || null
@@ -315,7 +318,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="start-label">Input Label (Optional)</Label>
               <Input
                 id="start-label"
-                value={node.data.label || ""}
+                value={data.label || ""}
                 onChange={(e) => handleUpdate("label", e.target.value)}
                 placeholder="e.g., GitHub URL Input"
               />
@@ -328,10 +331,10 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="start-placeholder">Placeholder Text</Label>
               <Input
                 id="start-placeholder"
-                value={node.data.placeholder || ""}
+                value={data.placeholder || ""}
                 onChange={(e) => handleUpdate("placeholder", e.target.value)}
                 placeholder="e.g., https://github.com/owner/repo"
-                disabled={!node.data.label}
+                disabled={!data.label}
               />
               <p className="text-xs text-muted-foreground">
                 Example text shown in the input field
@@ -341,9 +344,9 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="start-input-type">Input Type</Label>
               <Select
-                value={node.data.inputType || "text"}
+                value={data.inputType || "text"}
                 onValueChange={(value) => handleUpdate("inputType", value)}
-                disabled={!node.data.label}
+                disabled={!data.label}
               >
                 <SelectTrigger id="start-input-type">
                   <SelectValue placeholder="Select type" />
@@ -364,17 +367,17 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="start-default">Default Value (Optional)</Label>
               <Input
                 id="start-default"
-                value={node.data.defaultValue || ""}
+                value={data.defaultValue || ""}
                 onChange={(e) => handleUpdate("defaultValue", e.target.value)}
                 placeholder="Optional pre-fill value"
-                disabled={!node.data.label}
+                disabled={!data.label}
               />
               <p className="text-xs text-muted-foreground">
                 Pre-filled value for the input field
               </p>
             </div>
 
-            {!node.data.label && (
+            {!data.label && (
               <div className="rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
                 <p className="text-sm text-blue-900 dark:text-blue-100">
                   <strong>No Input Configuration:</strong> This Start node will not require user input.
@@ -386,13 +389,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
         )
 
       case "end":
-        const isGitHubScanner = node.data.workflowId === "github-security-scanner"
+        const isGitHubScanner = data.workflowId === "github-security-scanner"
         return (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               The End node marks the final output of your workflow.
             </p>
-            {node.data.output && isGitHubScanner && node.data.status === "completed" && onShowFullReport && (
+            {data.output && isGitHubScanner && data.status === "completed" && onShowFullReport && (
               <Button
                 onClick={onShowFullReport}
                 className="w-full"
@@ -402,7 +405,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
                 Show Full Report
               </Button>
             )}
-            {node.data.output && (
+            {data.output && (
               <p className="text-sm text-muted-foreground">
                 View and download the workflow output below.
               </p>
@@ -414,7 +417,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
         return (
           <div className="space-y-4">
             <ConditionalBuilder
-              value={node.data.condition || ""}
+              value={data.condition || ""}
               onChange={(value) => handleUpdate("condition", value)}
             />
           </div>
@@ -424,10 +427,10 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
         return (
           <div className="space-y-4">
             <HttpRequestEditor
-              url={node.data.url || ""}
-              method={node.data.method || "GET"}
-              headers={node.data.headers}
-              body={node.data.body}
+              url={data.url || ""}
+              method={data.method || "GET"}
+              headers={data.headers}
+              body={data.body}
               onUpdate={(data) => {
                 onUpdate(node.id, { ...node.data, ...data })
               }}
@@ -441,7 +444,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
               <Select
-                value={node.data.model || "openai/gpt-4o-mini"}
+                value={data.model || "openai/gpt-4o-mini"}
                 onValueChange={(value) => handleUpdate("model", value)}
               >
                 <SelectTrigger id="model">
@@ -461,13 +464,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="temperature">Temperature: {node.data.temperature || 0.7}</Label>
+              <Label htmlFor="temperature">Temperature: {data.temperature || 0.7}</Label>
               <Slider
                 id="temperature"
                 min={0}
                 max={2}
                 step={0.1}
-                value={[node.data.temperature || 0.7]}
+                value={[data.temperature || 0.7]}
                 onValueChange={([value]) => handleUpdate("temperature", value)}
               />
             </div>
@@ -477,7 +480,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Input
                 id="maxTokens"
                 type="number"
-                value={node.data.maxTokens || 2000}
+                value={data.maxTokens || 2000}
                 onChange={(e) => handleUpdate("maxTokens", Number.parseInt(e.target.value))}
               />
             </div>
@@ -487,7 +490,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
                 <input
                   type="checkbox"
                   id="structuredOutput"
-                  checked={node.data.structuredOutput || false}
+                  checked={data.structuredOutput || false}
                   onChange={(e) => handleUpdate("structuredOutput", e.target.checked)}
                   className="h-4 w-4 rounded border-border"
                 />
@@ -497,13 +500,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               </div>
             </div>
 
-            {node.data.structuredOutput && (
+            {data.structuredOutput && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="schemaName">Schema Name</Label>
                   <Input
                     id="schemaName"
-                    value={node.data.schemaName || ""}
+                    value={data.schemaName || ""}
                     onChange={(e) => handleUpdate("schemaName", e.target.value)}
                     placeholder="e.g., UserProfile"
                   />
@@ -511,7 +514,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
 
                 <div className="space-y-2">
                   <Label htmlFor="schema">Schema (Zod)</Label>
-                  <SchemaBuilder value={node.data.schema || ""} onChange={(value) => handleUpdate("schema", value)} />
+                  <SchemaBuilder value={data.schema || ""} onChange={(value) => handleUpdate("schema", value)} />
                 </div>
               </>
             )}
@@ -524,7 +527,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
               <Select
-                value={node.data.model || "openai/text-embedding-3-small"}
+                value={data.model || "openai/text-embedding-3-small"}
                 onValueChange={(value) => handleUpdate("model", value)}
               >
                 <SelectTrigger id="model">
@@ -542,7 +545,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Input
                 id="dimensions"
                 type="number"
-                value={node.data.dimensions || 1536}
+                value={data.dimensions || 1536}
                 onChange={(e) => handleUpdate("dimensions", Number.parseInt(e.target.value))}
               />
             </div>
@@ -555,7 +558,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
               <Select
-                value={node.data.model || "gemini-2.5-flash-image"}
+                value={data.model || "gemini-2.5-flash-image"}
                 onValueChange={(value) => handleUpdate("model", value)}
               >
                 <SelectTrigger id="model">
@@ -571,7 +574,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="aspectRatio">Aspect Ratio</Label>
               <Select
-                value={node.data.aspectRatio || "16:9"}
+                value={data.aspectRatio || "16:9"}
                 onValueChange={(value) => handleUpdate("aspectRatio", value)}
               >
                 <SelectTrigger id="aspectRatio">
@@ -589,7 +592,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             <div className="space-y-2">
               <Label htmlFor="outputFormat">Output Format</Label>
               <Select
-                value={node.data.outputFormat || "png"}
+                value={data.outputFormat || "png"}
                 onValueChange={(value) => handleUpdate("outputFormat", value)}
               >
                 <SelectTrigger id="outputFormat">
@@ -610,7 +613,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
-              <Select value={node.data.model || "openai/tts-1"} onValueChange={(value) => handleUpdate("model", value)}>
+              <Select value={data.model || "openai/tts-1"} onValueChange={(value) => handleUpdate("model", value)}>
                 <SelectTrigger id="model">
                   <SelectValue />
                 </SelectTrigger>
@@ -623,7 +626,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
 
             <div className="space-y-2">
               <Label htmlFor="voice">Voice</Label>
-              <Select value={node.data.voice || "alloy"} onValueChange={(value) => handleUpdate("voice", value)}>
+              <Select value={data.voice || "alloy"} onValueChange={(value) => handleUpdate("voice", value)}>
                 <SelectTrigger id="voice">
                   <SelectValue />
                 </SelectTrigger>
@@ -639,13 +642,13 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="speed">Speed: {node.data.speed || 1.0}</Label>
+              <Label htmlFor="speed">Speed: {data.speed || 1.0}</Label>
               <Slider
                 id="speed"
                 min={0.25}
                 max={4.0}
                 step={0.25}
-                value={[node.data.speed || 1.0]}
+                value={[data.speed || 1.0]}
                 onValueChange={([value]) => handleUpdate("speed", value)}
               />
             </div>
@@ -659,7 +662,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="name">Tool Name</Label>
               <Input
                 id="name"
-                value={node.data.name || ""}
+                value={data.name || ""}
                 onChange={(e) => handleUpdate("name", e.target.value)}
                 placeholder="e.g., getWeather"
               />
@@ -669,7 +672,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={node.data.description || ""}
+                value={data.description || ""}
                 onChange={(e) => handleUpdate("description", e.target.value)}
                 placeholder="Describe what this tool does..."
                 rows={3}
@@ -680,7 +683,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="code">Implementation (JavaScript)</Label>
               <Textarea
                 id="code"
-                value={node.data.code || ""}
+                value={data.code || ""}
                 onChange={(e) => handleUpdate("code", e.target.value)}
                 placeholder="// Tool implementation&#10;async function execute(args) {&#10;  // Your code here&#10;  return result;&#10;}"
                 rows={8}
@@ -698,7 +701,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="schemaName">Schema Name</Label>
               <Input
                 id="schemaName"
-                value={node.data.schemaName || ""}
+                value={data.schemaName || ""}
                 onChange={(e) => handleUpdate("schemaName", e.target.value)}
                 placeholder="e.g., UserProfile"
               />
@@ -706,7 +709,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
 
             <div className="space-y-2">
               <Label htmlFor="mode">Mode</Label>
-              <Select value={node.data.mode || "object"} onValueChange={(value) => handleUpdate("mode", value)}>
+              <Select value={data.mode || "object"} onValueChange={(value) => handleUpdate("mode", value)}>
                 <SelectTrigger id="mode">
                   <SelectValue />
                 </SelectTrigger>
@@ -717,14 +720,14 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               </Select>
             </div>
 
-            <SchemaBuilder value={node.data.schema || ""} onChange={(value) => handleUpdate("schema", value)} />
+            <SchemaBuilder value={data.schema || ""} onChange={(value) => handleUpdate("schema", value)} />
           </div>
         )
 
       case "prompt":
         return (
           <div className="space-y-4">
-            <PromptEditor value={node.data.content || ""} onChange={(value) => handleUpdate("content", value)} />
+            <PromptEditor value={data.content || ""} onChange={(value) => handleUpdate("content", value)} />
           </div>
         )
 
@@ -735,7 +738,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
               <Label htmlFor="code">JavaScript Code</Label>
               <Textarea
                 id="code"
-                value={node.data.code || ""}
+                value={data.code || ""}
                 onChange={(e) => handleUpdate("code", e.target.value)}
                 placeholder="// Access inputs as input1, input2, etc.&#10;return input1.toUpperCase()"
                 rows={10}
@@ -754,7 +757,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
   }
 
   const renderOutputSection = () => {
-    if (!node.data || node.data.output === undefined || node.data.output === null) {
+    if (!node.data || data.output === undefined || data.output === null) {
       return null
     }
 
@@ -771,26 +774,26 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
           </Label>
           <div className="flex items-center gap-2">
             {isImage && (
-              <Button variant="outline" size="xs" onClick={handleDownloadImage}>
+              <Button variant="outline" size="sm" onClick={handleDownloadImage}>
                 <Download className="mr-1.5 h-3.5 w-3.5" />
                 Download Image
               </Button>
             )}
             {isAudio && (
-              <Button variant="outline" size="xs" onClick={handleDownloadAudio}>
+              <Button variant="outline" size="sm" onClick={handleDownloadAudio}>
                 <Download className="mr-1.5 h-3.5 w-3.5" />
                 Download Audio
               </Button>
             )}
             {isThreatIntelReport() && (
               <Link href="/reports/template-ot-critical-infra" target="_blank" rel="noopener noreferrer">
-                <Button size="xs" className="bg-primary hover:bg-primary/90">
+                <Button size="sm" className="bg-primary hover:bg-primary/90">
                   <FileText className="mr-1.5 h-3.5 w-3.5" />
                   View Full Report
                 </Button>
               </Link>
             )}
-            <Button variant="outline" size="xs" onClick={handleCopyOutput}>
+            <Button variant="outline" size="sm" onClick={handleCopyOutput}>
               {copiedOutput ? <Check className="mr-1.5 h-3.5 w-3.5" /> : <Copy className="mr-1.5 h-3.5 w-3.5" />}
               {copiedOutput ? "Copied" : "Copy"}
             </Button>
@@ -833,7 +836,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
           <div className="space-y-2">
             <div className="rounded-md border border-border/60 bg-muted/20 p-3">
               <audio controls className="w-full">
-                <source src={node.data.output.url || node.data.output} />
+                <source src={data.output.url || data.output} />
                 Your browser does not support the audio element.
               </audio>
             </div>
@@ -847,9 +850,9 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onShowFullR
         {/* Text/JSON Preview (default) */}
         {!isImage && !isAudio && (
           <pre className="max-h-48 overflow-auto rounded-md border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
-            {typeof node.data.output === "string"
-              ? node.data.output
-              : JSON.stringify(node.data.output, null, 2)}
+            {typeof data.output === "string"
+              ? data.output
+              : JSON.stringify(data.output, null, 2)}
           </pre>
         )}
       </div>

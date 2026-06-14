@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react'
+import type { Edge } from '@xyflow/react'
 import { useWorkflowValidation } from '../use-workflow-validation'
 import * as validationEngine from '@/lib/security/validation-engine'
 
@@ -33,7 +34,7 @@ describe('useWorkflowValidation', () => {
 
   it('should return validation results', () => {
     const nodes = [{ id: '1', type: 'start' }]
-    const edges = []
+    const edges: Edge[] = []
     const apiKeys = {}
 
     const { result } = renderHook(() =>
@@ -58,7 +59,7 @@ describe('useWorkflowValidation', () => {
 
   it('should call validateApiKeys with apiKeys and nodes', () => {
     const nodes = [{ id: '1', type: 'textModel' }]
-    const edges = []
+    const edges: Edge[] = []
     const apiKeys = { openai: 'sk-test' }
 
     renderHook(() => useWorkflowValidation(nodes, edges, apiKeys))
@@ -154,7 +155,7 @@ describe('useWorkflowValidation', () => {
 
   it('should memoize results when inputs do not change', () => {
     const nodes = [{ id: '1', type: 'start' }]
-    const edges = []
+    const edges: Edge[] = []
     const apiKeys = {}
 
     const { result, rerender } = renderHook(() =>
@@ -174,7 +175,7 @@ describe('useWorkflowValidation', () => {
 
   it('should recompute when nodes change', () => {
     const initialNodes = [{ id: '1', type: 'start' }]
-    const edges = []
+    const edges: Edge[] = []
     const apiKeys = {}
 
     const { result, rerender } = renderHook(
@@ -195,7 +196,7 @@ describe('useWorkflowValidation', () => {
 
   it('should recompute when edges change', () => {
     const nodes = [{ id: '1', type: 'start' }]
-    const initialEdges = []
+    const initialEdges: Edge[] = []
     const apiKeys = {}
 
     const { result, rerender } = renderHook(
@@ -216,7 +217,7 @@ describe('useWorkflowValidation', () => {
 
   it('should recompute when apiKeys change', () => {
     const nodes = [{ id: '1', type: 'textModel' }]
-    const edges = []
+    const edges: Edge[] = []
     const initialApiKeys = {}
 
     const { result, rerender } = renderHook(

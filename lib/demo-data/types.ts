@@ -17,11 +17,11 @@ export interface DemoResult {
 }
 
 export interface NodeResult {
-  nodeId: string
-  nodeType: string
+  nodeId?: string
+  nodeType?: string
   output: any // Type depends on node
-  duration: number // Simulated duration (ms)
-  status: "completed" | "error"
+  duration?: number // Simulated duration (ms)
+  status?: "completed" | "error"
   error?: string
 }
 

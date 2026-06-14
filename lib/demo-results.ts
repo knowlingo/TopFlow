@@ -460,7 +460,7 @@ PHASE 5 - RECOVERY:
       },
       "cond-2": {
         output: true,
-        description: "CRITICAL severity - immediate escalation initiated"
+        error: "CRITICAL severity - immediate escalation initiated"
       },
       "http-2": {
         output: {

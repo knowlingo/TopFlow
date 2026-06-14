@@ -180,7 +180,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
         return this.executeToolNode(node, inputs)
 
       case 'prompt':
-        return this.executePromptNode(node, inputs)
+        return this.executePromptTemplate(node, inputs)
 
       default:
         // Fall back to base implementation for shared nodes
@@ -213,7 +213,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     Object.entries(inputs).forEach(([key, value]) => {
       // Support property access like $input1.fullName
       const regex = new RegExp(`\\$${key}(?:\\.([\\w\\.]+))?`, 'g')
-      interpolatedUrl = interpolatedUrl.replace(regex, (match, propertyPath) => {
+      interpolatedUrl = interpolatedUrl.replace(regex, (_match: string, propertyPath: string) => {
         if (propertyPath && typeof value === 'object' && value !== null) {
           // Access nested property
           const props = propertyPath.split('.')
@@ -279,7 +279,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       model,
       prompt: String(prompt),
       temperature,
-      maxTokens,
+      maxOutputTokens: maxTokens,
     })
 
     return result.text
@@ -365,7 +365,8 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     const openaiClient = createOpenAI({ apiKey: context.apiKeys.openai })
 
     const result = await embed({
-      model: openaiClient.embedding(modelId),
+       
+      model: openaiClient.embedding(modelId) as any,
       value: String(input),
     })
 
@@ -449,7 +450,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     return z.any() // fallback
   }
 
-  private async executePromptNode(node: Node, inputs: Record<string, any>): Promise<any> {
+  private async executePromptTemplate(node: Node, inputs: Record<string, any>): Promise<any> {
     const data = node.data as any
     let template = data.prompt || ''
 
@@ -482,7 +483,7 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       Object.entries(enhancedInputs).forEach(([key, value]) => {
         // Property access pattern: $input1.property.nested
         const regex = new RegExp(`\\$${key}(?:\\.([\\w\\.]+))?`, 'g')
-        template = template.replace(regex, (match, propertyPath) => {
+        template = template.replace(regex, (_match: string, propertyPath: string) => {
           if (propertyPath && typeof value === 'object' && value !== null) {
             // Access nested property
             const props = propertyPath.split('.')
@@ -575,7 +576,8 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
    * Wrap model to report v2 spec for AI SDK 5 compatibility
    * This prevents "Unsupported model version v3" errors
    */
-  private wrapToSpecV2(model: any, provider: string, modelId: string) {
+   
+  private wrapToSpecV2(model: any, provider: string, modelId: string): any {
     if (!model || typeof model !== 'object') {
       throw new Error('Invalid language model instance')
     }

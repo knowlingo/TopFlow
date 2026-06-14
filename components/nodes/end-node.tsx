@@ -168,7 +168,7 @@ function EndNode({ data, selected }: NodeProps<Node<EndNodeData>>) {
           <p className="mb-1.5 text-xs font-semibold text-muted-foreground/90 uppercase tracking-wide">Final Output:</p>
           {hasImages() ? (
             <div className="space-y-2">
-              {getImages().map((img, idx) => (
+              {getImages().map((img: string, idx: number) => (
                 <div key={idx} className="space-y-1.5">
                   <img
                     src={img || "/placeholder.svg"}

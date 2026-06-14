@@ -529,7 +529,7 @@ const priority = calculatePriority(tier, severity, timestamp);`}
         </Card>
 
         <DocsFooter
-          prevPage={{
+          previousPage={{
             title: "Tutorials",
             href: "/docs/learn/tutorials",
           }}
