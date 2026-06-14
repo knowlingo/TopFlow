@@ -204,8 +204,7 @@ export function SecurityValidationPanel({
               </div>
               <Progress
                 value={overallScore}
-                className="h-2"
-                indicatorClassName={cn("bg-gradient-to-r", getScoreGradient(overallScore))}
+                className={cn("h-2", getScoreGradient(overallScore))}
               />
             </CardContent>
           </Card>

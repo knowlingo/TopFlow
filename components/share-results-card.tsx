@@ -117,7 +117,7 @@ export function ShareResultsCard({ owner, repo, grade, score, vulnerabilities, v
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" onClick={nativeShare} className="w-full">
             <Share2 className="h-4 w-4 mr-2" />
-            {navigator.share ? "Share..." : "Copy Link"}
+            {typeof navigator.share === 'function' ? "Share..." : "Copy Link"}
           </Button>
           <Button variant="outline" onClick={downloadImage} className="w-full">
             <Download className="h-4 w-4 mr-2" />

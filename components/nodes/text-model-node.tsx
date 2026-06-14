@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { MessageSquare, Settings } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -18,7 +18,7 @@ export type TextModelNodeData = {
   output?: any
 }
 
-function TextModelNode({ data, selected }: NodeProps<TextModelNodeData>) {
+function TextModelNode({ data, selected }: NodeProps<Node<TextModelNodeData>>) {
   const status = data.status || "idle"
 
   return (

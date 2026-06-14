@@ -353,7 +353,7 @@ export default function CoreConceptsPage() {
         </Card>
 
         <DocsFooter
-          prevPage={{
+          previousPage={{
             title: "Quick Start",
             href: "/docs/learn/quick-start",
           }}

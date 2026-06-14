@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { ReactFlowProvider } from '@xyflow/react'
 import HttpRequestNode, { type HttpRequestNodeData } from '../http-request-node'
-import type { NodeProps } from '@xyflow/react'
+import type { NodeProps, Node } from '@xyflow/react'
 
 // Mock the status color utility
 jest.mock('@charliesu/workflow-core', () => ({
@@ -17,13 +17,11 @@ jest.mock('@charliesu/workflow-core', () => ({
   }),
 }))
 
-const createNodeProps = (data: HttpRequestNodeData, selected = false): NodeProps<HttpRequestNodeData> => ({
+const createNodeProps = (data: HttpRequestNodeData, selected = false): any => ({
   id: 'http-request-1',
   data,
   selected,
   type: 'httpRequest',
-  xPos: 0,
-  yPos: 0,
   zIndex: 0,
   isConnectable: true,
   positionAbsoluteX: 0,

@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
+import type { Edge } from '@xyflow/react'
 import { useAutoSave } from '../use-auto-save'
 import { useWorkflowStore } from '@/lib/workflow-store'
 
@@ -34,7 +35,7 @@ describe('useAutoSave', () => {
 
   it('should save workflow to localStorage after debounce delay', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     renderHook(() => useAutoSave(nodes, edges))
 
@@ -50,7 +51,7 @@ describe('useAutoSave', () => {
 
   it('should create autosave with timestamp', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const mockNow = 1234567890
     jest.spyOn(Date, 'now').mockReturnValue(mockNow)
@@ -69,7 +70,7 @@ describe('useAutoSave', () => {
 
   it('should update save status to "saving" then "saved"', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     renderHook(() => useAutoSave(nodes, edges))
 
@@ -83,7 +84,7 @@ describe('useAutoSave', () => {
 
   it('should update last save timestamp', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const mockNow = 1234567890
     jest.spyOn(Date, 'now').mockReturnValue(mockNow)
@@ -99,7 +100,7 @@ describe('useAutoSave', () => {
 
   it('should not save if workflow has not changed', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     renderHook(() => useAutoSave(nodes, edges))
 
@@ -121,7 +122,7 @@ describe('useAutoSave', () => {
 
   it('should save on 30-second auto-save interval', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     renderHook(() => useAutoSave(nodes, edges))
 
@@ -136,7 +137,7 @@ describe('useAutoSave', () => {
 
   it('should reset debounce timer when nodes change', () => {
     const initialNodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const { rerender } = renderHook(
       ({ nodes }) => useAutoSave(nodes, edges),
@@ -177,7 +178,7 @@ describe('useAutoSave', () => {
 
   it('should cleanup old autosaves and keep last 5', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     // Create 7 old autosaves
     for (let i = 1; i <= 7; i++) {
@@ -221,7 +222,7 @@ describe('useAutoSave', () => {
 
   it('should handle localStorage errors gracefully', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     // Mock localStorage.setItem to throw error
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
@@ -246,7 +247,7 @@ describe('useAutoSave', () => {
 
   it('should return saveWorkflow function', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const { result } = renderHook(() => useAutoSave(nodes, edges))
 
@@ -256,7 +257,7 @@ describe('useAutoSave', () => {
 
   it('should allow manual save via returned function', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const { result } = renderHook(() => useAutoSave(nodes, edges))
 
@@ -278,7 +279,7 @@ describe('useAutoSave', () => {
 
   it('should cleanup intervals on unmount', () => {
     const nodes = [{ id: '1', type: 'start', position: { x: 0, y: 0 }, data: {} }]
-    const edges = []
+    const edges: Edge[] = []
 
     const { unmount } = renderHook(() => useAutoSave(nodes, edges))
 
