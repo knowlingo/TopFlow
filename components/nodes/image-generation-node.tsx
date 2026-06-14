@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { ImageIcon, Download } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ export type ImageGenerationNodeData = {
   output?: any
 }
 
-function ImageGenerationNode({ data, selected }: NodeProps<ImageGenerationNodeData>) {
+function ImageGenerationNode({ data, selected }: NodeProps<Node<ImageGenerationNodeData>>) {
   const status = data.status || "idle"
 
   const handleDownloadImage = (imageData: string, index: number) => {

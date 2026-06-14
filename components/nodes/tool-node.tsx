@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react"
 import { Wrench, Settings } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { getStatusColor } from "@charliesu/workflow-core"
@@ -14,7 +14,7 @@ export type ToolNodeData = {
   status?: "idle" | "running" | "completed" | "error"
 }
 
-function ToolNode({ data, selected }: NodeProps<ToolNodeData>) {
+function ToolNode({ data, selected }: NodeProps<Node<ToolNodeData>>) {
   const status = data.status || "idle"
 
   return (
