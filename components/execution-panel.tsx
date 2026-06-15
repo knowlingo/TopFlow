@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { WorkflowInputDialog } from "@/components/workflow-input-dialog"
 import type { StartNodeData } from "@/components/nodes/start-node"
 import { GitHubScannerResults } from "@/components/github-scanner-results"
+import { decryptApiKeys, decryptValue } from "@/lib/security/encryption"
 
 type ExecutionResult = {
   nodeId: string
@@ -165,14 +166,18 @@ export function ExecutionPanel({
     })
 
     try {
-      const apiKeys = typeof window !== "undefined" ? localStorage.getItem("ai-agent-api-keys") : null
-      const keys = apiKeys ? JSON.parse(apiKeys) : {}
+      const storedKeys = typeof window !== "undefined" ? localStorage.getItem("ai-agent-api-keys") : null
+      // Decrypt at-rest BYOK keys before sending (legacy plaintext passes through).
+      const keys = storedKeys ? await decryptApiKeys(JSON.parse(storedKeys)) : {}
 
       // Two-axis BYOK: GitHub token => real scan DATA; AI key (in `keys`) => LLM NARRATIVE.
-      // Use the dialog's choice when present; otherwise fall back to any saved token.
-      const githubToken = scanOptions
-        ? scanOptions.githubToken
-        : (typeof window !== "undefined" ? localStorage.getItem("ai-agent-github-token") || undefined : undefined)
+      // Use the dialog's choice when present (already plaintext); otherwise fall back to
+      // the saved (encrypted) token and decrypt it.
+      let githubToken = scanOptions ? scanOptions.githubToken : undefined
+      if (!scanOptions && typeof window !== "undefined") {
+        const storedToken = localStorage.getItem("ai-agent-github-token")
+        githubToken = storedToken ? await decryptValue(storedToken) : undefined
+      }
 
       const response = await fetch("/api/execute-workflow", {
         method: "POST",
