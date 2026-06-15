@@ -32,7 +32,7 @@ A consistent template so the series compounds:
 | 01 | Securing workflow egress & execution: SSRF allowlisting, cycle detection, rate limiting | PR #12 | Draft 2026-06-14 | — |
 | 02 | Secrets at rest: BYOK key encryption in a zero-backend app | W1 key-encryption | Draft 2026-06-14 | — |
 | 03 | JS-node sandbox isolation: replacing `new Function()` with a real isolate | W1-T3 | Not started | Needs dep (`quickjs-emscripten` or `isolated-vm`) — frozen lockfile PR required |
-| 04 | Durable rate limiting: from in-memory to Redis/KV across serverless instances | W1-T4 | Not started | Needs dep (`@upstash/ratelimit`) — frozen lockfile PR required |
+| 04 | Durable rate limiting: from in-memory to Redis/KV across serverless instances | W1-T4 | Draft 2026-06-14 | — |
 | 05 | The Untrusted Reasoning Worker: constraining LLMs on security/compliance paths | W2 Phase 1 | Draft 2026-06-14 | — |
 
 **Tutorial → implementation mapping:** each tutorial is written once the corresponding code lands. Tutorials 03 and 04 are blocked until their dependency-add PRs merge. Tutorial 05 drafted alongside W2 Phase 1 shipment — no new deps required.
