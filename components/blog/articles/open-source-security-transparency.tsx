@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle, Users, Shield, Zap } from "lucide-react"
+import { CheckCircle2, XCircle, Users, Shield, Zap, ExternalLink } from "lucide-react"
 
 export function OpenSourceSecurityContent() {
   return (
@@ -41,6 +41,19 @@ export function OpenSourceSecurityContent() {
       <p>
         Security through transparency isn't just a philosophy—it's a competitive advantage. When you're confident enough
         to share your architecture publicly, you're demonstrating that your security controls can withstand scrutiny.
+      </p>
+      <p className="mt-4">
+        TopFlow's full source — including the security controls described in these posts — is on{" "}
+        <a
+          href="https://github.com/csupenn/topflow"
+          className="text-primary hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/csupenn/topflow
+          <ExternalLink className="w-3 h-3" />
+        </a>
+        . Read the code, open an issue, or fork it.
       </p>
     </div>
   )

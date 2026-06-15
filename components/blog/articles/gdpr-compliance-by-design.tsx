@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from "lucide-react"
+import { CheckCircle2, XCircle, ExternalLink } from "lucide-react"
 
 export function GDPRComplianceBlogContent() {
   return (
@@ -63,6 +63,16 @@ export function GDPRComplianceBlogContent() {
         TopFlow proves that privacy-first doesn't mean feature-poor. Experience it yourself at{" "}
         <a href="https://topflow.dev" className="text-primary hover:underline">
           topflow.dev
+        </a>{" "}
+        or review the architecture on{" "}
+        <a
+          href="https://github.com/csupenn/topflow"
+          className="text-primary hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+          <ExternalLink className="w-3 h-3" />
         </a>
         .
       </p>

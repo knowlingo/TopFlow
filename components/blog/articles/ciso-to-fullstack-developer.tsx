@@ -1,4 +1,4 @@
-import { Shield, Code, CheckCircle2 } from "lucide-react"
+import { Shield, Code, CheckCircle2, ExternalLink } from "lucide-react"
 
 export function CISOToFullStackContent() {
   return (
@@ -26,7 +26,7 @@ export function CISOToFullStackContent() {
           <h3 className="text-xl font-semibold text-foreground mb-3">Week 2: Core Workflow Engine</h3>
           <ul className="space-y-2 list-disc list-inside ml-4 text-sm">
             <li>Built drag-and-drop canvas with React Flow</li>
-            <li>Implemented 10 node types</li>
+            <li>Implemented 12 node types</li>
             <li>Added cycle detection and validation</li>
           </ul>
         </div>
@@ -56,6 +56,28 @@ export function CISOToFullStackContent() {
       <p>
         Building TopFlow proved that security expertise makes you a better developer, and that hands-on development
         makes you a better security leader.
+      </p>
+      <p className="mt-4">
+        The full source is open on{" "}
+        <a
+          href="https://github.com/csupenn/topflow"
+          className="text-primary hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/csupenn/topflow
+          <ExternalLink className="w-3 h-3" />
+        </a>
+        . The AI Security Tutorial series documents the real hardening work in detail:{" "}
+        <a
+          href="https://topflow.dev/blog"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          topflow.dev/blog
+        </a>
+        .
       </p>
     </div>
   )
