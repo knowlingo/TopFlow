@@ -17,21 +17,18 @@ import { UpstashRateLimitStore } from '../upstash-rate-limit-store'
 // ---------------------------------------------------------------------------
 
 function makeMockRedis(zrangeResult: string[]) {
-  const calls: { cmd: string; args: unknown[] }[] = []
+  const calls: string[] = []
 
   const pipeline = {
-    zadd: (...args: unknown[]) => { calls.push({ cmd: 'zadd', args }); return pipeline },
-    zremrangebyscore: (...args: unknown[]) => { calls.push({ cmd: 'zremrangebyscore', args }); return pipeline },
-    zrange: (...args: unknown[]) => { calls.push({ cmd: 'zrange', args }); return pipeline },
-    expire: (...args: unknown[]) => { calls.push({ cmd: 'expire', args }); return pipeline },
+    zadd: (..._: unknown[]) => { calls.push('zadd'); return pipeline },
+    zremrangebyscore: (..._: unknown[]) => { calls.push('zremrangebyscore'); return pipeline },
+    zrange: (..._: unknown[]) => { calls.push('zrange'); return pipeline },
+    expire: (..._: unknown[]) => { calls.push('expire'); return pipeline },
     exec: async () => [1, 0, zrangeResult, 1],
-    _calls: calls,
   }
 
-  return {
-    pipeline: () => pipeline,
-    _pipelineCalls: calls,
-  } as unknown as import('@upstash/redis').Redis
+  const redis = { pipeline: () => pipeline } as unknown as import('@upstash/redis').Redis
+  return { redis, calls }
 }
 
 // ---------------------------------------------------------------------------
@@ -42,7 +39,7 @@ describe('UpstashRateLimitStore', () => {
   it('returns timestamps parsed from member strings', async () => {
     const t1 = 1_000
     const t2 = 2_000
-    const redis = makeMockRedis([`${t1}:abc`, `${t2}:def`])
+    const { redis } = makeMockRedis([`${t1}:abc`, `${t2}:def`])
     const store = new UpstashRateLimitStore(redis)
 
     const result = await store.hit('user:1', 3_000, 60_000)
@@ -51,7 +48,7 @@ describe('UpstashRateLimitStore', () => {
   })
 
   it('returns results sorted ascending by timestamp', async () => {
-    const redis = makeMockRedis(['3000:c', '1000:a', '2000:b'])
+    const { redis } = makeMockRedis(['3000:c', '1000:a', '2000:b'])
     const store = new UpstashRateLimitStore(redis)
 
     const result = await store.hit('user:1', 4_000, 60_000)
@@ -60,21 +57,19 @@ describe('UpstashRateLimitStore', () => {
   })
 
   it('issues ZADD, ZREMRANGEBYSCORE, ZRANGE, EXPIRE in pipeline', async () => {
-    const redis = makeMockRedis([])
-    const pipeline = redis.pipeline() as ReturnType<typeof makeMockRedis>['pipeline'] & { _calls: { cmd: string; args: unknown[] }[] }
+    const { redis, calls } = makeMockRedis([])
     const store = new UpstashRateLimitStore(redis)
 
     await store.hit('user:1', 5_000, 60_000)
 
-    const cmds = (pipeline as any)._calls.map((c: { cmd: string }) => c.cmd)
-    expect(cmds).toContain('zadd')
-    expect(cmds).toContain('zremrangebyscore')
-    expect(cmds).toContain('zrange')
-    expect(cmds).toContain('expire')
+    expect(calls).toContain('zadd')
+    expect(calls).toContain('zremrangebyscore')
+    expect(calls).toContain('zrange')
+    expect(calls).toContain('expire')
   })
 
   it('filters out NaN entries from malformed members', async () => {
-    const redis = makeMockRedis(['1000:a', 'not-a-number', '2000:b'])
+    const { redis } = makeMockRedis(['1000:a', 'not-a-number', '2000:b'])
     const store = new UpstashRateLimitStore(redis)
 
     const result = await store.hit('user:1', 3_000, 60_000)
@@ -104,7 +99,7 @@ describe('UpstashRateLimitStore', () => {
 
     // zrange returns post-zadd state: 11 hits (10 existing + this one) → over limit of 10
     const postZadd = Array.from({ length: 11 }, (_, i) => `${1000 + i * 100}:x`)
-    const redis = makeMockRedis(postZadd)
+    const { redis } = makeMockRedis(postZadd)
     const store = new UpstashRateLimitStore(redis)
     const limiter = new RateLimiter({ limit: 10, windowMs: 60_000, store, now: () => 2000 })
 
@@ -119,7 +114,7 @@ describe('UpstashRateLimitStore', () => {
 
     // zrange returns post-zadd state: 6 hits (5 existing + this one) → under limit of 10
     const postZadd = Array.from({ length: 6 }, (_, i) => `${1000 + i * 100}:x`)
-    const redis = makeMockRedis(postZadd)
+    const { redis } = makeMockRedis(postZadd)
     const store = new UpstashRateLimitStore(redis)
     const limiter = new RateLimiter({ limit: 10, windowMs: 60_000, store, now: () => 2000 })
 
