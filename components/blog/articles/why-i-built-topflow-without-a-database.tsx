@@ -1,3 +1,5 @@
+import { ExternalLink } from "lucide-react"
+
 export function DatabaseFreeBlogContent() {
   return (
     <div className="space-y-6 text-muted-foreground leading-relaxed">
@@ -129,7 +131,18 @@ export async function executeWorkflow(workflow: Workflow) {
         <a href="https://topflow.dev" className="text-primary hover:underline">
           topflow.dev
         </a>{" "}
-        and build an AI workflow—no signup required, no data collected.
+        and build an AI workflow — no signup required, no data collected. The full source (including the
+        localStorage abstraction and AES-256-GCM key encryption) is on{" "}
+        <a
+          href="https://github.com/csupenn/topflow"
+          className="text-primary hover:underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/csupenn/topflow
+          <ExternalLink className="w-3 h-3" />
+        </a>
+        .
       </p>
     </div>
   )
