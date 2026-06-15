@@ -125,7 +125,7 @@ Each shipped hardening slice produces a companion tutorial — a case-study-styl
 | 02 | Secrets at rest: AES-256-GCM BYOK key encryption | W1-T5 | ✅ Shipped | ✅ Draft complete |
 | 03 | JS-node sandbox isolation (`new Function()` → real isolate) | W1-T3 | 🔴 Blocked (dep) | 🔲 Not started |
 | 04 | Durable rate limiting: in-memory → Redis/KV | W1-T4 (durable) | 🔴 Blocked (dep) | 🔲 Not started |
-| 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | ✅ Shipped | 🔲 Not started — write after this PR merges |
+| 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | ✅ Shipped | ✅ Draft complete |
 
 **Rule:** a tutorial is not started until its code is merged to `dev` and CI is green. Once code ships, the tutorial draft targets completion in the same PR or the immediately following one.
 
