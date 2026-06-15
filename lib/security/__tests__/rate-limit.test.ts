@@ -17,7 +17,7 @@ describe("RateLimiter (sliding window, injected clock)", () => {
   })
 
   test("keys are isolated", async () => {
-    let now = 0
+    const now = 0
     const rl = new RateLimiter({ limit: 1, windowMs: 1000, now: () => now })
     expect((await rl.check("a")).allowed).toBe(true)
     expect((await rl.check("a")).allowed).toBe(false)
