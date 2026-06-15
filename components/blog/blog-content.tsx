@@ -10,6 +10,7 @@ import { SSRFPreventionContent } from "@/components/blog/articles/preventing-ssr
 import { BudgetSaaSContent } from "@/components/blog/articles/20-dollar-saas-infrastructure"
 import { GDPRAutomationContent } from "@/components/blog/articles/gdpr-automation-3-minutes"
 import { EncryptionBugContent } from "@/components/blog/articles/encryption-bug-aes-gcm-ephemeral-key"
+import { URWContent } from "@/components/blog/articles/untrusted-reasoning-worker-llm-security"
 
 interface BlogContentProps {
   slug: string
@@ -25,7 +26,8 @@ export function BlogContent({ slug }: BlogContentProps) {
     "preventing-ssrf-attacks-ai-workflows": <SSRFPreventionContent />,
     "20-dollar-saas-infrastructure": <BudgetSaaSContent />,
     "gdpr-automation-3-minutes": <GDPRAutomationContent />,
-    "encryption-bug-aes-gcm-ephemeral-key": <EncryptionBugContent />
+    "encryption-bug-aes-gcm-ephemeral-key": <EncryptionBugContent />,
+    "untrusted-reasoning-worker-llm-security": <URWContent />
   }
 
   const content = contentMap[slug]

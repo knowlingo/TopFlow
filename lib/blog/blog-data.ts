@@ -181,7 +181,7 @@ export const blogPosts: BlogPost[] = [
     title: "The Bug That Made My Encryption Instantly Useless",
     excerpt:
       "I added AES-256-GCM encryption to protect BYOK API keys in localStorage. It compiled, tests passed—but every ciphertext was immediately unrecoverable. Here's the silent bug, the fix, and what it teaches about cryptographic code.",
-    publishedAt: "June 15, 2026",
+    publishedAt: "March 15, 2026",
     readTime: "9 min read",
     category: "Security",
     author: authorCharlie,
@@ -196,6 +196,29 @@ export const blogPosts: BlogPost[] = [
         "localStorage encryption",
         "key management",
         "cryptographic testing",
+      ],
+    },
+  },
+  {
+    slug: "untrusted-reasoning-worker-llm-security",
+    title: "The Untrusted Reasoning Worker: Why I Don't Let the LLM Decide",
+    excerpt:
+      "Letting an LLM write a security report sounds convenient—until it starts inventing CVE IDs, accepts attacker instructions embedded in advisory text, and produces output no code can reliably check. Here's the pattern that fixes all three.",
+    publishedAt: "April 10, 2026",
+    readTime: "11 min read",
+    category: "Security",
+    author: authorCharlie,
+    seo: {
+      description:
+        "The Untrusted Reasoning Worker (URW) pattern: how to use an LLM on security-sensitive paths without letting it fabricate facts, accept prompt injection, or produce uncheckable output. Real code from TopFlow's GitHub Security Scanner.",
+      keywords: [
+        "LLM security",
+        "prompt injection prevention",
+        "AI agent security",
+        "constrained elicitation",
+        "LLM hallucination",
+        "agentic AI security",
+        "OWASP LLM top 10",
       ],
     },
   },
