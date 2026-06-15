@@ -1,7 +1,7 @@
 # OSV Scanner — Implementation Status
 
 **Last updated:** 2026-06-14  
-**Branch baseline:** `dev` @ `75a3d17`
+**Branch baseline:** `dev` @ `71c7d34`
 
 This document is the ground truth between what the roadmap plans and what the code actually does. Update it as things land or get blocked — not after the fact.
 
@@ -29,9 +29,9 @@ This document is the ground truth between what the roadmap plans and what the co
 | **T2 Cycle detection** (DFS pre-execution, reject cyclic graphs, server-side enforcement) | ✅ Shipped | Same commit as T1 |
 | **T4 Durable rate limiter** (sliding-window, injected clock, `MemoryRateLimitStore` → `UpstashRateLimitStore`) | ✅ Shipped | `lib/security/rate-limit.ts` + `upstash-rate-limit-store.ts`; Redis when env vars present, in-memory fallback |
 | **T5 Encrypt API keys at rest** (AES-256-GCM, Web Crypto, encrypt-on-save / decrypt-on-load) | ✅ Shipped | `lib/security/encryption.ts`; wired into settings + scanner dialogs; decrypt-before-send in execution panel |
-| **T6 Reconcile claims/docs** | 🔄 Partial | Encryption and SSRF claims now accurate; rate-limit and sandbox claims still need updating |
+| **T6 Reconcile claims/docs** | ✅ Done | `architecture-overview.md` updated: SSRF provenance-aware exemption documented, rate-limit describes MemoryStore→UpstashStore, sandbox limitation (T3 deferred) noted — PR #19 |
 | **T3 JS-node sandbox replacement** (isolated-vm / QuickJS-wasm) | 🔴 Blocked | Requires new dependency — see blocker below |
-| **T7 Drop `typescript.ignoreBuildErrors`** | 🔄 Pending | Type-check gate is live in CI; `next.config.mjs` flag can be removed once build is confirmed clean end-to-end |
+| **T7 Drop `typescript.ignoreBuildErrors`** | ✅ Done | Removed from `next.config.mjs`; `tsc --noEmit` exits clean; CI type-check gate confirms — PR #19 |
 
 ### W2 — URW trust boundary
 
@@ -106,9 +106,9 @@ Evaluate in this order: (1) `quickjs-emscripten` — pure wasm, no native binari
 ## What's next (ordered)
 
 1. ~~**W2 Phase 1** — constrained-selector~~ ✅ shipped (`lib/security/urw.ts`)
-2. **T4 durable rate limiter** — dedicated dep-add PR (`@upstash/ratelimit`)
-3. **T6 claims reconciliation** — update `architecture-overview.md` rate-limit and sandbox status flags; remove "encrypted in your browser" copy until encryption is confirmed wired end-to-end
-4. **T7 drop `ignoreBuildErrors`** — once build is clean end-to-end
+2. ~~**T4 durable rate limiter**~~ ✅ shipped (`lib/security/upstash-rate-limit-store.ts`; PR #20)
+3. ~~**T6 claims reconciliation**~~ ✅ shipped (`docs/architecture/architecture-overview.md`; PR #19)
+4. ~~**T7 drop `ignoreBuildErrors`**~~ ✅ shipped (`next.config.mjs`; PR #19)
 5. **T3 JS-node sandbox** — dedicated dep-add PR (`quickjs-emscripten`), dedicated branch
 6. **W2 Phase 2** — trifecta guard + human-gated sinks (co-develops with T3)
 7. **W3 PII Detection** — M2, after URW Phase 1 establishes the pattern
@@ -144,4 +144,4 @@ Tutorial 02 documents the encryption bug-and-fix in full, including the XSS limi
 | `lib/__tests__/osv-scanner.test.ts` | — | ✅ |
 | `lib/__tests__/scanner-axes.test.ts` | — | ✅ |
 | All other suites | — | ✅ |
-| **Total** | **503** | **25/25 suites passing** |
+| **Total** | **536** | **27/27 suites passing** |
