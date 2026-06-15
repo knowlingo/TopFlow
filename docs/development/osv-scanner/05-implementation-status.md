@@ -37,7 +37,7 @@ This document is the ground truth between what the roadmap plans and what the co
 
 | Task | Status | Notes |
 |------|:------:|-------|
-| Phase 1 — constrained-selector (tasks 1.1–1.7) | 🔲 Not started | Extends `renderReport`; design complete in `02-p0-urw-trust-boundary.md` |
+| Phase 1 — constrained-selector (tasks 1.1–1.7) | ✅ Shipped | `lib/security/urw.ts` + engine + `renderReport`; 26 tests |
 | Phase 2 — trifecta guard + human-gated sinks | 🔲 Not started | Co-develops with W1 T1/T2 (same files) |
 
 ---
@@ -105,7 +105,7 @@ Evaluate in this order: (1) `quickjs-emscripten` — pure wasm, no native binari
 
 ## What's next (ordered)
 
-1. **W2 Phase 1** — constrained-selector for the scanner's `ai-analysis` node (no new deps, co-develops with existing files)
+1. ~~**W2 Phase 1** — constrained-selector~~ ✅ shipped (`lib/security/urw.ts`)
 2. **T4 durable rate limiter** — dedicated dep-add PR (`@upstash/ratelimit`)
 3. **T6 claims reconciliation** — update `architecture-overview.md` rate-limit and sandbox status flags; remove "encrypted in your browser" copy until encryption is confirmed wired end-to-end
 4. **T7 drop `ignoreBuildErrors`** — once build is clean end-to-end
@@ -125,7 +125,7 @@ Each shipped hardening slice produces a companion tutorial — a case-study-styl
 | 02 | Secrets at rest: AES-256-GCM BYOK key encryption | W1-T5 | ✅ Shipped | ✅ Draft complete |
 | 03 | JS-node sandbox isolation (`new Function()` → real isolate) | W1-T3 | 🔴 Blocked (dep) | 🔲 Not started |
 | 04 | Durable rate limiting: in-memory → Redis/KV | W1-T4 (durable) | 🔴 Blocked (dep) | 🔲 Not started |
-| 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | 🔲 Not started | 🔲 Not started |
+| 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | ✅ Shipped | 🔲 Not started — write after this PR merges |
 
 **Rule:** a tutorial is not started until its code is merged to `dev` and CI is green. Once code ships, the tutorial draft targets completion in the same PR or the immediately following one.
 

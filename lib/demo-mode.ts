@@ -361,13 +361,39 @@ export async function simulateDelay(delayMs: number): Promise<void> {
  */
 export function renderReport(
   analysis: any,
-  opts?: { repo?: string; score?: number }
+  opts?: {
+    repo?:            string
+    score?:           number
+    // URW Phase 1: validated, deterministic assembly inputs.
+    // When provided, findings are ordered by LLM-prioritized + validated IDs
+    // and per-finding effort/impact come from the constrained schema output.
+    order?:           string[]
+    recommendations?: Array<{ findingId: string; effort: string; impact: string }>
+    summaryLabel?:    string
+    commentary?:      string   // stripped, non-authoritative, max 280 chars
+  }
 ): string {
   const repo = opts?.repo || analysis?.repository || "the repository"
   const score = opts?.score ?? analysis?.securityScore ?? 0
   const grade = analysis?.grade || "N/A"
   const vulns = analysis?.vulnerabilities || { critical: 0, high: 0, medium: 0, low: 0 }
-  const details: any[] = Array.isArray(vulns.details) ? vulns.details : []
+  let details: any[] = Array.isArray(vulns.details) ? vulns.details : []
+
+  // URW deterministic assembly: re-order details by validated LLM priority.
+  // Fall back to the original order if the selected set is empty.
+  if (opts?.order && opts.order.length > 0) {
+    const rankMap = new Map(opts.order.map((id, i) => [id, i]))
+    const sorted = [...details].sort((a, b) => {
+      const ra = rankMap.get(a.id) ?? rankMap.get(a.osvId) ?? Infinity
+      const rb = rankMap.get(b.id) ?? rankMap.get(b.osvId) ?? Infinity
+      return ra - rb
+    })
+    // Only include validated findings; append any not in the ranked set at the end.
+    const inRanked = new Set(opts.order)
+    const tail = details.filter(d => !inRanked.has(d.id) && !inRanked.has(d.osvId))
+    details = [...sorted.filter(d => inRanked.has(d.id) || inRanked.has(d.osvId)), ...tail]
+  }
+
   const vulnSummary = `${vulns.critical || 0} critical, ${vulns.high || 0} high, ${vulns.medium || 0} medium, ${vulns.low || 0} low`
   const language = analysis?.language || "the project"
 
@@ -394,16 +420,33 @@ export function renderReport(
     ? enabledPractices.map((p) => `- ${p}`).join("\n")
     : "- No automated security controls detected yet"
 
-  const findingsBlock = details.slice(0, 5).map((v) =>
-    `### ${v.severity}: ${v.id}\n**Component:** ${v.component}\n**Issue:** ${v.description}\n**Fix:** ${v.fix}\n**Effort:** ${v.effort}`
-  ).join("\n\n")
+  // URW: use per-finding effort/impact from validated recommendations when available.
+  const urwRecMap = new Map(
+    (opts?.recommendations ?? []).map(r => [r.findingId, r])
+  )
+  const findingsBlock = details.slice(0, 5).map((v) => {
+    const urwRec = urwRecMap.get(v.id) || urwRecMap.get(v.osvId)
+    const effort = urwRec?.effort ?? v.effort
+    return `### ${v.severity}: ${v.id}\n**Component:** ${v.component}\n**Issue:** ${v.description}\n**Fix:** ${v.fix}\n**Effort:** ${effort}`
+  }).join("\n\n")
 
-  // Prefer curated recommendations (mock data); otherwise derive remediations
-  // from the actual findings (real scan).
+  // Prefer curated recommendations (mock data); when URW provides validated
+  // per-finding metadata, use that; otherwise derive from actual findings.
   const recommendationsBlock = recs.length
     ? recs.slice(0, 5).map((r, i) => `${i + 1}. **${r.title}** (${r.effort}): ${r.description}`).join("\n\n")
-    : (details.slice(0, 5).map((v, i) => `${i + 1}. **Upgrade ${v.component}** (${v.effort}): ${v.fix} — resolves ${v.id} (${v.severity}).`).join("\n\n")
-      || "No dependency vulnerabilities detected. Maintain current practices.")
+    : (opts?.recommendations?.length
+      ? opts.recommendations.slice(0, 5).map((r, i) => {
+          const finding = details.find(d => d.id === r.findingId || d.osvId === r.findingId)
+          if (!finding) return null
+          return `${i + 1}. **Upgrade ${finding.component}** (Effort: ${r.effort}, Impact: ${r.impact}): ${finding.fix} — resolves ${finding.id} (${finding.severity}).`
+        }).filter(Boolean).join("\n\n")
+      : details.slice(0, 5).map((v, i) => `${i + 1}. **Upgrade ${v.component}** (${v.effort}): ${v.fix} — resolves ${v.id} (${v.severity}).`).join("\n\n"))
+      || "No dependency vulnerabilities detected. Maintain current practices."
+
+  // URW: non-authoritative AI commentary (stripped, labeled, not on the factual path).
+  const commentarySection = opts?.commentary
+    ? `\n\n---\n*AI Commentary (non-authoritative — informational only):* ${opts.commentary}`
+    : ""
 
   if (score >= 90) {
     return `# 🎉 Security Excellence Report
@@ -428,7 +471,7 @@ This repository demonstrates security excellence by maintaining comprehensive se
 
 ${recommendationsBlock}
 
-Maintaining these practices keeps the security score high.`
+Maintaining these practices keeps the security score high.${commentarySection}`
   } else if (score >= 80) {
     return `# Strong Security Report
 
@@ -450,7 +493,7 @@ ${findingsBlock}
 
 ${recommendationsBlock}
 
-Implementing these improvements would elevate the security score further.`
+Implementing these improvements would elevate the security score further.${commentarySection}`
   } else {
     return `# Security Improvement Report
 
@@ -474,7 +517,7 @@ ${recommendationsBlock}
 
 ## Expected Impact
 
-Implementing the priority recommendations above would meaningfully increase your security score.`
+Implementing the priority recommendations above would meaningfully increase your security score.${commentarySection}`
   }
 }
 
