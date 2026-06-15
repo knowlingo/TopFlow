@@ -174,7 +174,7 @@ export function assertSafeOutboundUrl(rawUrl: string): void {
         </p>
         <div className="flex flex-wrap gap-4 text-sm">
           <a
-            href="https://topflow.dev/blog/01-ssrf-cycle-detection-rate-limiting"
+            href="https://github.com/csupenn/topflow/blob/main/docs/AI-Security/osv-scanner/01-ssrf-cycle-detection-rate-limiting-2026-06-14-draft.md"
             className="text-primary hover:underline inline-flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
