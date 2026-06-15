@@ -27,7 +27,7 @@ This document is the ground truth between what the roadmap plans and what the co
 |------|:------:|-------|
 | **T1 SSRF egress guard** (block private/reserved ranges, enforce http/s only, allow scanner's internal `/api/scan/github`) | ✅ Shipped | `feat(security): SSRF egress guard` — `lib/security/` |
 | **T2 Cycle detection** (DFS pre-execution, reject cyclic graphs, server-side enforcement) | ✅ Shipped | Same commit as T1 |
-| **T4 Durable rate limiter** (sliding-window, injected clock, `MemoryRateLimitStore`) | ✅ Shipped | `lib/security/rate-limit.ts`; **in-process only** — see blocker below |
+| **T4 Durable rate limiter** (sliding-window, injected clock, `MemoryRateLimitStore` → `UpstashRateLimitStore`) | ✅ Shipped | `lib/security/rate-limit.ts` + `upstash-rate-limit-store.ts`; Redis when env vars present, in-memory fallback |
 | **T5 Encrypt API keys at rest** (AES-256-GCM, Web Crypto, encrypt-on-save / decrypt-on-load) | ✅ Shipped | `lib/security/encryption.ts`; wired into settings + scanner dialogs; decrypt-before-send in execution panel |
 | **T6 Reconcile claims/docs** | 🔄 Partial | Encryption and SSRF claims now accurate; rate-limit and sandbox claims still need updating |
 | **T3 JS-node sandbox replacement** (isolated-vm / QuickJS-wasm) | 🔴 Blocked | Requires new dependency — see blocker below |
@@ -124,7 +124,7 @@ Each shipped hardening slice produces a companion tutorial — a case-study-styl
 | 01 | SSRF egress guard, cycle detection, rate limiting | W1-T1, T2, T4 (in-memory) | ✅ Shipped | ✅ Draft complete |
 | 02 | Secrets at rest: AES-256-GCM BYOK key encryption | W1-T5 | ✅ Shipped | ✅ Draft complete |
 | 03 | JS-node sandbox isolation (`new Function()` → real isolate) | W1-T3 | 🔴 Blocked (dep) | 🔲 Not started |
-| 04 | Durable rate limiting: in-memory → Redis/KV | W1-T4 (durable) | 🔴 Blocked (dep) | 🔲 Not started |
+| 04 | Durable rate limiting: in-memory → Redis/KV | W1-T4 (durable) | ✅ Shipped | ✅ Draft complete |
 | 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | ✅ Shipped | ✅ Draft complete |
 
 **Rule:** a tutorial is not started until its code is merged to `dev` and CI is green. Once code ships, the tutorial draft targets completion in the same PR or the immediately following one.

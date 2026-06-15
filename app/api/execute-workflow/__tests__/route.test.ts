@@ -29,6 +29,11 @@ jest.mock('@/lib/demo-data', () => ({
   hasDemoData: jest.fn(),
 }))
 
+// Prevent @upstash/redis (ESM) from being loaded in jsdom environment
+jest.mock('@/lib/security/upstash-rate-limit-store', () => ({
+  createUpstashStore: () => null,
+}))
+
 import { TopFlowExecutionEngine } from '@/lib/topflow-execution-engine'
 import { validateWorkflow, validateApiKeys } from '@charliesu/workflow-core'
 import { shouldUseDemoMode } from '@/lib/demo-mode'

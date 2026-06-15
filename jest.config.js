@@ -66,9 +66,9 @@ const customJestConfig = {
     '/e2e/',
   ],
 
-  // Transform ignore patterns
+  // Transform ignore patterns — allow @upstash/redis (ESM) to be transformed by babel-jest
   transformIgnorePatterns: [
-    '/node_modules/',
+    '/node_modules/(?!@upstash/redis)',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
 }
