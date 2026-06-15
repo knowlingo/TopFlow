@@ -6,14 +6,19 @@ import { shouldUseDemoMode, hasDemoData as hasNewDemoData, resolveScanModes, typ
 import { getDemoWorkflowResult, hasDemoData as hasLegacyDemoData } from "@/lib/demo-data"
 import { RateLimiter, rateLimitKey } from "@/lib/security/rate-limit"
 import { detectWorkflowCycle } from "@/lib/security/workflow-graph"
+import { createUpstashStore } from "@/lib/security/upstash-rate-limit-store"
 
 export const maxDuration = 30
 
 // ============================================================================
-// Rate Limiting (sliding window; in-memory store, pluggable for Redis/KV)
+// Rate Limiting (sliding window; Upstash Redis when env vars present, else in-memory)
 // ============================================================================
 
-const limiter = new RateLimiter({ limit: 10, windowMs: 60_000 }) // 10 requests / minute / client
+const limiter = new RateLimiter({
+  limit: 10,
+  windowMs: 60_000,
+  store: createUpstashStore() ?? undefined, // null → MemoryRateLimitStore default
+})
 
 // ============================================================================
 // Input Sanitization
