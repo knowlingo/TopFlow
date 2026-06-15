@@ -43,7 +43,7 @@ async function getEncryptionKey(): Promise<CryptoKey> {
     crypto.getRandomValues(raw)
     persistKeyBytes(raw)
   }
-  cachedKey = await crypto.subtle.importKey("raw", raw, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])
+  cachedKey = await crypto.subtle.importKey("raw", raw as Uint8Array<ArrayBuffer>, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])
   return cachedKey
 }
 
