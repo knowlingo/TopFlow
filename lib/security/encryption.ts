@@ -1,16 +1,50 @@
 const ENCRYPTION_KEY_NAME = "ai-agent-builder-encryption-key"
 const ENCRYPTED_DATA_PREFIX = "encrypted:"
 
-// Generate or retrieve encryption key
+// Generate-once, then REUSE a stable AES-GCM key.
+//
+// Why this matters: AES-GCM decryption only succeeds with the exact key used to
+// encrypt. The previous implementation generated a fresh random key on every call,
+// so nothing encrypted could ever be decrypted (the GCM auth tag never matched).
+// We now cache the key in memory and persist the raw bytes to localStorage so it
+// survives reloads.
+//
+// SECURITY NOTE: a client-held key only protects against plaintext-at-rest
+// inspection / casual exfiltration — it is NOT a defense against XSS (a script in
+// the page can read both the ciphertext and the key). True secret custody needs a
+// server or a user passphrase. See docs/AI-Security/osv-scanner/02-secrets-at-rest-*.
+let cachedKey: CryptoKey | null = null
+
+function loadPersistedKeyBytes(): Uint8Array | null {
+  try {
+    if (typeof localStorage === "undefined") return null
+    const b64 = localStorage.getItem(ENCRYPTION_KEY_NAME)
+    if (!b64) return null
+    return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
+  } catch {
+    return null
+  }
+}
+
+function persistKeyBytes(bytes: Uint8Array): void {
+  try {
+    if (typeof localStorage === "undefined") return
+    localStorage.setItem(ENCRYPTION_KEY_NAME, btoa(String.fromCharCode(...bytes)))
+  } catch {
+    /* best-effort: in-memory cache still allows round-trips this session */
+  }
+}
+
 async function getEncryptionKey(): Promise<CryptoKey> {
-  // In a real app, you'd want to derive this from a user password or secure storage
-  // For this demo, we'll generate a key and store it in IndexedDB
-  // This is better than plaintext but not perfect - real apps should use server-side encryption
-
-  const keyData = new Uint8Array(32) // 256 bits
-  crypto.getRandomValues(keyData)
-
-  return await crypto.subtle.importKey("raw", keyData, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])
+  if (cachedKey) return cachedKey
+  let raw = loadPersistedKeyBytes()
+  if (!raw) {
+    raw = new Uint8Array(32) // 256-bit AES key
+    crypto.getRandomValues(raw)
+    persistKeyBytes(raw)
+  }
+  cachedKey = await crypto.subtle.importKey("raw", raw as Uint8Array<ArrayBuffer>, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])
+  return cachedKey
 }
 
 // Encrypt a string value

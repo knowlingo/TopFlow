@@ -15,6 +15,16 @@ import {
   renderReport,
   resolveReportModel
 } from './demo-mode'
+import { assertSafeOutboundUrl } from './security/ssrf'
+import {
+  extractKnownIds,
+  buildMinimizedView,
+  buildUrwPrompt,
+  URW_CONSTRAINED_SCHEMA,
+  validateFindingIds,
+  stripCommentary,
+  buildAuditRecord,
+} from './security/urw'
 
 /**
  * TopFlow-specific execution engine
@@ -122,9 +132,21 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       return this.dataMode === 'demo' ? { handled: true, result: await mock() } : { handled: false }
     }
 
-    // Narrative axis: real LLM when "llm"; templated render otherwise.
+    // Narrative axis: URW-constrained LLM when "llm"; templated render otherwise.
     if (narrativeNodes.includes(id)) {
-      if (this.narrativeMode === 'llm') return { handled: false }
+      if (this.narrativeMode === 'llm') {
+        // URW Phase 1: intercept the two narrative nodes that need constraints.
+        if (id === 'ai-analysis') {
+          return { handled: true, result: await this.executeUrwAnalysis(context) }
+        }
+        if (id === 'extract-actions') {
+          return { handled: true, result: await this.executeUrwAssembly(context) }
+        }
+        // Other narrative nodes (prompt-excellent, prompt-improve) still run
+        // to produce the grade-check branch label — their output feeds ai-analysis
+        // which URW intercepts above, so the free-text never reaches the report.
+        return { handled: false }
+      }
       if (id === 'ai-analysis') {
         // Templated (no-LLM) report from the ACTUAL analysis (real or mock).
         const analysis = this.executionResults.get('fetch-security') || {}
@@ -234,6 +256,11 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
       // Server-side: use localhost
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
       finalUrl = `${baseUrl}${interpolatedUrl}`
+    } else {
+      // SSRF guard: applied to user-supplied absolute URLs only. Engine-generated
+      // relative app routes (handled above, e.g. the scanner's /api/scan/github)
+      // are trusted internal calls and are intentionally exempt.
+      assertSafeOutboundUrl(finalUrl)
     }
 
     const options: RequestInit = {
@@ -371,6 +398,110 @@ export class TopFlowExecutionEngine extends ExecutionEngine {
     })
 
     return result.embedding
+  }
+
+  // ---------------------------------------------------------------------------
+  // URW Phase 1 — constrained-selector narrative methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Step 1 of 2 in the URW narrative path (replaces the free-text ai-analysis node).
+   *
+   * Instead of feeding the LLM the open-ended prompt-excellent/prompt-improve
+   * output, we build a minimized, sanitized view of the actual scan findings
+   * (IDs + severity — no advisory prose) and elicit only a constrained JSON
+   * selection via generateObject + URW_CONSTRAINED_SCHEMA.
+   *
+   * Returns the constrained output as a JSON string so the downstream
+   * executeUrwAssembly step can parse and validate it.
+   */
+  private async executeUrwAnalysis(context: ExecutionContext): Promise<string> {
+    const analysis = this.executionResults.get('fetch-security') || {}
+    const score    = (this.executionResults.get('calculate-score') as any)?.score ?? analysis.securityScore ?? 0
+    const grade    = (this.executionResults.get('calculate-score') as any)?.grade ?? analysis.grade ?? 'N/A'
+
+    const minimized = buildMinimizedView(analysis)
+    const prompt    = buildUrwPrompt(minimized, score, grade)
+    const modelId   = this.resolveReportModelId(context.apiKeys)
+    const model     = this.getModel(modelId, context.apiKeys)
+
+    const { object } = await generateObject({
+      model,
+      schema: URW_CONSTRAINED_SCHEMA,
+      prompt,
+      temperature: 0.1, // low temperature — ranking task, not creative writing
+    })
+
+    // Store the model used so the audit record in step 2 can reference it.
+    this.executionResults.set('_urw_model', modelId)
+
+    return JSON.stringify(object)
+  }
+
+  /**
+   * Step 2 of 2 in the URW narrative path (replaces extract-actions).
+   *
+   * Parses the constrained output from executeUrwAnalysis, validates all
+   * returned IDs against the ground-truth set from the real scan, drops
+   * unknowns (fail closed), emits a per-run audit record, and assembles
+   * the final Markdown report deterministically via renderReport.
+   */
+  private async executeUrwAssembly(context: ExecutionContext): Promise<string> {
+    const analysis  = this.executionResults.get('fetch-security') || {}
+    const score     = (this.executionResults.get('calculate-score') as any)?.score ?? analysis.securityScore ?? 0
+    const rawOutput = this.executionResults.get('ai-analysis')
+
+    const knownIds = extractKnownIds(analysis)
+
+    // Parse the constrained JSON produced by executeUrwAnalysis.
+    let parsed: any
+    let schemaValid = true
+    try {
+      parsed = typeof rawOutput === 'string' ? JSON.parse(rawOutput) : rawOutput
+    } catch {
+      schemaValid = false
+      parsed = { prioritizedFindingIds: [], recommendations: [], summaryLabel: 'NEEDS_ATTENTION' }
+    }
+
+    const validation = validateFindingIds(parsed, knownIds)
+
+    // Fall back to deterministic order when the LLM returned no valid IDs.
+    const order = validation.selectedIds.length > 0
+      ? validation.selectedIds
+      : Array.from(knownIds).slice(0, 10)
+
+    const rawCommentary = parsed.commentaryHint as string | undefined
+    const commentary    = stripCommentary(rawCommentary)
+    const modelId       = (this.executionResults.get('_urw_model') as string | undefined) ?? 'unknown'
+
+    // Emit per-run audit record (task 1.7).
+    const audit = buildAuditRecord({
+      workflowId:    this.workflowId ?? 'github-security-scanner',
+      model:         modelId,
+      knownIds,
+      output:        parsed,
+      validation,
+      schemaValid,
+      rawCommentary,
+    })
+    this.executionResults.set('_urw_audit', audit)
+
+    if (validation.droppedIds.length > 0) {
+      console.warn('[URW] Dropped fabricated/unknown IDs:', validation.droppedIds)
+    }
+
+    return renderReport(analysis, {
+      score,
+      order,
+      recommendations: validation.selectedRecommendations,
+      summaryLabel:    parsed.summaryLabel,
+      commentary,
+    })
+  }
+
+  /** Resolve which AI model to use for the URW narrative. */
+  private resolveReportModelId(apiKeys: Record<string, string>): string {
+    return resolveReportModel(apiKeys) ?? 'openai/gpt-4o-mini'
   }
 
   private async executeStructuredOutputNode(

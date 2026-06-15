@@ -108,8 +108,8 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+// Mock window.matchMedia (guard: not available in @jest-environment node tests)
+if (typeof window !== 'undefined') Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
