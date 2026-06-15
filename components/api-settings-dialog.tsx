@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { encryptApiKeys, decryptApiKeys } from "@/lib/security/encryption"
 import {
   Dialog,
   DialogContent,
@@ -50,17 +51,24 @@ export function ApiSettingsDialog({ open, onOpenChange }: ApiSettingsDialogProps
   const [validationStatus, setValidationStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return
+    let cancelled = false
+    ;(async () => {
       const stored = localStorage.getItem("ai-agent-api-keys")
-      const keys = stored ? JSON.parse(stored) : {}
+      const raw = stored ? JSON.parse(stored) : {}
+      // Decrypt at-rest values (legacy plaintext passes through unchanged).
+      const keys = await decryptApiKeys(raw)
+      if (cancelled) return
       setSettings(keys)
 
-      // Validate all stored keys
       const status: Record<string, boolean> = {}
       Object.entries(keys).forEach(([provider, key]) => {
         status[provider] = validateApiKey(provider, key as string)
       })
       setValidationStatus(status)
+    })()
+    return () => {
+      cancelled = true
     }
   }, [open])
 
@@ -73,8 +81,10 @@ export function ApiSettingsDialog({ open, onOpenChange }: ApiSettingsDialogProps
     setValidationStatus(newStatus)
   }
 
-  const handleSave = () => {
-    localStorage.setItem("ai-agent-api-keys", JSON.stringify(settings))
+  const handleSave = async () => {
+    // Encrypt at rest (AES-GCM via Web Crypto) before persisting.
+    const encrypted = await encryptApiKeys(settings as Record<string, string>)
+    localStorage.setItem("ai-agent-api-keys", JSON.stringify(encrypted))
     onOpenChange(false)
   }
 
