@@ -15,8 +15,8 @@ TopFlow is a security-focused visual workflow builder for creating AI-powered ap
 ### 2. Security-First Design
 - **5-Layer Defense-in-Depth**: Security controls at every layer
 - **OWASP Top 10 Coverage**: Protection against common web vulnerabilities
-- **SSRF Prevention**: Comprehensive URL validation and blocklists
-- **Sandboxed Execution**: JavaScript code runs in restricted environments
+- **SSRF Prevention**: Egress guard (`lib/security/ssrf.ts`) — blocks private/reserved IP ranges, cloud metadata endpoints, non-HTTP schemes; provenance-aware exemption for engine-internal routes
+- **Sandboxed Execution**: JavaScript nodes run via `new Function()` with limited scope (a real isolate is planned — see T3)
 
 ### 3. Bring Your Own Key (BYOK) Model
 - **User-Provided API Keys**: Users supply their own AI provider credentials
@@ -53,7 +53,8 @@ TopFlow is a security-focused visual workflow builder for creating AI-powered ap
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐  ┌─────────────┐  ┌──────────────────┐  │
 │  │ Rate Limiter │  │   DDoS      │  │   Request        │  │
-│  │ (10 req/min) │  │ Protection  │  │   Validation     │  │
+│  │(10 req/min/IP│  │ Protection  │  │   Validation     │  │
+│  │ in-memory)   │  │             │  │                  │  │
 │  └──────┬───────┘  └─────┬───────┘  └────────┬─────────┘  │
 │         └─────────────────┼───────────────────┘            │
 │                           ▼                                 │
@@ -118,7 +119,7 @@ npm install @topflow/workflow-core
 - `ConditionalNode`: Branching logic (true/false outputs)
 
 **Integration Nodes**:
-- `JavaScriptNode`: Custom code execution (sandboxed)
+- `JavaScriptNode`: Custom code execution (`new Function()` — real isolate planned)
 - `HttpRequestNode`: External API calls
 - `ToolNode`: AI SDK tool definitions
 - `StructuredOutputNode`: Schema-validated outputs
@@ -151,10 +152,10 @@ npm install @topflow/workflow-core
 
 #### Security Controls
 
-- **SSRF Prevention**: Blocklist for localhost, private IPs, cloud metadata
+- **SSRF Prevention**: `lib/security/ssrf.ts` — blocks private/reserved ranges, metadata IPs, non-HTTP schemes; exempt engine-internal relative routes by provenance
 - **Input Sanitization**: XSS protection via character stripping
 - **Timeout Enforcement**: 30-second maximum execution time
-- **JavaScript Sandboxing**: `new Function()` with limited scope
+- **JavaScript Sandboxing**: `new Function()` with limited scope (not a true isolate — real sandbox is T3, planned)
 
 ### 4. Code Generation System (`/lib/code-generator`)
 
@@ -236,7 +237,7 @@ Storage Keys:
 - Secure WebSocket for streaming
 
 #### Layer 3: API Gateway (Vercel Edge)
-- Rate limiting (10 requests/minute/IP)
+- Rate limiting (10 requests/minute/IP — sliding window, in-memory per serverless instance; durable Redis/KV store is T4, planned)
 - DDoS protection
 - Request size limits
 - Geographic restrictions (optional)
@@ -429,10 +430,10 @@ case 'custom':
 TopFlow is open source and welcomes contributions. Key areas:
 
 ### Priority Areas
-1. **Security Hardening**: Additional SSRF protections
-2. **Node Types**: New AI capabilities
-3. **Providers**: Additional AI services
-4. **Testing**: Unit and integration tests
+1. **JS-node sandbox** (T3): Replace `new Function()` with a real isolate (`quickjs-emscripten`) — requires a dep-add PR
+2. **Durable rate limiter** (T4): Swap in-memory store for Redis/KV (`@upstash/ratelimit`) — requires a dep-add PR
+3. **Node Types**: New AI capabilities
+4. **Providers**: Additional AI services
 5. **Documentation**: Tutorials and guides
 
 ### Development Setup
@@ -446,7 +447,7 @@ pnpm install
 # Run development server
 pnpm dev
 
-# Run tests (when available)
+# Run tests (529 tests, 26 suites)
 pnpm test
 ```
 

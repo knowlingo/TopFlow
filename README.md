@@ -128,6 +128,7 @@ Next.js 15 · React 19 · TypeScript · TailwindCSS v4 · ReactFlow · Vercel AI
 - [Architecture Overview](docs/architecture/architecture-overview.md) — System design & security model
 - [Security Docs](https://topflow.dev/docs/security) — Threat model & controls
 - [Node Reference](https://topflow.dev/docs/build/nodes) — All 12 node types
+- [AI Security Tutorials](docs/AI-Security/osv-scanner/README.md) — Hands-on case studies from real hardening work (SSRF, encryption, rate limiting, LLM constraints); published at [topflow.dev/blog](https://topflow.dev/blog)
 
 ---
 

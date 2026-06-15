@@ -177,6 +177,29 @@ export const blogPosts: BlogPost[] = [
     },
   },
   {
+    slug: "encryption-bug-aes-gcm-ephemeral-key",
+    title: "The Bug That Made My Encryption Instantly Useless",
+    excerpt:
+      "I added AES-256-GCM encryption to protect BYOK API keys in localStorage. It compiled, tests passed—but every ciphertext was immediately unrecoverable. Here's the silent bug, the fix, and what it teaches about cryptographic code.",
+    publishedAt: "June 15, 2026",
+    readTime: "9 min read",
+    category: "Security",
+    author: authorCharlie,
+    seo: {
+      description:
+        "A real AES-256-GCM bug where generateKey() produced a fresh key on every call, making decryption impossible. Learn the fix, the round-trip test that catches it, and the honest XSS limitation of client-held keys.",
+      keywords: [
+        "AES-GCM encryption bug",
+        "Web Crypto API",
+        "encryption at rest",
+        "BYOK security",
+        "localStorage encryption",
+        "key management",
+        "cryptographic testing",
+      ],
+    },
+  },
+  {
     slug: "gdpr-automation-3-minutes",
     title: "GDPR Automation in 3 Minutes: How TopFlow Handles Data Subject Access Requests",
     excerpt:
