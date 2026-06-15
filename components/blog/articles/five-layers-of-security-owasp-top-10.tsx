@@ -250,12 +250,13 @@ const WorkflowSchema = z.object({
       <div className="bg-card border border-border rounded-lg p-6 my-6 space-y-3">
         <h3 className="text-lg font-semibold text-foreground">Go Deeper</h3>
         <p className="text-sm">
-          The AI Security Tutorial series covers each of these controls in detail — threat models,
-          attack trees, design trade-offs, and hands-on labs.
+          The AI Security Tutorial series covers each of these controls in full — threat models,
+          attack trees, design trade-offs, and hands-on labs. Tutorials live in the GitHub repo
+          alongside the code they document.
         </p>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <a
-            href="https://topflow.dev/blog/01-ssrf-cycle-detection-rate-limiting"
+            href="https://github.com/csupenn/topflow/blob/main/docs/AI-Security/osv-scanner/01-ssrf-cycle-detection-rate-limiting-2026-06-14-draft.md"
             className="text-primary hover:underline inline-flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
@@ -264,7 +265,7 @@ const WorkflowSchema = z.object({
             <ExternalLink className="w-3 h-3" />
           </a>
           <a
-            href="https://topflow.dev/blog/02-secrets-at-rest-byok-encryption"
+            href="https://github.com/csupenn/topflow/blob/main/docs/AI-Security/osv-scanner/02-secrets-at-rest-byok-key-encryption-2026-06-14-draft.md"
             className="text-primary hover:underline inline-flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
@@ -273,7 +274,7 @@ const WorkflowSchema = z.object({
             <ExternalLink className="w-3 h-3" />
           </a>
           <a
-            href="https://topflow.dev/blog/04-durable-rate-limiting-upstash-redis"
+            href="https://github.com/csupenn/topflow/blob/main/docs/AI-Security/osv-scanner/04-durable-rate-limiting-2026-06-14-draft.md"
             className="text-primary hover:underline inline-flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"

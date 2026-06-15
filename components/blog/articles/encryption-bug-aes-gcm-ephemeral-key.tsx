@@ -314,7 +314,7 @@ it("produces different ciphertexts for the same plaintext", async () => {
         on GitHub. The security case study behind this fix — covering the threat model, attack trees, and the
         key-custody tradeoff spectrum — is{" "}
         <a
-          href="https://topflow.dev/blog/02-secrets-at-rest-byok-encryption"
+          href="https://github.com/csupenn/topflow/blob/main/docs/AI-Security/osv-scanner/02-secrets-at-rest-byok-key-encryption-2026-06-14-draft.md"
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary hover:underline"
