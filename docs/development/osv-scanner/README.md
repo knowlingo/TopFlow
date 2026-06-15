@@ -24,7 +24,13 @@ The work here is tracked across two P0 workstreams (W1 security hardening, W2 UR
 | `04-p1-distribution-loop.md` | W4: real badge API, GitHub Action/PR bot, shareable report cards |
 | `05-implementation-status.md` | Live tracking: what's shipped, what's in progress, what's blocked and why |
 
-Companion architecture docs (the "why" and the design):
+## Tutorial series
+
+Each shipped hardening slice has a companion tutorial in `docs/AI-Security/osv-scanner/` — the public-facing teaching layer. Tutorials cover threat model, attack trees, design decisions, code walkthrough, and hands-on labs. See that folder's `README.md` for the full tutorial index and status.
+
+---
+
+## Companion architecture docs (the "why" and the design)
 - `docs/architecture/osv-real-scan-design.md` — two-axis BYOK model (data axis = GitHub token, narrative axis = AI key)
 - `docs/architecture/urw-llm-pipeline-design.md` — Untrusted Reasoning Worker design for the LLM pipeline
 

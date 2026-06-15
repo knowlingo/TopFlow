@@ -26,12 +26,18 @@ A consistent template so the series compounds:
 8. **Takeaways, mappings & further reading** — OWASP / CWE / NIST / MITRE references and a checklist.
 
 ## Tutorials
-| # | Topic | Source PR | Status |
-|---|---|---|---|
-| 01 | Securing workflow egress & execution: SSRF allowlisting, cycle detection, rate limiting | #12 | Draft 2026-06-14 |
-| 02 | Secrets at rest: BYOK key encryption in a zero-backend app | (W1 key-encryption) | Draft 2026-06-14 |
 
-_More to come as the W1 "5-layer defense" hardening lands (JS-sandbox isolation, etc.)._
+| # | Topic | Source | Status | Blocker |
+|---|---|---|---|---|
+| 01 | Securing workflow egress & execution: SSRF allowlisting, cycle detection, rate limiting | PR #12 | Draft 2026-06-14 | — |
+| 02 | Secrets at rest: BYOK key encryption in a zero-backend app | W1 key-encryption | Draft 2026-06-14 | — |
+| 03 | JS-node sandbox isolation: replacing `new Function()` with a real isolate | W1-T3 | Not started | Needs dep (`quickjs-emscripten` or `isolated-vm`) — frozen lockfile PR required |
+| 04 | Durable rate limiting: from in-memory to Redis/KV across serverless instances | W1-T4 | Not started | Needs dep (`@upstash/ratelimit`) — frozen lockfile PR required |
+| 05 | The Untrusted Reasoning Worker: constraining LLMs on security/compliance paths | W2 Phase 1 | Not started | Depends on W2 Phase 1 implementation (no new deps) |
+
+**Tutorial → implementation mapping:** each tutorial is written once the corresponding code lands. Tutorials 03 and 04 are blocked until their dependency-add PRs merge. Tutorial 05 can proceed after W2 Phase 1 (constrained-selector) ships — no new deps required.
+
+See `docs/development/osv-scanner/05-implementation-status.md` for the live implementation tracker (what's shipped, what's blocked, what's next).
 
 ## Companion design docs
 - `docs/architecture/urw-llm-pipeline-design.md` — the Untrusted Reasoning Worker trust boundary.

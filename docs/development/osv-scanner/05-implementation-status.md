@@ -115,6 +115,24 @@ Evaluate in this order: (1) `quickjs-emscripten` — pure wasm, no native binari
 
 ---
 
+## Tutorial series status (`docs/AI-Security/osv-scanner/`)
+
+Each shipped hardening slice produces a companion tutorial — a case-study-style teaching doc covering threat model, attack trees, design decisions, implementation walkthrough, and hands-on labs. Tutorials are written **after** the code lands; they are the public evidence layer for the CISO positioning.
+
+| Tutorial | Topic | Tied to | Code status | Tutorial status |
+|----------|--------|---------|:-----------:|:---------------:|
+| 01 | SSRF egress guard, cycle detection, rate limiting | W1-T1, T2, T4 (in-memory) | ✅ Shipped | ✅ Draft complete |
+| 02 | Secrets at rest: AES-256-GCM BYOK key encryption | W1-T5 | ✅ Shipped | ✅ Draft complete |
+| 03 | JS-node sandbox isolation (`new Function()` → real isolate) | W1-T3 | 🔴 Blocked (dep) | 🔲 Not started |
+| 04 | Durable rate limiting: in-memory → Redis/KV | W1-T4 (durable) | 🔴 Blocked (dep) | 🔲 Not started |
+| 05 | Untrusted Reasoning Worker: constraining LLMs on security paths | W2 Phase 1 | 🔲 Not started | 🔲 Not started |
+
+**Rule:** a tutorial is not started until its code is merged to `dev` and CI is green. Once code ships, the tutorial draft targets completion in the same PR or the immediately following one.
+
+Tutorial 02 documents the encryption bug-and-fix in full, including the XSS limitation and the client-held-key tradeoff (see `02-secrets-at-rest-…` for the authoritative write-up).
+
+---
+
 ## Test coverage summary (as of `75a3d17`)
 
 | Suite | Tests | Status |
