@@ -85,11 +85,6 @@ export function SchemaOrg() {
       "BYOK Model",
       "Demo Mode",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5.0",
-      ratingCount: "1",
-    },
     author: {
       "@type": "Person",
       name: "Charlie Su",

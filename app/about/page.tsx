@@ -251,7 +251,7 @@ export default function AboutPage() {
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <a href="https://linkedin.com/in/charliesu" target="_blank" rel="noopener noreferrer">
+                <a href="https://linkedin.com/in/charliesu-ai" target="_blank" rel="noopener noreferrer">
                   <Linkedin className="mr-2 h-5 w-5" />
                   Connect on LinkedIn
                 </a>
